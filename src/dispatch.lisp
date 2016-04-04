@@ -73,6 +73,30 @@
       `(every (lambda ,vars ,@body) ,@data)))
 
 
+(defun lconc (buf items)
+  (cond
+    ((null buf)
+     (cons items (last items)))
+    ((null (car buf))
+     (setf (car buf) items)
+     (setf (cdr buf) (last items))
+     buf)
+    ((null items)
+     buf)
+    (t
+     (setf (cdr (cdr buf)) items)
+     (setf (cdr buf) (last items))
+     buf)))
+
+(defun tconc (buf &rest items)
+  (lconc buf items))
+
+(defun getter (key)
+  #'(lambda (obj)
+      (getf obj key)))
+
+(define-modify-macro orf (&rest args) or)
+
 (defgeneric specializer-intersections (spec1 spec2)
   (:documentation
    "Compute and return a list of all the specializers (classes for example) which
@@ -83,26 +107,34 @@ both A and B.  But if C and D both inherit from A and B, but C also inherits fro
 then omit C in the return list."))
 
 (defmethod specializer-intersections ((class1 class) (class2 class))
-  (cond
-    ((member class2 (compute-class-precedence-list class1))
-     (list class1))
-    ((member class1 (compute-class-precedence-list class2))
-     (list class2))
-    (t
-     (let (common)
-       (dolist (sub1 (class-direct-subclasses class1))
-	 (dolist (sub2 (class-direct-subclasses class2))
-	   (dolist (inter (specializer-intersections sub1 sub2))
-	     (cond
-	       ((member inter common)
-		nil)
-	       ((exists i common
-		  (member i (compute-class-precedence-list inter)))
-		nil)
-	       (t
-		(push inter common))))))
-       common))))
-
+  ;; breadth first search down the class hierarchy towards nil
+  (let ((queue (tconc nil
+		      (list :class class1 :1 t   :2 nil :supers nil)
+		      (list :class class2 :1 nil :2 t   :supers nil))))
+    (dolist (node (car queue))
+      (dolist (sub (class-direct-subclasses (getf node :class)))
+	(let ((found (find sub (car queue) :key (getter :class))))
+	  (cond
+	    (found
+	     (pushnew node (getf found :supers))
+	     (orf (getf found :1) (getf node :1))
+	     (orf (getf found :2) (getf node :2)))
+	    (t
+	     (let ((new (list :class sub
+			      :1 (getf node :1)
+			      :2 (getf node :2)
+			      :supers (list node))))
+	       (tconc queue new)))))))
+    (mapcar (getter :class)
+	    ;; find all nodes which are descendants of both class1 and
+	    ;; class2, but which have no parent node which are also
+	    ;; both descendants thereof.
+	    (setof node (car queue)
+	      (and (getf node :1)
+		   (getf node :2)
+		   (not (exists super-node (getf node :supers)
+			  (and (getf super-node :1)
+			       (getf super-node :2)))))))))
 
 (defmethod specializer-intersections ((eql1 eql-specializer) (class2 class))
   (when (typep (eql-specializer-object eql1) class2)
@@ -203,26 +235,6 @@ is selected from the nth element of sub-lists."
 					       type-intersections)))
 			methods)))
 	 ambiguities)))))
-
-
-(defun lconc (buf items)
-  (cond
-    ((null buf)
-     (cons items (last items)))
-    ((null (car buf))
-     (setf (car buf) items)
-     (setf (cdr buf) (last items))
-     buf)
-    ((null items)
-     buf)
-    (t
-     (setf (cdr (cdr buf)) items)
-     (setf (cdr buf) (last items))
-     buf)))
-
-(defun tconc (buf &rest items)
-  (lconc buf items))
-
 
 (defgeneric check-specializers (obj))
 

@@ -72,5 +72,6 @@
       
 	(assert-true (find (mapcar #'find-class pair)
 			   ambig
+			   :test #'equal
 			   :key (getter :arg-types)))))))
 			     

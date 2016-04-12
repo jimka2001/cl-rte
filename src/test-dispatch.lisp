@@ -24,6 +24,13 @@
 
 (in-package :dispatch.test)
 
+(defun test ()
+  (let ((*print-summary* t)
+	(*print-failures* t)
+	(*summarize-results* t)
+	(*print-errors* t))
+    (run-tests :all (list :dispatch.test))))
+
 (defclass T1 () ())
 (defclass T2 () ())
 (defclass T3 (T1 T2) ())

@@ -96,7 +96,8 @@
   #'(lambda (obj)
       (getf obj key)))
 
-(define-modify-macro orf (&rest args) or)
+
+(define-modify-macro unionf (&rest args) union)
 
 (defgeneric specializer-intersections (spec1 spec2)
   (:documentation
@@ -110,32 +111,37 @@ then omit C in the return list."))
 (defmethod specializer-intersections ((class1 class) (class2 class))
   ;; breadth first search down the class hierarchy towards nil
   (let ((queue (tconc nil
-		      (list :class class1 :1 t   :2 nil :supers nil)
-		      (list :class class2 :1 nil :2 t   :supers nil))))
+		      (list :class class1 :roots (list class1) :supers nil)
+		      (list :class class2 :roots (list class2) :supers nil))))
     (dolist (node (car queue))
+      ;; node->:class is a class in the sub-tree of either class1 or class2 (or both)
+      ;; node->:roots set subset of (class1 class2) indicating which root classes are eventually superclasses of node->class
+      ;; node->:supers is a list of nodes (not classes).  If classX has sub as direct-subclass
+      ;;    then the node with :class = sub has the node with :class = classX in its :supers list
       (dolist (sub (class-direct-subclasses (getf node :class)))
 	(let ((found (find sub (car queue) :key (getter :class))))
 	  (cond
 	    (found
 	     (pushnew node (getf found :supers))
-	     (orf (getf found :1) (getf node :1))
-	     (orf (getf found :2) (getf node :2)))
+	     (unionf (getf found :roots) (getf node :roots)))
 	    (t
-	     (let ((new (list :class sub
-			      :1 (getf node :1)
-			      :2 (getf node :2)
-			      :supers (list node))))
-	       (tconc queue new)))))))
+	     (tconc queue (list :class sub
+				:roots (getf node :roots)
+				:supers (list node))))))))
+    ;; now (car queue) is a list of nodes corresponding to the entire
+    ;; subtrees of class1 and class2.  If any class appears on both
+    ;; subtrees, then only one corresponding node is found in (car
+    ;; queue) but it has field :roots containing class1 and class2.
     (mapcar (getter :class)
 	    ;; find all nodes which are descendants of both class1 and
 	    ;; class2, but which have no parent node which are also
 	    ;; both descendants thereof.
 	    (setof node (car queue)
-	      (and (getf node :1)
-		   (getf node :2)
-		   (not (exists super-node (getf node :supers)
-			  (and (getf super-node :1)
-			       (getf super-node :2)))))))))
+		   (and (member class1 (getf node :roots))
+			(member class2 (getf node :roots))
+			(not (exists super-node (getf node :supers)
+			       (and (member class1 (getf super-node :roots))
+				    (member class2 (getf super-node :roots))))))))))
 
 (defmethod specializer-intersections ((eql1 eql-specializer) (class2 class))
   (when (typep (eql-specializer-object eql1) class2)

@@ -22,9 +22,10 @@
 (defpackage :dispatch
   (:export)
   (:use :cl :closer-mop)
-  (:shadow "STANDARD-GENERIC-FUNCTION"
-	   "DEFMETHOD"
-	   "DEFGENERIC"))
+  (:shadowing-import-from :closer-mop
+			  "STANDARD-GENERIC-FUNCTION"
+			  "DEFMETHOD"
+			  "DEFGENERIC"))
 
 (in-package :dispatch)
 

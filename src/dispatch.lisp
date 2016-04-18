@@ -21,11 +21,7 @@
 
 (defpackage :dispatch
   (:export)
-  (:use :cl :closer-mop)
-  (:shadowing-import-from :closer-mop
-			  "STANDARD-GENERIC-FUNCTION"
-			  "DEFMETHOD"
-			  "DEFGENERIC"))
+  (:use :closer-common-lisp))
 
 (in-package :dispatch)
 

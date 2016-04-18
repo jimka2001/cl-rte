@@ -55,9 +55,6 @@
 	    (funcall binary head item)))
 	data-list))
 
-(defun map-common-subtypes (unary class1 class2)
-  ())
-
 (defmacro setof (var data &body body)
   `(remove-if-not #'(lambda (,var) ,@body) ,data))
 
@@ -106,14 +103,18 @@ then omit C in the return list."))
 
 (defmethod specializer-intersections ((class1 class) (class2 class))
   ;; breadth first search down the class hierarchy towards nil
-  (let ((queue (tconc nil
+  (let ((both-roots (list class1 class2))
+	(queue (tconc nil
 		      (list :class class1 :roots (list class1) :supers nil)
 		      (list :class class2 :roots (list class2) :supers nil))))
     (dolist (node (car queue))
-      ;; node->:class is a class in the sub-tree of either class1 or class2 (or both)
-      ;; node->:roots set subset of (class1 class2) indicating which root classes are eventually superclasses of node->class
-      ;; node->:supers is a list of nodes (not classes).  If classX has sub as direct-subclass
-      ;;    then the node with :class = sub has the node with :class = classX in its :supers list
+      ;; node->:class is a class in the sub-tree of either class1 or
+      ;;    class2 (or both)
+      ;; node->:roots set subset of (class1 class2) indicating which
+      ;;    root classes are eventually superclasses of node->class
+      ;; node->:supers is a list of nodes (not classes).  If classX
+      ;;    has sub as direct-subclass then the node with :class = sub
+      ;;    has the node with :class = classX in its :supers list
       (dolist (sub (class-direct-subclasses (getf node :class)))
 	(let ((found (find sub (car queue) :key (getter :class))))
 	  (cond
@@ -133,11 +134,9 @@ then omit C in the return list."))
 	    ;; class2, but which have no parent node which are also
 	    ;; both descendants thereof.
 	    (setof node (car queue)
-		   (and (member class1 (getf node :roots))
-			(member class2 (getf node :roots))
-			(not (exists super-node (getf node :supers)
-			       (and (member class1 (getf super-node :roots))
-				    (member class2 (getf super-node :roots))))))))))
+	      (and (subsetp both-roots (getf node :roots))
+		   (not (exists super-node (getf node :supers)
+			  (subsetp both-roots (getf super-node :roots)))))))))
 
 (defmethod specializer-intersections ((eql1 eql-specializer) (class2 class))
   (when (typep (eql-specializer-object eql1) class2)

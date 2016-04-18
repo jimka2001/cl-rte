@@ -82,3 +82,29 @@
 			   :test #'equal
 			   :key (getter :arg-types)))))))
 			     
+(defclass C0 () ())
+(defclass C1 (C0) ())
+(defclass A (C0) ())
+
+(defclass B () ())
+(defclass C2 (B) ())
+(defclass C3 (B) ())
+
+(defclass C4 (C1 A) ())
+(defclass C5 (A) ())
+(defclass C6 (C2 C3) ())
+(defclass C7 (C6) ())
+(defclass C8 (C5 C6) ())
+(defclass C9 (C8) ())
+(defclass C10 (C8) ())
+(defclass C11 (C5 C7) ())
+(defclass C12 (C4 C9) ())
+(defclass C13 (C7) ())
+(defclass C14 (C12) ())
+(defclass C15 (C12 C10 C13) ())
+
+(define-test dispatch/tricky
+  (assert-false
+   (set-exclusive-or
+    (dispatch::specializer-intersections (find-class 'A) (find-class 'B))
+    (list (find-class 'C11) (find-class 'C8)))))

@@ -547,9 +547,9 @@ a fixed point is found."
 		     ,@(mapcar #'dump-case-transition (transitions state))
 		     (t (return-from check nil))))
 		 (t
-		  `(optimized-typecase ,next
-				       ,@(mapcar #'dump-typecase-transition (transitions state))
-				       (t (return-from check nil))))))
+		  `(auto-permute-typecase ,next
+                     ,@(mapcar #'dump-typecase-transition (transitions state))
+                     (t (return-from check nil))))))
 	     (dump-state (state end next)
 	       (copy-list `(,(state-name state)
 			    ,(dump-end state end)

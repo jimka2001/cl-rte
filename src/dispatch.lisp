@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :dispatch
-  (:export)
+  (:export "SPECIALIZER-INTERSECTIONS")
   (:use :closer-common-lisp))
 
 (in-package :dispatch)
@@ -94,24 +94,33 @@
 
 (defgeneric specializer-intersections (spec1 spec2)
   (:documentation
-   "Compute and return a list of all the specializers (classes for example) which
-inherit from both spec1 and spec2, but disregarding specializers which inherit
-from another one of the calculated specializers.  E.g., If spec1=<class A> and
-spec2=<class B>, then calculate the list of all classes inheriting from
-both A and B.  But if C and D both inherit from A and B, but C also inherits from D
-then omit C in the return list."))
+   "Compute and return a list of all the specializers (classes for
+example) which inherit from both spec1 and spec2, but disregarding
+specializers which inherit from another one of the calculated
+specializers.  E.g., If spec1=<class A> and spec2=<class B>, then
+calculate the list of all classes inheriting from both A and B.  But
+if C and D both inherit from A and B, but C also inherits from D then
+omit C in the return list."))
 
-(defmethod specializer-intersections ((class1 class) (class2 class))
+(defmethod specializer-intersections ((class1 class)
+                                      (class2 class))
+  (declare (optimize (compilation-speed 0) (debug 0) (space 0) (safety 0) (speed 3)))
   ;; breadth first search down the class hierarchy towards nil
   (let ((both-roots (list class1 class2))
 	(queue (tconc nil
-		      (list :class class1 :roots (list class1) :supers nil)
-		      (list :class class2 :roots (list class2) :supers nil))))
+		      (list :class class1
+                            :roots (list class1)
+                            :supers nil)
+		      (list :class class2
+                            :roots (list class2)
+                            :supers nil))))
     (dolist (node (car queue))
       ;; node->:class is a class in the sub-tree of either class1 or
       ;;    class2 (or both)
+      
       ;; node->:roots set subset of (class1 class2) indicating which
       ;;    root classes are eventually superclasses of node->class
+      
       ;; node->:supers is a list of nodes (not classes).  If classX
       ;;    has sub as direct-subclass then the node with :class = sub
       ;;    has the node with :class = classX in its :supers list

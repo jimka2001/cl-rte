@@ -1,0 +1,45 @@
+#!/lrde/home/jnewton/opt/sbcl/bin/sbcl --script
+#|
+#PBS -m ea
+|#
+
+(require :asdf)
+(require :sb-posix)
+(let ((home (directory-namestring (user-homedir-pathname)))
+      (uid (sb-posix:getuid))
+      (pid  (sb-posix:getpid)))
+  (setf asdf::*user-cache* (ensure-directories-exist (format nil "/tmp~A~D/~D/" home uid pid))))
+
+#-quicklisp
+(let ((quicklisp-init
+	"/lrde/home/jnewton/quicklisp/setup.lisp"))
+  (if (probe-file quicklisp-init)
+      (load quicklisp-init)
+      (error "file not found ~S" quicklisp-init)))
+(asdf:load-system :lisp-types-test)
+(in-package :lisp-types.test)
+
+(defvar *num-vars* (parse-integer (sb-posix:getenv "NUM-VARS")))
+(defvar *num-samples* (parse-integer (sb-posix:getenv "NUM-SAMPLES")))
+(defvar *broadcast* (format nil "cluster.~A/broadcast.big-report.~A-~D-~D"
+			    (sb-posix:getenv "CLUSTER_JOB_NUM")
+			    (or (sb-posix:getenv "PBS_JOBID") "0")
+			    (sb-posix:getpid)
+			    *bucket-index*))
+
+(with-dup-stream (*standard-output* *broadcast*)
+  (format t "Writing to broadcast file ~A~%" *broadcast*)
+  (format t "-------------------------------------------------~%")
+  (format t "-------------------------------------------------~%")
+  (format t "starting distribution-report ~A~%" *num-vars*)
+  (format t "-------------------------------------------------~%")
+  (finish-output)
+  (time (measure-and-write-bdd-distrubtion
+	 "/lrde/home/jnewton/analysis/."
+	 *num-vars*
+	 *num-samples*))
+  (format t "finished distribution-report ~A~%" *num-vars*))
+
+(sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
+		    :search t)
+(qstat-f)

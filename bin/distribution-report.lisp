@@ -37,7 +37,8 @@
   (time (measure-and-write-bdd-distribution
 	 "/lrde/home/jnewton/analysis/."
 	 *num-vars*
-	 *num-samples*))
+	 *num-samples*
+         :interval (* 60 5)))
   (format t "finished distribution-report ~A~%" *num-vars*))
 
 (sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)

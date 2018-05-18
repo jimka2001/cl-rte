@@ -34,7 +34,7 @@
   (format t "starting distribution-report ~A~%" *num-vars*)
   (format t "-------------------------------------------------~%")
   (finish-output)
-  (time (measure-and-write-bdd-distrubtion
+  (time (measure-and-write-bdd-distribution
 	 "/lrde/home/jnewton/analysis/."
 	 *num-vars*
 	 *num-samples*))

@@ -21,11 +21,11 @@
 
 (defvar *num-vars* (parse-integer (sb-posix:getenv "NUM-VARS")))
 (defvar *num-samples* (parse-integer (sb-posix:getenv "NUM-SAMPLES")))
-(defvar *broadcast* (format nil "cluster.~A/broadcast.big-report.~A-~D-~D"
+(defvar *broadcast* (format nil "cluster.~A/broadcast.distribution-report.~A-~D-~D"
 			    (sb-posix:getenv "CLUSTER_JOB_NUM")
 			    (or (sb-posix:getenv "PBS_JOBID") "0")
 			    (sb-posix:getpid)
-			    *bucket-index*))
+			    *num-vars*))
 
 (with-dup-stream (*standard-output* *broadcast*)
   (format t "Writing to broadcast file ~A~%" *broadcast*)
@@ -34,7 +34,7 @@
   (format t "starting distribution-report ~A~%" *num-vars*)
   (format t "-------------------------------------------------~%")
   (finish-output)
-  (time (measure-and-write-bdd-distrubtion
+  (time (measure-and-write-bdd-distribution
 	 "/lrde/home/jnewton/analysis/."
 	 *num-vars*
 	 *num-samples*))

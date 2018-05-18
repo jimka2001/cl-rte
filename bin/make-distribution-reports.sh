@@ -6,7 +6,7 @@ export CLUSTER_JOB_NUM=$$
 mkdir cluster.$$
 cd cluster.$$
 echo starting jobs in cluster.$$
-BIN="$HOME/sw/regular-type-expression/bin/"
+BIN="$HOME/sw/regular-type-expression/bin"
 
 x=""
 x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="3",NUM-SAMPLES="256" $BIN/distribution-report.lisp`
@@ -14,7 +14,7 @@ x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="
 x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="5",NUM-SAMPLES="500000" $BIN/distribution-report.lisp`
 x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="6",NUM-SAMPLES="400000" $BIN/distribution-report.lisp`
 x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="7",NUM-SAMPLES="100000" $BIN/distribution-report.lisp`
-x=$x:`qsub -l walltime=24:00:00-v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="8",NUM-SAMPLES="21000" $BIN/distribution-report.lisp`
+x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="8",NUM-SAMPLES="21000" $BIN/distribution-report.lisp`
 x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="9",NUM-SAMPLES="4500" $BIN/distribution-report.lisp`
 x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="10",NUM-SAMPLES="1000" $BIN/distribution-report.lisp`
 

@@ -32,6 +32,9 @@
 			    (sb-posix:getpid)
 			    *num-vars*))
 
+
+(setf *random-state* (make-random-state t))
+
 (with-dup-stream (*standard-output* *broadcast*)
   (format t "Writing to broadcast file ~A~%" *broadcast*)
   (format t "-------------------------------------------------~%")

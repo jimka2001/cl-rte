@@ -15,7 +15,7 @@ x=""
 #x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="6",NUM-SAMPLES="400000" $BIN/distribution-report.lisp`
 #x=$x:`qsub -l walltime=24:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="7",NUM-SAMPLES="100000" $BIN/distribution-report.lisp`
 #x=$x:`qsub -q infinite -l walltime=48:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="8",NUM-SAMPLES="20000" $BIN/distribution-report.lisp`
-for i in $(seq 0 200) ; do
+for i in $(seq 0 400) ; do
   qsub -q lrde -l walltime=30:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="9",NUM-SAMPLES="40" $BIN/distribution-report.lisp
   qsub -q lrde -l walltime=30:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="10",NUM-SAMPLES="10" $BIN/distribution-report.lisp
 done

@@ -43,6 +43,7 @@
 	 "/lrde/home/jnewton/analysis/."
 	 *num-vars*
 	 *num-samples*
+         *bdd-sizes-file*
          :interval (* 60 5)))
   (format t "finished distribution-report ~A~%" *num-vars*))
 

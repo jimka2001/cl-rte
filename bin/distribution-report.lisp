@@ -19,10 +19,15 @@
 (asdf:load-system :lisp-types-test)
 (in-package :lisp-types.test)
 
-(defvar *num-vars* (parse-integer (sb-posix:getenv "NUM-VARS")))
-(defvar *num-samples* (parse-integer (sb-posix:getenv "NUM-SAMPLES")))
+(defvar *num-vars* (parse-integer (demand-env-var "NUM-VARS")))
+(defvar *num-samples* (parse-integer (demand-env-var "NUM-SAMPLES")))
+(defvar *bdd-sizes-file* (format nil "cluster.~A/bdd-sizes.~A-~D-~D"
+                                 (demand-env-var "CLUSTER_JOB_NUM")
+                                 (or (sb-posix:getenv "PBS_JOBID") "0")
+                                 (sb-posix:getpid)
+                                 *num-vars*))
 (defvar *broadcast* (format nil "cluster.~A/broadcast.distribution-report.~A-~D-~D"
-			    (sb-posix:getenv "CLUSTER_JOB_NUM")
+			    (demand-env-var "CLUSTER_JOB_NUM")
 			    (or (sb-posix:getenv "PBS_JOBID") "0")
 			    (sb-posix:getpid)
 			    *num-vars*))

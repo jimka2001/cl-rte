@@ -1,4 +1,4 @@
-;; Copyright (c) 2017 EPITA Research and Development Laboratory
+;; Copyright (c) 2017,2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package   :lisp-types)
+(in-package   :cl-robdd)
 
 (defun bdd-to-dot (bdd stream &key (reduced t))
   (cond
@@ -38,10 +38,7 @@
               (bdd-shape (bdd)
                 (typecase bdd
                   (bdd-node "ellipse")
-                  (bdd-leaf "box")))
-
-              )
-
+                  (bdd-leaf "box"))))
        (cond
          (reduced
           (let* ((num 0)
@@ -118,7 +115,7 @@
        ;; footer
        (format stream "}~%")))))
      
-(defun bdd-to-png (bdd &key (reduced t) (basename (format nil "/tmp/jnewton/graph/~A" (bdd-ident bdd))))
+(defun bdd-to-png (bdd &key (reduced t) (basename (format nil "~A/~A" (make-temp-dir "graph") (bdd-ident bdd))))
   (let ((dot-path (format nil "~A.dot" basename))
         (png-path (format nil "~A.png" basename)))
     (ensure-directories-exist dot-path)
@@ -131,7 +128,7 @@
                  :search t)
     png-path))
   
-(defun bdd-view (bdd &key (reduced t) (basename (format nil "/tmp/jnewton/graph/~A" (bdd-ident bdd))))
+(defun bdd-view (bdd &key (reduced t) (basename (format nil "~A/~A" (make-temp-dir "graph") (bdd-ident bdd))))
   (run-program "open" (list (bdd-to-png bdd :reduced reduced
                                             :basename basename))
                :search t))

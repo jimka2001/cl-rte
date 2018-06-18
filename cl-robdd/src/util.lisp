@@ -1,4 +1,4 @@
-;; Copyright (c) 2016,2017 EPITA Research and Development Laboratory
+;; Copyright (c) 2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,5 +19,27 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package   :lisp-types)
+(in-package :cl-robdd)
+
+(defun lconc (buf items)
+  (cond
+    ((null buf)
+     (cons items (last items)))
+    ((null (car buf))
+     (setf (car buf) items)
+     (setf (cdr buf) (last items))
+     buf)
+    ((null items)
+     buf)
+    (t
+     (setf (cdr (cdr buf)) items)
+     (setf (cdr buf) (last items))
+     buf)))
+
+(defun tconc (buf &rest items)
+  (lconc buf items))
+
+(defmacro while (test &body body)
+  `(loop :while ,test
+	 :do (progn ,@body)))
 

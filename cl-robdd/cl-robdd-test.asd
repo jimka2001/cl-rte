@@ -1,4 +1,4 @@
-;; Copyright (c) 2016,2017 EPITA Research and Development Laboratory
+;; Copyright (c) 2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,5 +19,11 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package   :lisp-types)
-
+(asdf:defsystem :cl-robdd-test
+  :depends-on (:cl-robdd
+               (:version :lisp-unit "0.9.0"))
+  :components
+  ((:module "src"
+    :components
+    ((:file "test-bdd")
+     ))))

@@ -19,7 +19,12 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types.test)
+(cl:defpackage :cl-robdd-analysis
+  (:use :cl :cl-robdd)
+  (:export
+   "MEASURE-AND-WRITE-BDD-DISTRIBUTION"))
+
+(in-package :cl-robdd-analysis)
 
 
 (defun int-to-boolean-expression (n vars)
@@ -80,6 +85,10 @@ Why?  Because the truth table of this function is:
   ;; vars is a list of symbols
   (int-to-boolean-expression (random (expt 2 (expt 2 (length vars))))
                              vars))
+
+(defmacro while (test &body body)
+  `(loop :while ,test
+	 :do (progn ,@body)))
 
 (defun median-a-list (a-list)
   (let ((a-list (copy-list a-list)))
@@ -229,6 +238,18 @@ than INTERVAL number of seconds"
             (push bdd-size samples))))
       samples)))
 
+(defun bdd-count-nodes (bdd)
+  (let ((c 0))
+    (bdd-bfs bdd (lambda (node)
+                   (declare (ignore node))
+                   (incf c)))
+    c))
+
+(defun garbage-collect ()
+  #+sbcl (sb-ext::gc :full t)
+  #+allegro (excl:gc t)
+)
+
 (defun measure-bdd-size (vars num-samples &key (interval 2) (bdd-sizes-file "/dev/null") (read-from-log-p nil))
   ;; READ-FROM-LOG-P specifies to read a bdd-size from the log file if possible.
   ;;      if there are fewer than num-samples in the log file, an error is triggered.
@@ -291,8 +312,6 @@ than INTERVAL number of seconds"
         (pushnew 0 samples)
         (pushnew 1 samples)
         (pushnew ffff samples)
-        ;; (format t "grey-sorting ~D integers~%" (length samples))
-        ;;(setf samples (lisp-types::grey-sort samples))
         (format t "sorting ~D integers~%" (length samples))
         (setf samples (remove-duplicates-sorted-list (sort samples #'<)))
         (format t "generating ~D " (length samples))
@@ -388,6 +407,8 @@ than INTERVAL number of seconds"
                                             (getf plist :counts))))
                     (list (calc-plist histogram (getf plist :num-vars) (getf plist :randomp))))))))
 
+(defvar *bdd-boolean-variables* '(ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1))
+
 (defun measure-and-write-bdd-distribution (prefix num-vars num-samples bdd-sizes-file &key (interval 2) (read-from-log-p nil))
   "PREFIX: string designating path name to directory to write analysis results, 
            e.g., \"/lrde/home/jnewton/analysis/.\"
@@ -395,12 +416,15 @@ than INTERVAL number of seconds"
    NUM-SAMPLES: number of random truth tables to try
    BDD-SIZES-FILE: string (also accepts t an nil) indicate file to output log information
    INTERVAL: minimum number of seconds between progress updates"
-  (write-bdd-distribution-data (measure-bdd-sizes *bdd-test-classes*
+  (write-bdd-distribution-data (measure-bdd-sizes *bdd-boolean-variables*
                                                   num-samples num-vars num-vars
                                                   :bdd-sizes-file bdd-sizes-file
                                                   :read-from-log-p read-from-log-p
                                                   :interval interval)
                                prefix))
+
+(defun getter (field)
+  (lambda (obj) (getf obj field)))
 
 (defun latex-measure-bdd-sizes (prefix vars num-samples &key (min 1) (max (length vars)) (re-run t))
   ;; example values

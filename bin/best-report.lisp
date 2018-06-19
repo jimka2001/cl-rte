@@ -17,7 +17,7 @@
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
 (asdf:load-system :lisp-types-test)
-(in-package :lisp-types.test)
+(in-package :lisp-types-test)
 
 (defvar *bucket-index* (parse-integer (sb-posix:getenv "BUCKET-INDEX")))
 (defvar *bucket*    (nth *bucket-index* *bucket-reporters* ))

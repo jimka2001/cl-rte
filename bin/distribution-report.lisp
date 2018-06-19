@@ -17,7 +17,7 @@
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
 (asdf:load-system :lisp-types-test)
-(in-package :lisp-types.test)
+(in-package :lisp-types-test)
 
 (defvar *num-vars* (parse-integer (demand-env-var "NUM-VARS")))
 (defvar *num-samples* (parse-integer (demand-env-var "NUM-SAMPLES")))

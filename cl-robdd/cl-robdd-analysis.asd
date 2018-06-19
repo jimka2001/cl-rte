@@ -20,10 +20,11 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :cl-robdd-analysis
-  :depends-on (:cl-robdd)
+  :depends-on (:cl-robdd :sb-sprof)
   :components
   ((:module "src"
     :components
     ((:file "bdd-size-simulation")
      (:file "bdd-ops-test")
+     (:file "profile")
      ))))

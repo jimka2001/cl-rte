@@ -12,8 +12,8 @@
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
-(asdf:load-system :lisp-types-test)
-(in-package :lisp-types-test)
+(asdf:load-system :lisp-types-analysis)
+(in-package :lisp-types-analysis)
 
 (sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
 		    :search t)

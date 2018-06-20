@@ -16,8 +16,8 @@
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
-(asdf:load-system :lisp-types-test)
-(in-package :lisp-types-test)
+(asdf:load-system :cl-robdd-analysis)
+(in-package :cl-robdd-analysis)
 
 (defvar *num-vars* (parse-integer (demand-env-var "NUM-VARS")))
 (defvar *num-samples* (parse-integer (demand-env-var "NUM-SAMPLES")))

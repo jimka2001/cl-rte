@@ -19,8 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types)
+(in-package :cl-robdd-analysis)
 
+(defun run-program (program args &rest options)
+  #+sbcl (apply #'sb-ext:run-program program args :search t options)
+  #+allegro (apply #'excl:run-shell-command
+                   (apply #'vector (cons program args))
+                   :wait t
+                   options
+                   )
+  )
 
 (defun bdd-nth-row (n)
   (let ((k 1))
@@ -79,6 +87,18 @@
             (t
              (funcall f (svref vec i1) (svref vec r)))))))))
 
+
+(defvar *tmp-dir* (format nil "/tmp/~A/" (or (sb-posix:getenv "USER")
+                                             "unknown-user")))
+
+(defun make-temp-dir (suffix)
+  (format nil "~A/~A/" *tmp-dir* suffix))
+
+(defun bdd-view (bdd &key (reduced t) (basename (format nil "~A/~A" (make-temp-dir "graph") (bdd-ident bdd))))
+  (run-program "open" (list (bdd-to-png bdd :reduced reduced
+                                            :basename basename))
+               :search t))
+
 (defun bdd-make-worst-case (vars &key (basename (format nil "/tmp/jnewton/graph/bdd-worst-~D" (length vars))))
   (let* ((leaves (list *bdd-true* *bdd-false*))
          (size 2) ;; length of leaves
@@ -119,10 +139,10 @@
         ;; nodes.  If p*(p-1) >= 2^n then this is sufficient,
         ;; otherwise, remaining denotes how many additional need to be
         ;; created in BLOCK create-remaining.
-        (map-pairs (lambda (left right)
+        (map-pairs (lambda (positive negative)
                      (cond
                        ((plusp needed)
-                        (push (bdd-node (car vars) left right) bdds)
+                        (push (bdd-node (car vars) positive negative) bdds)
                         (decf needed))
                        (t
                         (return-from create-links-to-n+1))))
@@ -137,7 +157,7 @@
         ;; the existing nodes row n+2, n+3 ... as necessary, skipping
         ;; any pair which has already been created in the previous
         ;; block.
-        (map-pairs (lambda (right left &aux (bdd (bdd-node (car vars) left right)))
+        (map-pairs (lambda (negative positive &aux (bdd (bdd-node (car vars) positive negative)))
                      (cond
                        ;; if there's already a bdd in bdds pointing to
                        ;; these two nodes, this skip this pair.  we

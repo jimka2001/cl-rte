@@ -19,21 +19,13 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types-test)
-
-(defclass Z1 () ())
-(defclass Z2 () ())
-(defclass Z3 () ())
-(defclass Z4 () ())
-(defclass Z5 () ())
-(defclass Z6 () ())
-(defclass Z7 () ())
-(defclass Z8 () ())
-(defclass Z9 () ())
-(defclass ZA () ())
-(defclass ZB () ())
-(defclass ZC () ())
-(defclass Z12345678 (Z1 Z2 Z3 Z4 Z5 Z6 Z7 Z8) ())
-(defclass ZCBA987654321 (ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1) ())
-
-(defvar *bdd-test-classes* '(ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1))
+(asdf:defsystem :cl-robdd-analysis-test
+  :depends-on (:cl-robdd-analysis
+               (:version :lisp-unit "0.9.0"))
+  :components
+  ((:module "src"
+    :components
+    ((:file "test-size-simulation")
+     (:file "test-profile")
+     (:file "test-timing")
+     ))))

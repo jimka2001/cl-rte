@@ -1,4 +1,4 @@
-;; Copyright (c) 2016,2017 EPITA Research and Development Laboratory
+;; Copyright (c) 2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,18 +19,24 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package   :lisp-types)
+(in-package :cl-robdd)
 
 (defgeneric bdd-serialize (bdd))
-
-(defgeneric bdd (obj))
+(defgeneric bdd-factory (bdd-class))
+(defgeneric bdd (obj &key bdd-node-class))
 (defgeneric bdd-leaf (value))
-(defgeneric bdd-node (label left right))
+(defgeneric bdd-node (label positive negative  &key bdd-node-class))
 (defgeneric bdd-or (b1 b2))
 (defgeneric bdd-and (b1 b2))
 (defgeneric bdd-and-not (b1 b2))
 (defgeneric bdd-xor (b1 b2))
 (defgeneric bdd-not (b))
+(defgeneric %bdd-node (label positive-bdd negative-bdd &key bdd-node-class &allow-other-keys))
+(defgeneric bdd-allocate (label positive-bdd negative-bdd &key bdd-node-class &allow-other-keys))
+
+
+(deftype class-designator ()
+  `(or (and symbol (not null)) class))
 
 (defvar *bdd-count* 1)
 (defclass bdd ()
@@ -54,6 +60,20 @@
 (defun bdd-ident (bdd)
   (slot-value bdd 'ident))
 
+
+
+(defclass bdd-node (bdd)
+  ((positive :type bdd :initarg :positive ;;:reader bdd-positive
+         )
+   (negative :type bdd :initarg :negative ;; :reader bdd-negative
+          )))
+
+(defmethod bdd-factory ((bdd-class (eql (find-class 'bdd-node))))
+  #'bdd)
+
+(defmethod bdd-factory ((bdd-class (eql 'bdd-node)))
+  #'bdd)
+
 (defun bdd-bfs (bdd action)
   (let* ((buf (tconc nil bdd))
          ;; TODO -- don't really need nodes, we could
@@ -64,21 +84,16 @@
       (funcall action (car nodes))
       (typecase (car nodes)
         (bdd-node
-         (unless (member (bdd-left (car nodes)) (car buf) :test #'eq)
-           (tconc buf (bdd-left (car nodes))))
-         (unless (member (bdd-right (car nodes)) (car buf) :test #'eq)
-           (tconc buf (bdd-right (car nodes))))))
+         (unless (member (bdd-positive (car nodes)) (car buf) :test #'eq)
+           (tconc buf (bdd-positive (car nodes))))
+         (unless (member (bdd-negative (car nodes)) (car buf) :test #'eq)
+           (tconc buf (bdd-negative (car nodes))))))
       (pop nodes))))
 
-(defun bdd-count-nodes (bdd)
-  (let ((c 0))
-    (bdd-bfs bdd (lambda (node)
-                   (declare (ignore node))
-                   (incf c)))
-    c))
 
 (defvar *bdd-generation* 0)
 (defvar *bdd-hash-strength* :weak-dynamic ) ;; or :weak or :weak-dynamic
+(defvar *bdd-hash-type* '(or bdd-node bdd-leaf))
 (defun bdd-new-hash (&key ((bdd-hash-strength *bdd-hash-strength*) *bdd-hash-strength*))
   (flet ((make-hash ()
            (incf *bdd-generation*)
@@ -127,31 +142,23 @@
 (defun bdd-call-with-new-hash (thunk &key (verbose *bdd-verbose*))
   (let ((*bdd-verbose* verbose)
         (*bdd-hash-struct* (bdd-new-hash)))
-    ;; (setf (gethash :type-system *bdd-hash*)
-    ;;       (bdd '(not (or
-    ;;                   (and (not integer) (not ratio) rational)
-    ;;                   (and rational float)
-    ;;                   (and array sequence (not vector))
-    ;;                   (and (not float) (not integer) (not ratio) real)
-    ;;                   (and (not bignum) (not fixnum) unsigned-byte)))))
-    (caching-types
-     (prog1 (funcall thunk)
-       (when verbose
-         (format t "finished with ~A~%" (bdd-hash)))))))
+    (prog1 (funcall thunk)
+      (when verbose
+        (format t "finished with ~A~%" (bdd-hash))))))
   
-(defun bdd-make-key (label left right)
-  (list left right label))
+(defun bdd-make-key (label positive negative)
+  (list positive negative label))
 
-(defun bdd-find-int-int (hash label left right)
-  (declare (type fixnum left right)
+(defun bdd-find-int-int (hash label positive negative)
+  (declare (type fixnum positive negative)
            (optimize (speed 3)))
-  (gethash (bdd-make-key label left right) hash))
+  (gethash (bdd-make-key label positive negative) hash))
 
-(defun bdd-find (hash label left-bdd right-bdd)
-  (declare (type bdd left-bdd right-bdd))
+(defun bdd-find (hash label positive-bdd negative-bdd)
+  (declare (type bdd positive-bdd negative-bdd))
   (when (eq hash (bdd-hash))
     (setf (bdd-recent-count) (hash-table-count (bdd-hash))))
-  (bdd-find-int-int hash label (bdd-ident left-bdd) (bdd-ident right-bdd)))
+  (bdd-find-int-int hash label (bdd-ident positive-bdd) (bdd-ident negative-bdd)))
 
 #+sbcl
 (progn
@@ -172,26 +179,22 @@
       (format stream "[~D]" (slot-value bdd 'ident)))
     (format stream "~S=~S" (bdd-serialize bdd) (bdd-to-dnf bdd))))
 
-(defmethod bdd ((bdd bdd))
+(defmethod bdd ((bdd bdd) &key &allow-other-keys)
   bdd)
 
-(defclass bdd-node (bdd)
-  ((left :type bdd :initarg :left ;;:reader bdd-left
-         )
-   (right :type bdd :initarg :right ;; :reader bdd-right
-          )))
+
 
 ;; reader for the label slot.  I've implemented this as a defun rather than :reader becase
 ;;  it seems to be in the critical performance loop and the normal function performs marginally
 ;;  faster than the method
-(defun bdd-right (bdd)
-  (slot-value bdd 'right))
+(defun bdd-negative (bdd)
+  (slot-value bdd 'negative))
 
 ;; reader for the label slot.  I've implemented this as a defun rather than :reader becase
 ;;  it seems to be in the critical performance loop and the normal function performs marginally
 ;;  faster than the method
-(defun bdd-left (bdd)
-  (slot-value bdd 'left))
+(defun bdd-positive (bdd)
+  (slot-value bdd 'positive))
 
 (defclass bdd-leaf (bdd) ())
 
@@ -213,13 +216,11 @@
 (defvar *bdd-true* (make-instance 'bdd-true))
 (defvar *bdd-false* (make-instance 'bdd-false))
 
-(defmethod bdd ((label symbol))
-  (if (valid-type-p label)
-      (%bdd-node label *bdd-true* *bdd-false*)
-      (error "invalid type specifier: ~A" label)))
+(defmethod bdd ((label symbol) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (%bdd-node label *bdd-true* *bdd-false* :bdd-node-class bdd-node-class))
 
-(defgeneric bdd-list-to-bdd (head tail))
-
+(defgeneric bdd-list-to-bdd (head tail &key bdd-node-class))
 (defvar *bdd-operation-order* (the (member :divide-and-conquer
                                            :reduce) :divide-and-conquer ))
 (flet ((bdd-list-to-bdd-helper (len bdds zero op)
@@ -242,42 +243,46 @@
              ((:divide-and-conquer)
               (divide-and-conquer len bdds))))))
 
-  (defmethod bdd-list-to-bdd ((head (eql 'xor)) tail)
-    (bdd-list-to-bdd-helper (length tail) (mapcar #'bdd tail) *bdd-true* #'bdd-xor))
+  (defmethod bdd-list-to-bdd ((head (eql 'xor)) tail &key (bdd-node-class 'bdd-node) &allow-other-keys)
+    (declare (type class-designator bdd-node-class))
+    (bdd-list-to-bdd-helper (length tail) (mapcar (bdd-factory bdd-node-class) tail) *bdd-true* #'bdd-xor))
   
-  (defmethod bdd-list-to-bdd ((head (eql 'and)) tail)
-    (bdd-list-to-bdd-helper (length tail) (mapcar #'bdd tail) *bdd-true* #'bdd-and))
+  (defmethod bdd-list-to-bdd ((head (eql 'and)) tail &key (bdd-node-class 'bdd-node) &allow-other-keys)
+    (declare (type class-designator bdd-node-class))
+    (bdd-list-to-bdd-helper (length tail) (mapcar (bdd-factory bdd-node-class) tail) *bdd-true* #'bdd-and))
 
-  (defmethod bdd-list-to-bdd ((head (eql 'or)) tail)
-    (bdd-list-to-bdd-helper (length tail) (mapcar #'bdd tail) *bdd-false* #'bdd-or))
+  (defmethod bdd-list-to-bdd ((head (eql 'or)) tail &key (bdd-node-class 'bdd-node) &allow-other-keys)
+    (declare (type class-designator bdd-node-class))
+    (bdd-list-to-bdd-helper (length tail) (mapcar (bdd-factory bdd-node-class) tail) *bdd-false* #'bdd-or))
 
-  (defmethod bdd-list-to-bdd ((head (eql 'and-not)) tail)
+  (defmethod bdd-list-to-bdd ((head (eql 'and-not)) tail &key (bdd-node-class 'bdd-node) &allow-other-keys)
+    (declare (type class-designator bdd-node-class))
     ;; (assert (<= 2 (length tail)) ()
     ;;         "AND-NOT takes at least two arguments: cannot convert ~A to a BDD" expr)
-    (destructuring-bind (bdd-head &rest bdd-tail) (mapcar #'bdd tail)
+    (destructuring-bind (bdd-head &rest bdd-tail) (mapcar (bdd-factory bdd-node-class) tail)
       (ecase *bdd-operation-order*
         ((:reduce)
          (reduce #'bdd-and-not bdd-tail :initial-value bdd-head))
         ((:divide-and-conquer)
          (bdd-and-not bdd-head (bdd-list-to-bdd-helper (length bdd-tail) bdd-tail *bdd-true* #'bdd-and)))))))
 
-(defmethod bdd-list-to-bdd ((head (eql 'not)) tail)
+(defmethod bdd-list-to-bdd ((head (eql 'not)) tail &key (bdd-node-class 'bdd-node) &allow-other-keys)
+  (declare (type class-designator bdd-node-class))
   ;; (assert (null (cdr tail)) ()
   ;;         "NOT takes exactly one argument: cannot convert ~A to a BDD" expr)
-  (bdd-and-not *bdd-true* (bdd (car tail))))
+  (bdd-and-not *bdd-true* (funcall (bdd-factory bdd-node-class) (car tail))))
 
-(defmethod bdd-list-to-bdd (head tail &aux (expr (cons head tail)))
-  (if (valid-type-p expr)
-      (%bdd-node expr *bdd-true* *bdd-false*)
-      (error "invalid type specifier: ~A" expr)))
+(defmethod bdd-list-to-bdd (head tail &key bdd-node-class &aux (expr (cons head tail)) )
+  (%bdd-node expr *bdd-true* *bdd-false* :bdd-node-class bdd-node-class))
 
-(defmethod bdd ((expr list))
-  (bdd-list-to-bdd (car expr) (cdr expr)))
+(defmethod bdd ((expr list) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (bdd-list-to-bdd (car expr) (cdr expr) :bdd-node-class bdd-node-class))
 
-(defmethod bdd ((label (eql nil)))
+(defmethod bdd ((label (eql nil)) &key &allow-other-keys)
   *bdd-false*)
 
-(defmethod bdd ((label (eql t)))
+(defmethod bdd ((label (eql t)) &key &allow-other-keys)
   *bdd-true*)
 
 (defmethod bdd-leaf ((value (eql t)))
@@ -287,31 +292,35 @@
 
 (defmethod bdd-serialize ((b bdd-node))
   (list (bdd-label b)
-        (bdd-serialize (bdd-left b))
-        (bdd-serialize (bdd-right b))))
+        (bdd-serialize (bdd-positive b))
+        (bdd-serialize (bdd-negative b))))
 
-(defmethod bdd-node (label left right)
-  (error "cannot create bdd-node from arguments ~A" (list label left right)))
+(defmethod bdd-node (label positive negative &key &allow-other-keys)
+  (error "cannot create bdd-node from arguments ~A" (list label positive negative)))
 
-(defmethod bdd-node :around (label (left (eql t)) right)
-  (bdd-node label *bdd-true* right))
+(defmethod bdd-node :around (label (positive (eql t)) negative &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (bdd-node label *bdd-true* negative :bdd-node-class bdd-node-class))
 
-(defmethod bdd-node :around (label (left (eql nil)) right)
-  (bdd-node label *bdd-false* right))
+(defmethod bdd-node :around (label (positive (eql nil)) negative &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (bdd-node label *bdd-false* negative :bdd-node-class bdd-node-class))
 
-(defmethod bdd-node :around (label left (right (eql t)))
-  (bdd-node label left *bdd-true*))
+(defmethod bdd-node :around (label positive (negative (eql t)) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (bdd-node label positive *bdd-true* :bdd-node-class bdd-node-class))
 
-(defmethod bdd-node :around (label left (right (eql nil)))
-  (bdd-node label left *bdd-false*))
-
+(defmethod bdd-node :around (label positive (negative (eql nil)) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (bdd-node label positive *bdd-false* :bdd-node-class bdd-node-class))
 
 (defvar *bdd-hash-access-count* 0)
 
 
 
-(defmethod bdd-node (label (left bdd) (right bdd))
-  (%bdd-node label left right))
+(defmethod bdd-node (label (positive bdd) (negative bdd) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (%bdd-node label positive negative :bdd-node-class bdd-node-class))
 
 (defmethod bdd-not ((true bdd-true))
   *bdd-false*)
@@ -360,8 +369,8 @@
   b)
 (defmethod bdd-and-not ((true bdd-true) (b bdd))
   (%bdd-node (bdd-label b)
-            (bdd-and-not *bdd-true* (bdd-left b))
-            (bdd-and-not *bdd-true* (bdd-right b))
+            (bdd-and-not *bdd-true* (bdd-positive b))
+            (bdd-and-not *bdd-true* (bdd-negative b))
             :bdd-node-class (class-of b)))
 
 
@@ -430,33 +439,32 @@
   (the (member < > =)
        (funcall *bdd-cmp-function* t1 t2)))
 
-
 (flet ((bdd-op (op bdd-1 bdd-2)
          (declare (type bdd bdd-1 bdd-2))
          (let ((lab-1   (bdd-label bdd-1))
-               (left-1  (bdd-left bdd-1))
-               (right-1 (bdd-right bdd-1))
+               (positive-1  (bdd-positive bdd-1))
+               (negative-1 (bdd-negative bdd-1))
                (lab-2   (bdd-label bdd-2))
-               (left-2  (bdd-left bdd-2))
-               (right-2 (bdd-right bdd-2)))
-           (declare (type bdd left-1 left-2 right-1 right-2))
+               (positive-2  (bdd-positive bdd-2))
+               (negative-2 (bdd-negative bdd-2)))
+           (declare (type bdd positive-1 positive-2 negative-1 negative-2))
            (ecase (bdd-cmp lab-1 lab-2)
              ((=)
               ;; If the labels are equal, then the operations twice,
-              ;; once on the two left branches, and once on the two right branches.
-              (%bdd-node lab-1 (funcall op left-1 left-2) (funcall op right-1 right-2)
+              ;; once on the two positive branches, and once on the two negative branches.
+              (%bdd-node lab-1 (funcall op positive-1 positive-2) (funcall op negative-1 negative-2)
                          :bdd-node-class (class-of bdd-1)))
              ;; If the labels are not equal, then take the lesser label
-             ;; and perform the op on the lesser.left vs greater  and lesser.right vs greater,
+             ;; and perform the op on the lesser.positive vs greater  and lesser.negative vs greater,
              ;; being careful not to change the order of the arguments as there is
              ;; no guarantee that op is commutative, and in fact and-not is not commutative.
-             ;; This means (%bdd-node lesser.label (op lesser.left greater) (op lesser.right greater))
-             ;;   or       (%bdd-node lesser.label (op greater lesser.left) (op greater lesser.right))
+             ;; This means (%bdd-node lesser.label (op lesser.positive greater) (op lesser.negative greater))
+             ;;   or       (%bdd-node lesser.label (op greater lesser.positive) (op greater lesser.negative))
              ((<)
-              (%bdd-node lab-1 (funcall op left-1 bdd-2) (funcall op right-1 bdd-2)
+              (%bdd-node lab-1 (funcall op positive-1 bdd-2) (funcall op negative-1 bdd-2)
                          :bdd-node-class (class-of bdd-1)))
              ((>)
-              (%bdd-node lab-2 (funcall op bdd-1 left-2) (funcall op bdd-1 right-2)
+              (%bdd-node lab-2 (funcall op bdd-1 positive-2) (funcall op bdd-1 negative-2)
                          :bdd-node-class (class-of bdd-2)))))))
 
   (defmethod bdd-or ((b1 bdd-node) (b2 bdd-node))
@@ -494,6 +502,56 @@
 (defun bdd-to-expr (bdd)
   (slot-value bdd 'expr))
 
+(defun %bdd-to-dnf (bdd)
+  "Convert a BDD to logical expression in DNF (disjunctive normal form), i.e. an OR of ANDs.
+The construction attempts re-use cons cells in order to reduce the memory footprint of a large
+set of BDDs."
+  (declare (type bdd bdd))
+  (labels (
+           (wrap (op zero forms)
+             (cond ((cdr forms)
+                    (cons op forms))
+                   (forms
+                    (car forms))
+                   (t
+                    zero)))
+           (prepend (head dnf)
+             (typecase dnf
+               ((cons (eql or))
+                (wrap
+                 'or nil
+                 (mapcar (lambda (tail)
+                           (prepend head tail))
+                         (cdr dnf))))
+               ((cons (eql and))
+                (wrap 'and t (cons head (cdr dnf))))
+               ((eql t)
+                head)
+               ((eql nil)
+                nil)
+               (t
+                (wrap 'and t (list head dnf)))))
+           (disjunction (positive negative)
+             (cond
+               ((null positive)
+                negative)
+               ((null negative)
+                positive)
+               ((and (typep positive '(cons (eql or)))
+                     (typep negative '(cons (eql or))))
+                (cons 'or (nconc (copy-list (cdr positive)) (cdr negative))))
+               ((typep positive '(cons (eql or)))
+                (wrap 'or nil (cons negative (cdr positive))))
+               ((typep negative '(cons (eql or)))
+                (wrap 'or nil (cons positive (cdr negative))))
+               (t
+                (wrap 'or nil (list positive negative))))))
+    
+    (let ((positive-terms  (prepend (bdd-label bdd) (bdd-to-dnf (bdd-positive bdd))))
+          (negative-terms (prepend `(not ,(bdd-label bdd)) (bdd-to-dnf (bdd-negative bdd)))))
+      (disjunction positive-terms
+                   negative-terms))))
+
 (defmethod slot-unbound (class (bdd bdd-node) (slot-name (eql 'dnf)))
   (setf (slot-value bdd 'dnf)
         (%bdd-to-dnf bdd)))
@@ -501,22 +559,71 @@
 (defmethod slot-unbound (class (bdd bdd-node) (slot-name (eql 'expr)))
   (setf (slot-value bdd 'expr)
         (cond
-          ((and (eq *bdd-false* (bdd-left bdd))
-                (eq *bdd-true* (bdd-right bdd)))
+          ((and (eq *bdd-false* (bdd-positive bdd))
+                (eq *bdd-true* (bdd-negative bdd)))
            `(not ,(bdd-label bdd)))
-          ((and (eq *bdd-false* (bdd-right bdd))
-                (eq *bdd-true* (bdd-left bdd)))
+          ((and (eq *bdd-false* (bdd-negative bdd))
+                (eq *bdd-true* (bdd-positive bdd)))
            (bdd-label bdd))
-          ((eq *bdd-false* (bdd-left bdd))
-           `(and (not ,(bdd-label bdd)) ,(bdd-to-expr (bdd-right bdd))))
-          ((eq *bdd-false* (bdd-right bdd))
-           `(and ,(bdd-label bdd) ,(bdd-to-expr (bdd-left bdd))))
-          ((eq *bdd-true* (bdd-left bdd))
+          ((eq *bdd-false* (bdd-positive bdd))
+           `(and (not ,(bdd-label bdd)) ,(bdd-to-expr (bdd-negative bdd))))
+          ((eq *bdd-false* (bdd-negative bdd))
+           `(and ,(bdd-label bdd) ,(bdd-to-expr (bdd-positive bdd))))
+          ((eq *bdd-true* (bdd-positive bdd))
            `(or ,(bdd-label bdd)
-                (and (not ,(bdd-label bdd)) ,(bdd-to-expr (bdd-right bdd)))))
-          ((eq *bdd-true* (bdd-right bdd))
-           `(or (and ,(bdd-label bdd) ,(bdd-to-expr (bdd-left bdd)))
+                (and (not ,(bdd-label bdd)) ,(bdd-to-expr (bdd-negative bdd)))))
+          ((eq *bdd-true* (bdd-negative bdd))
+           `(or (and ,(bdd-label bdd) ,(bdd-to-expr (bdd-positive bdd)))
                 (not ,(bdd-label bdd))))
           (t
-           `(or (and ,(bdd-label bdd) ,(bdd-to-expr (bdd-left bdd)))
-                (and (not ,(bdd-label bdd)) ,(bdd-to-expr (bdd-right bdd))))))))
+           `(or (and ,(bdd-label bdd) ,(bdd-to-expr (bdd-positive bdd)))
+                (and (not ,(bdd-label bdd)) ,(bdd-to-expr (bdd-negative bdd))))))))
+
+
+(defun incr-hash ()
+  (incf *bdd-hash-access-count*)
+  (when *bdd-verbose*
+    (when (= 0 (mod *bdd-hash-access-count* 10000))
+      (format t "bdd hash = ~A wall-time=~A cpu-time=~A~%"
+              (getf *bdd-hash-struct* :hash)
+              (truncate (get-internal-run-time) internal-time-units-per-second)
+              (truncate (get-universal-time) internal-time-units-per-second)))))
+
+(defmethod bdd-allocate (label (positive-bdd bdd-node) (negative-bdd bdd-node) &key &allow-other-keys)
+  (if (eq (typep positive-bdd 'bdd-leaf)
+          (typep negative-bdd 'bdd-leaf))
+      (call-next-method label positive-bdd negative-bdd :bdd-node-class (class-of positive-bdd))
+      (error "cannot create a bdd-node with children classes ~A"
+             (list (class-of negative-bdd) (class-of positive-bdd)))))
+
+(defmethod bdd-allocate (label (positive-bdd bdd-node) (negative-bdd bdd-leaf) &key &allow-other-keys)
+  (call-next-method label positive-bdd negative-bdd :bdd-node-class (class-of positive-bdd)))
+
+(defmethod bdd-allocate (label (positive-bdd bdd-leaf) (negative-bdd bdd-node) &key &allow-other-keys)
+  (call-next-method label positive-bdd negative-bdd :bdd-node-class (class-of negative-bdd)))
+
+(defvar *bdd-node-type* '(or bdd-leaf bdd-node))
+(defmethod bdd-allocate (label (positive-bdd bdd) (negative-bdd bdd) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (let* ((bdd (make-instance bdd-node-class
+                             :label label
+                             :positive positive-bdd
+                             :negative negative-bdd))
+         (key (bdd-make-key label (bdd-ident positive-bdd) (bdd-ident negative-bdd))))
+    (incr-hash)
+    (assert (typep bdd *bdd-node-type*) (bdd *bdd-node-type*) "The bdd hash ~A is expecting objects of type ~A not ~A"
+            (bdd-hash) *bdd-node-type*  (type-of bdd ))
+    (setf (gethash key (bdd-hash)) bdd)))
+
+(defmethod %bdd-node (label (positive-bdd bdd) (negative-bdd bdd) &key (bdd-node-class 'bdd-node))
+  (declare (type class-designator bdd-node-class))
+  (cond
+    ((eq positive-bdd negative-bdd)
+     positive-bdd)
+    ((bdd-find (bdd-hash) label positive-bdd negative-bdd))
+    (t
+     (bdd-allocate label positive-bdd negative-bdd :bdd-node-class bdd-node-class))))
+
+
+
+

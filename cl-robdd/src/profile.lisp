@@ -19,19 +19,8 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types.test)
+(in-package :cl-robdd-analysis)
 
-#|
-
-|#
-
-(let ((lisp-types-test (find-package  :lisp-types.test))
-      (lisp-types (find-package  :lisp-types)))
-  (do-symbols (name :lisp-types)
-    (when (and (eq lisp-types (symbol-package name))
-               (not (find-symbol (symbol-name name) lisp-types-test)))
-      (format t "1 importing name=~A into  :lisp-types.test~%" name)
-      (shadowing-import name :lisp-types.test))))
 
 #+nil(defun gather-profiling (thunk)
   (let* ((graph       (sb-sprof::make-call-graph most-positive-fixnum))
@@ -54,7 +43,6 @@
     :for end = (and beg (position-if delimiterp string :start beg))
     :when beg :collect (subseq string beg end)
       :while end))
-
 
 (defun clean-sprofiling-plist (plist)
   (flet ((clean-count-percent (key &aux (value (getf plist key)))
@@ -119,7 +107,6 @@
                                    :function (progn (read-next stream) ;; skip calls because don't know whether to call / or truncate
                                                     (format nil "~A" (read-next stream)))))
                        (close stream))))))
-
 
 (defun call-with-sprofiling (thunk consume-prof consume-n)
   (declare (type (function () t) thunk)
@@ -327,3 +314,5 @@
                             #'set-dprofile-plists
                             #'set-n-dtimes)
       )))
+
+

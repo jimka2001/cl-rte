@@ -19,21 +19,36 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types-test)
 
-(defclass Z1 () ())
-(defclass Z2 () ())
-(defclass Z3 () ())
-(defclass Z4 () ())
-(defclass Z5 () ())
-(defclass Z6 () ())
-(defclass Z7 () ())
-(defclass Z8 () ())
-(defclass Z9 () ())
-(defclass ZA () ())
-(defclass ZB () ())
-(defclass ZC () ())
-(defclass Z12345678 (Z1 Z2 Z3 Z4 Z5 Z6 Z7 Z8) ())
-(defclass ZCBA987654321 (ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1) ())
+(in-package :cl-robdd-analysis)
 
-(defvar *bdd-test-classes* '(ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1))
+(defun compare-hash-strength (num-tests vars)
+  (loop :for *bdd-hash-strength*
+          :in '(:weak :strong :weak-dynamic :strong-dynamic)
+        :do (format t "~A~%" *bdd-hash-strength*)
+        :do (time (bdd-ops-test num-tests vars))))
+
+(defun bdd-ops-test (num-tests vars)
+  (garbage-collect)
+  (bdd-with-new-hash ()
+    (dotimes (_ num-tests)
+      (bdd-with-new-hash ()
+        (let* ((a (bdd (random-boolean-combination vars)))
+               (b (bdd (random-boolean-combination vars)))
+               (c (bdd-or a b))
+               (d (bdd-and a b))
+               (e (bdd-and-not a b))
+               (f (bdd-and-not b a))
+               (bdds (list c d e f)))
+          (dolist (x bdds)
+            (dolist (y bdds)
+              (bdd-and x y)
+              (bdd-or x y)
+              (bdd-and-not x y)
+              (bdd-and-not y x))))))
+    (format t "~A~%" (bdd-hash))))
+
+
+
+
+

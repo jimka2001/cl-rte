@@ -19,21 +19,8 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types.test)
+(in-package :cl-robdd-analysis)
 
-#|
-
-|#
-
-
-
-(let ((lisp-types-test (find-package  :lisp-types.test))
-      (lisp-types (find-package  :lisp-types)))
-  (do-symbols (name :lisp-types)
-    (when (and (eq lisp-types (symbol-package name))
-               (not (find-symbol (symbol-name name) lisp-types-test)))
-      (format t "1 importing name=~A into  :lisp-types.test~%" name)
-      (shadowing-import name :lisp-types.test))))
 
 (defun display-theta (n theta)
   (flet ((e2 (theta)

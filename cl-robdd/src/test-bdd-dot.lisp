@@ -19,21 +19,20 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types-test)
+(in-package :cl-robdd-test)
 
-(defclass Z1 () ())
-(defclass Z2 () ())
-(defclass Z3 () ())
-(defclass Z4 () ())
-(defclass Z5 () ())
-(defclass Z6 () ())
-(defclass Z7 () ())
-(defclass Z8 () ())
-(defclass Z9 () ())
-(defclass ZA () ())
-(defclass ZB () ())
-(defclass ZC () ())
-(defclass Z12345678 (Z1 Z2 Z3 Z4 Z5 Z6 Z7 Z8) ())
-(defclass ZCBA987654321 (ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1) ())
+(shadow-all-symbols :package-from :cl-robdd :package-into :cl-robdd-test)
 
-(defvar *bdd-test-classes* '(ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1))
+
+(define-test bdd-to-png
+  (bdd-to-png (bdd t))
+  (bdd-to-png (bdd nil))
+  (bdd-to-png (bdd '(and x1 (or x2 (not x3))))))
+
+
+(define-test bdd-to-dot
+  (bdd-to-png (bdd t))
+  (bdd-to-png (bdd nil))
+  (bdd-to-png (bdd '(and x1 (or x2 (not x3))))))
+
+

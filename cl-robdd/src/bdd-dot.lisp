@@ -1,4 +1,4 @@
-;; Copyright (c) 2017 EPITA Research and Development Laboratory
+;; Copyright (c) 2017,2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package   :lisp-types)
+(in-package   :cl-robdd)
 
 (defun bdd-to-dot (bdd stream &key (reduced t))
   (cond
@@ -38,10 +38,7 @@
               (bdd-shape (bdd)
                 (typecase bdd
                   (bdd-node "ellipse")
-                  (bdd-leaf "box")))
-
-              )
-
+                  (bdd-leaf "box"))))
        (cond
          (reduced
           (let* ((num 0)
@@ -55,10 +52,10 @@
                 (dot-node bdd node-num)
                 (typecase bdd
                   (bdd-node
-                   (unless (find (bdd-left bdd) (car buf) :key (getter :bdd))
-                     (tconc buf (list :bdd (bdd-left bdd)  :node-num (incf num))))
-                   (unless (find (bdd-right bdd) (car buf) :key (getter :bdd))
-                     (tconc buf (list :bdd (bdd-right bdd) :node-num (incf num)))))))
+                   (unless (find (bdd-positive bdd) (car buf) :key (getter :bdd))
+                     (tconc buf (list :bdd (bdd-positive bdd)  :node-num (incf num))))
+                   (unless (find (bdd-negative bdd) (car buf) :key (getter :bdd))
+                     (tconc buf (list :bdd (bdd-negative bdd) :node-num (incf num)))))))
               (pop nodes))
             ;; now print the rank=same lines
             (dolist (label labels)
@@ -74,14 +71,14 @@
               (destructuring-bind (&key node-num bdd) node
                 (typecase bdd
                   (bdd-node
-                   (let* ((left-num  (getf (find (bdd-left  bdd) (car buf)
+                   (let* ((positive-num  (getf (find (bdd-positive  bdd) (car buf)
                                                  :key (getter :bdd))
                                            :node-num))
-                          (right-num (getf (find (bdd-right bdd) (car buf)
+                          (negative-num (getf (find (bdd-negative bdd) (car buf)
                                                  :key (getter :bdd))
                                            :node-num)))
-                     (format stream "~D -> ~D [style=~A,color=~A]~%" node-num left-num  "solid" "green")
-                     (format stream "~D -> ~D [style=~A,color=~A]~%" node-num right-num "dotted" "red"))))))))
+                     (format stream "~D -> ~D [style=~A,color=~A]~%" node-num positive-num  "solid" "green")
+                     (format stream "~D -> ~D [style=~A,color=~A]~%" node-num negative-num "dotted" "red"))))))))
          (t
           (let (nodes
                 (num 0))
@@ -89,8 +86,8 @@
                        (funcall action bdd path)
                        (typecase bdd
                          (bdd-node
-                          (visit (bdd-left bdd) action (cons :L path))
-                          (visit (bdd-right bdd) action (cons :R path)))))
+                          (visit (bdd-positive bdd) action (cons :L path))
+                          (visit (bdd-negative bdd) action (cons :R path)))))
                      (name-node (bdd path)
                        (push (list :bdd bdd :node-num (incf num) :path path) nodes))
                      (print-node (bdd path &aux
@@ -106,11 +103,11 @@
                        (typecase bdd
                          (bdd-node
                           (let* ((node-num  (getf (find-node bdd             path)           :node-num))
-                                 (left-num  (getf (find-node (bdd-left  bdd) (cons :L path)) :node-num))
-                                 (right-num (getf (find-node (bdd-right bdd) (cons :R path)) :node-num)))
-                            (declare (type fixnum left-num right-num))
-                            (format stream "~D -> ~D [style=~A]~%" node-num left-num  "solid")
-                            (format stream "~D -> ~D [style=~A]~%" node-num right-num "dotted"))))))
+                                 (positive-num  (getf (find-node (bdd-positive  bdd) (cons :L path)) :node-num))
+                                 (negative-num (getf (find-node (bdd-negative bdd) (cons :R path)) :node-num)))
+                            (declare (type fixnum positive-num negative-num))
+                            (format stream "~D -> ~D [style=~A]~%" node-num positive-num  "solid")
+                            (format stream "~D -> ~D [style=~A]~%" node-num negative-num "dotted"))))))
               (visit bdd #'name-node ())
               (visit bdd #'print-node ())
               (visit bdd #'print-connections ())))))
@@ -118,7 +115,7 @@
        ;; footer
        (format stream "}~%")))))
      
-(defun bdd-to-png (bdd &key (reduced t) (basename (format nil "/tmp/jnewton/graph/~A" (bdd-ident bdd))))
+(defun bdd-to-png (bdd &key (reduced t) (basename (format nil "~A/~A" (make-temp-dir "graph") (bdd-ident bdd))))
   (let ((dot-path (format nil "~A.dot" basename))
         (png-path (format nil "~A.png" basename)))
     (ensure-directories-exist dot-path)
@@ -131,7 +128,4 @@
                  :search t)
     png-path))
   
-(defun bdd-view (bdd &key (reduced t) (basename (format nil "/tmp/jnewton/graph/~A" (bdd-ident bdd))))
-  (run-program "open" (list (bdd-to-png bdd :reduced reduced
-                                            :basename basename))
-               :search t))
+

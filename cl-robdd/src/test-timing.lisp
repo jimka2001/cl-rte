@@ -19,21 +19,11 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :lisp-types-test)
+(in-package :cl-robdd-analysis-test)
+(shadow-all-symbols :package-from :cl-robdd-analysis
 
-(defclass Z1 () ())
-(defclass Z2 () ())
-(defclass Z3 () ())
-(defclass Z4 () ())
-(defclass Z5 () ())
-(defclass Z6 () ())
-(defclass Z7 () ())
-(defclass Z8 () ())
-(defclass Z9 () ())
-(defclass ZA () ())
-(defclass ZB () ())
-(defclass ZC () ())
-(defclass Z12345678 (Z1 Z2 Z3 Z4 Z5 Z6 Z7 Z8) ())
-(defclass ZCBA987654321 (ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1) ())
-
-(defvar *bdd-test-classes* '(ZC ZB ZA Z9 Z8 Z7 Z6 Z5 Z4 Z3 Z2 Z1))
+(define-test analysis/call-with-timeout
+  (assert-true (numberp (getf (call-with-timeout 2 (lambda () (sleep 10)) 1)
+                              :time-out)))
+  (assert-true (eql 42 (getf (call-with-timeout 20 (lambda () 42) 2)
+                             :value))))

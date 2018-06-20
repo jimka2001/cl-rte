@@ -20,6 +20,6 @@ for bucket in $(seq 0 9) ; do
     done
 done
 
-qsub -W depend=afterok$x -l walltime=1:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM" $BIN/copy-reports
+qsub -W depend=afterok$x -l walltime=1:00:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM" $BIN/copy-reports.sh
 
 

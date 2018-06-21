@@ -3,6 +3,9 @@
 cd /lrde/home/jnewton/sw/regular-type-expression ; git pull --no-edit
 cd
 export CLUSTER_JOB_NUM=$$
+if [ -d cluster.$$ ]; then
+  mv cluster.$$ "cluster.$$.`date`"
+fi
 mkdir cluster.$$
 cd cluster.$$
 echo starting jobs in cluster.$$

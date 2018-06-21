@@ -10,6 +10,8 @@
       (pid  (sb-posix:getpid)))
   (setf asdf::*user-cache* (ensure-directories-exist (format nil "/tmp~A~D/~D/" home uid pid))))
 
+(declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
+
 #-quicklisp
 (let ((quicklisp-init
 	"/lrde/home/jnewton/quicklisp/setup.lisp"))

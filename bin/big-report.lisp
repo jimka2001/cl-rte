@@ -32,6 +32,7 @@
   (format t "Writing to broadcast file ~A~%" *broadcast*)
   (format t "-------------------------------------------------~%")
   (format t "-------------------------------------------------~%")
+  (format t "*bucket-index* = ~A~%" *bucket-index*)
   (format t "starting big-test-report ~A~%" *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output)

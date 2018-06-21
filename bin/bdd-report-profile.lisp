@@ -34,6 +34,8 @@
   (format t "Writing to broadcast file ~A~%" *broadcast*)
   (format t "-------------------------------------------------~%")
   (format t "-------------------------------------------------~%")
+  (format t "*bucket-index* = ~A~%" *bucket-index*)
+  (format t "*decompose-function-index* = ~A~%" *decompose-function-index*)
   (format t "starting bdd-report-profile ~A ~A ~%" *decompose* *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output)

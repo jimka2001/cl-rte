@@ -27,7 +27,7 @@ BIN="$HOME/sw/regular-type-expression/bin"
 
 # done
 
-for n in $(seq 10 22) ; do
+for n in $(seq 10 19) ; do
   qsub -q lrde -l walltime=30:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="$n",NUM-SAMPLES="1000" $BIN/distribution-report.lisp
 done
 

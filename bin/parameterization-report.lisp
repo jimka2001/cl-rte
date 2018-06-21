@@ -10,7 +10,8 @@
       (pid  (sb-posix:getpid)))
   (setf asdf::*user-cache* (ensure-directories-exist (format nil "/tmp~A~D/~D/" home uid pid))))
 
-(declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
+;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
+(declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
 #-quicklisp
 (let ((quicklisp-init
@@ -20,7 +21,6 @@
       (error "file not found ~S" quicklisp-init)))
 (asdf:load-system :lisp-types-analysis)
 (in-package :lisp-types-analysis)
-(trace bdd-call-with-new-hash)
 
 (defvar *bucket-index* (parse-integer (sb-posix:getenv "BUCKET-INDEX")))
 (defvar *bucket*    (nth *bucket-index* *bucket-reporters* ))

@@ -20,7 +20,7 @@
       (error "file not found ~S" quicklisp-init)))
 (asdf:load-system :lisp-types-analysis)
 (in-package :lisp-types-analysis)
-
+(trace bdd-call-with-new-hash)
 
 (defvar *bucket-index* (parse-integer (sb-posix:getenv "BUCKET-INDEX")))
 (defvar *bucket*    (nth *bucket-index* *bucket-reporters* ))

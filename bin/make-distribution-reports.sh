@@ -55,18 +55,18 @@ for n in $(seq 1 2) ; do
   # 16 var 1000 takes (est) 3016 = 50 minutes = 8.84 hours
   #  => 30 minutes gives 600
   qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="16",NUM-SAMPLES="600" $BIN/distribution-report.lisp
-for n in $(seq 1 2) ; do
+for n in $(seq 1 6) ; do
   # 17 var 1000 takes (est) 6032 = 1.67 hours
   #  ==> 30 minutes gives 300
-  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="17",NUM-SAMPLES="300" $BIN/distribution-report.lisp
-for n in $(seq 1 2) ; do
+  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="17",NUM-SAMPLES="125" $BIN/distribution-report.lisp
+for n in $(seq 1 6) ; do
   # 18 var 1000 takes (est) 12064 = 3.35 hours
   #  ==> 30 mintues gives 149
-  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="18",NUM-SAMPLES="150" $BIN/distribution-report.lisp
-for n in $(seq 1 2) ; do
+  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="18",NUM-SAMPLES="50" $BIN/distribution-report.lisp
+for n in $(seq 1 8) ; do
   # 19 var 1000 takes (est) 24128 = 402 minutes = 6.7 hours
   #  ==> 30 minutes gives 74
-  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="19",NUM-SAMPLES="77" $BIN/distribution-report.lisp
+  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="19",NUM-SAMPLES="18" $BIN/distribution-report.lisp
 done
 done
 done

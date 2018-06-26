@@ -7,7 +7,7 @@ for file in * ; do
     cat tmp | sort -u > $file
     wc -l $file
     git add $file
-    cat $file | sed -e 's/ [^ ]*$//' > $file.2-columns
+    cat $file | sed -e 's/ [^ ]*$/  -1/' > $file.2-columns
     git add $file.2-columns
     scp $file.2-columns johan:/Users/jnewton/analysis/.
 done

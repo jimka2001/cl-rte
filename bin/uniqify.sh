@@ -1,16 +1,15 @@
 #!/bin/bash
 
 cd /lrde/cluster/jnewton/bdd-sizes
-rm -ftmp
+rm -f tmp
 for file in * ; do
-    echo -n before " " 
-    wc -l $file
     mv $file tmp
     cat tmp | sort -u > $file
-    echo -n after "  " 
     wc -l $file
     git add $file
     cat $file | sed -e 's/ [^ ]*$//' > $file.2-columns
     git add $file.2-columns
+    scp $file.2-columns johan:/Users/jnewton/analysis/.
 done
+rm -f tmp
 git commit -m'automatic update'

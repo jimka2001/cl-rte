@@ -2,7 +2,7 @@
 
 cd /lrde/cluster/jnewton/bdd-sizes
 rm -f tmp
-for file in * ; do
+for file in bdd-sizes-unique-[0-9]? ; do
     mv $file tmp
     cat tmp | sort -u > $file
     wc -l $file

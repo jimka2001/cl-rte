@@ -13,6 +13,7 @@ cp -v bdd-efficiency-sample.ltxdat \
    bdd-distribution-sigma.ltxdat \
    bdd-distribution-sigma-2-8.ltxdat \
    sigma-kolmogorov-*.ltxdat \
+   average-kolmogorov-*.ltxdat \
    bdd-distribution-kolmogorov-*-*.ltxdat \
    bdd-samples-table.ltx \
    ~/newton.16.edtchs/src/

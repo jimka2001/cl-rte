@@ -12,4 +12,4 @@ for file in bdd-sizes-unique-[0-9]? ; do
     scp $file.2-columns johan:/Users/jnewton/analysis/.
 done
 rm -f tmp
-git commit -m'automatic update'
+git commit -q -m'automatic update'

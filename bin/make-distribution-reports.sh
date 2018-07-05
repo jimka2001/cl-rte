@@ -33,7 +33,7 @@ for n in $(seq 1 50) ; do
   # 10 var 1000 takes 66 sec
   qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="10",NUM-SAMPLES="1000" $BIN/distribution-report.lisp
   # 11 var 1000 takes 106 sec
-  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="12",NUM-SAMPLES="1000" $BIN/distribution-report.lisp
+  qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="11",NUM-SAMPLES="1000" $BIN/distribution-report.lisp
   # 12 var 1000 takes 193 sec
   qsub -q lrde -l walltime=40:00 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="12",NUM-SAMPLES="1000" $BIN/distribution-report.lisp
   # 13 var 1000 takes 377 sec 

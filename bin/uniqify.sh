@@ -12,7 +12,7 @@ for new in *new ; do
     mv $file tmp
     sort -m -u -T $PWD tmp $new > $file
     rm tmp $new
-    wc -l $file
-   cat $file | sed -e 's/ [^ ]* [^ ]*$/  -1/' > $file.2-columns
-   scp $file.2-columns johan:/Users/jnewton/analysis/.
+    cat $file | sed -e 's/ [^ ]* [^ ]*$/  -1/' > $file.2-columns
+    wc $file $file.2-columns
+    scp $file.2-columns johan:/Users/jnewton/analysis/.
 done

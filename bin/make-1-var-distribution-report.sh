@@ -17,7 +17,7 @@ numsamplesperjob=$3
 numjobs=$4
 
 for n in $(seq 1 $numjobs) ; do
-qsub -l walltime=$time -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="$numvars",NUM-SAMPLES="$numsamplesperjob" $BIN/distribution-report.lisp
+qsub -N $numvars-$numsamplesperjob-distribution-report -l walltime=$time -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",NUM-VARS="$numvars",NUM-SAMPLES="$numsamplesperjob" $BIN/distribution-report.lisp
 done
 
 echo started `qselect -u $USER -s RQ | wc -l` jobs

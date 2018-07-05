@@ -13,6 +13,6 @@ for new in *new ; do
     sort -m -u -T $PWD tmp $new > $file
     rm tmp $new
     wc -l $file
-   cat $file | sed -e 's/ [^ ]*$/  -1/' > $file.2-columns
+   cat $file | sed -e 's/ [^ ]* [^ ]*$/  -1/' > $file.2-columns
    scp $file.2-columns johan:/Users/jnewton/analysis/.
 done

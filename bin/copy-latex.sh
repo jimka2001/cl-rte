@@ -16,5 +16,6 @@ cp -v bdd-efficiency-sample.ltxdat \
    average-kolmogorov-*.ltxdat \
    excursion-summary.ltxdat \
    bdd-distribution-kolmogorov-*-*.ltxdat \
+   delta-N=*-exp=*.ltxdat \
    bdd-samples-table.ltx \
    ~/newton.16.edtchs/src/

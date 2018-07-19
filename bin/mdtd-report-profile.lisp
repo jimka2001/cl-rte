@@ -27,7 +27,7 @@
 (defvar *decompose-function-index* (parse-integer (sb-posix:getenv "DECOMPOSE-INDEX")))
 (defvar *decompose* (nth *decompose-function-index* *decomposition-functions* ))
 
-(defvar *broadcast* (format nil "cluster.~A/broadcast.bdd-report-profile-~A-~D-~D"
+(defvar *broadcast* (format nil "cluster.~A/broadcast.mdtd-report-profile-~A-~D-~D"
 			    (sb-posix:getenv "CLUSTER_JOB_NUM")
 			    (or (sb-posix:getenv "PBS_JOBID") "0")
 			    (sb-posix:getpid) *decompose-function-index*
@@ -39,17 +39,17 @@
   (format t "-------------------------------------------------~%")
   (format t "*bucket-index* = ~A~%" *bucket-index*)
   (format t "*decompose-function-index* = ~A~%" *decompose-function-index*)
-  (format t "starting bdd-report-profile ~A ~A ~%" *decompose* *bucket*)
+  (format t "starting mdtd-report-profile ~A ~A ~%" *decompose* *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output)
-  (time (bdd-report-profile :decomposition-functions (list *decompose*)
+  (time (mdtd-report-profile :decomposition-functions (list *decompose*)
 			    :bucket-reporters (list *bucket*)
 			    :num-tries 2
 			    :prefix (format nil "bdd-profile-~D-~D-" *decompose-function-index* *bucket-index*)
 			    :create-png-p nil
 			    :multiplier 6.0
 			    :destination-dir "/lrde/home/jnewton/analysis/."))
-  (format t "finished bdd-report-profile ~A ~A ~%" *decompose* *bucket*))
+  (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 
 
 

@@ -17,9 +17,9 @@ for bucket in $(seq 0 9) ; do
     x=$x:`qsub -l walltime=20000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/big-report.lisp`
     x=$x:`qsub -l walltime=10000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/best-report.lisp`
     x=$x:`qsub -l walltime=16000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/parameterization-report.lisp`
-    x=$x:`qsub -l walltime=16000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/bdd-report.lisp`
+    x=$x:`qsub -l walltime=16000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/mdtd-report.lisp`
     for decompose in $(seq 0 10) ; do
-	x=$x:`qsub -q lrde -l walltime=20000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",DECOMPOSE-INDEX="$decompose",BUCKET-INDEX="$bucket"  $BIN/bdd-report-profile.lisp`
+	x=$x:`qsub -q lrde -l walltime=20000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",DECOMPOSE-INDEX="$decompose",BUCKET-INDEX="$bucket"  $BIN/mdtd-report-profile.lisp`
     done
 done
 

@@ -24,7 +24,7 @@
 (defvar *bucket-index* (parse-integer (sb-posix:getenv "BUCKET-INDEX")))
 (defvar *bucket*    (nth *bucket-index* *bucket-reporters* ))
 
-(defvar *broadcast* (format nil "cluster.~A/broadcast.bdd-report.~A-~D-~D"
+(defvar *broadcast* (format nil "cluster.~A/broadcast.mdtd-report.~A-~D-~D"
 			    (sb-posix:getenv "CLUSTER_JOB_NUM")
 			    (or (sb-posix:getenv "PBS_JOBID") "0")
 			    (sb-posix:getpid)
@@ -35,13 +35,13 @@
   (format t "-------------------------------------------------~%")
   (format t "-------------------------------------------------~%")
   (format t "*bucket-index* = ~A~%" *bucket-index*)
-  (format t "starting bdd-report ~A~%" *bucket*)
+  (format t "starting mdtd-report ~A~%" *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output) 
-  (time (bdd-report :create-png-p nil
+  (time (mdtd-report :create-png-p nil
 		    :bucket-reporters (list *bucket*)
 		    :destination-dir "/lrde/home/jnewton/analysis/."))
-  (format t "finished bdd-report ~A~%" *bucket*))
+  (format t "finished mdtd-report ~A~%" *bucket*))
 
 (sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
 		    :search t)

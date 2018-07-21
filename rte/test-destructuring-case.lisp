@@ -180,26 +180,26 @@
 		   (:cat (:0-* (not (eql :z)) t) (:or :empty-word (:cat (eql :z) t (:0-* t)))))))
 
     (map-permutations (lambda (perm)
-			(assert-test (equal :here
+			(assert-true (equal :here
 					    (destructuring-case (mapcan (lambda (key)
 									  (list key 12))
 									perm)
 					      ((&key (x 1) (y 1) (z 1)) ((fixnum x y z))
-					       (assert-test (equal 12 x))
-					       (assert-test (equal 12 y))
-					       (assert-test (equal 12 z))
+					       (assert-true (equal 12 x))
+					       (assert-true (equal 12 y))
+					       (assert-true (equal 12 z))
 					       :here)))))
 		      '(:x :y :z))
 
   (map-permutations (lambda (perm)
-		      (assert-test (equal :here
+		      (assert-true (equal :here
 					  (destructuring-case (mapcan (lambda (key)
 									(list key 12))
 								      perm)
 					    ((&key (x 1) (y 1) (z 1) &allow-other-keys) ((fixnum x y z))
-					     (assert-test (equal 12 x))
-					     (assert-test (equal 12 y))
-					     (assert-test (equal 12 z))
+					     (assert-true (equal 12 x))
+					     (assert-true (equal 12 y))
+					     (assert-true (equal 12 z))
 					     :here)))))
 		    '(:w :x :y :z)))
 

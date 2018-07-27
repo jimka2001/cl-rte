@@ -38,6 +38,7 @@
   (format t "starting mdtd-report ~A~%" *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output) 
+  ;; make the bdd-ws files
   (time (mdtd-report :create-png-p nil
 		    :bucket-reporters (list *bucket*)
 		    :destination-dir "/lrde/home/jnewton/analysis/."))

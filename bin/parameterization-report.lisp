@@ -39,6 +39,7 @@
   (format t "starting parameterization-report ~A ~%" *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output)
+  ;; make param- files
   (time (parameterization-report :create-png-p nil
 				 :bucket-reporters (list *bucket*)
 				 :destination-dir "/lrde/home/jnewton/analysis/."))

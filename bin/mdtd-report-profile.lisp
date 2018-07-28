@@ -45,7 +45,7 @@
   (time (mdtd-report-profile :decomposition-functions (list *decompose*)
 			    :bucket-reporters (list *bucket*)
 			    :num-tries 2
-			    :prefix (format nil "mtdt-profile-~D-~D-" *decompose-function-index* *bucket-index*)
+			    :prefix (format nil "mdtd-profile-~D-~D-" *decompose-function-index* *bucket-index*)
 			    :create-png-p nil
 			    :multiplier 6.0
 			    :destination-dir "/lrde/home/jnewton/analysis/."))

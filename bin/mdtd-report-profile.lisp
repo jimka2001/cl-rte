@@ -25,8 +25,10 @@
 (defvar *bucket*    (nth *bucket-index* *bucket-reporters* ))
 
 (defvar *decompose-function-index* (parse-integer (sb-posix:getenv "DECOMPOSE-INDEX")))
-(defvar *decompose* (nth *decompose-function-index* *decomposition-functions* ))
-
+(defvar *decompose* (nth *decompose-function-index* *decomposition-functions*))
+(assert (= 14 (length  *decomposition-functions*)) ()
+	"make-profile-reports.sh assumes there are exactly 14 decomposition functions, ~D were found"
+	(length  *decomposition-functions*))
 (defvar *broadcast* (format nil "cluster.~A/broadcast.mdtd-report-profile-~A-~D-~D"
 			    (sb-posix:getenv "CLUSTER_JOB_NUM")
 			    (or (sb-posix:getenv "PBS_JOBID") "0")
@@ -43,12 +45,12 @@
   (format t "-------------------------------------------------~%")
   (finish-output)
   (time (mdtd-report-profile :decomposition-functions (list *decompose*)
-			    :bucket-reporters (list *bucket*)
-			    :num-tries 2
-			    :prefix (format nil "mdtd-profile-~D-~D-" *decompose-function-index* *bucket-index*)
-			    :create-png-p nil
-			    :multiplier 6.0
-			    :destination-dir "/lrde/home/jnewton/analysis/."))
+			     :bucket-reporters (list *bucket*)
+			     :num-tries 2
+			     :prefix (format nil "mdtd-profile-single-~A-" *decompose*)
+			     :create-png-p nil
+			     :multiplier 6.0
+			     :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 
 

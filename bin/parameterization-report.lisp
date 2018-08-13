@@ -1,6 +1,6 @@
 #!/lrde/home/jnewton/opt/sbcl/bin/sbcl --script
 #|
-#PBS -m ea
+#PBS -m e
 |#
 
 (require :asdf)

@@ -22,10 +22,12 @@
 (in-package :lisp-types-analysis)
 
 (defvar *bucket-index* (parse-integer (sb-posix:getenv "BUCKET-INDEX")))
-(defvar *bucket*    (nth *bucket-index* *bucket-reporters* ))
+(defvar *bucket*    (or (nth *bucket-index* *bucket-reporters* )
+                        (error "no *bucket* found with index ~D" *bucket-index*)))
 
 (defvar *decompose-function-index* (parse-integer (sb-posix:getenv "DECOMPOSE-INDEX")))
-(defvar *decompose* (nth *decompose-function-index* *decomposition-functions*))
+(defvar *decompose* (or (nth *decompose-function-index* *decomposition-functions*)
+                        (error "no *decompose* function found with index ~D" *decompose-function-index*)))
 (assert (= 13 (length  *decomposition-functions*)) ()
 	"make-profile-reports.sh assumes there are exactly 13 decomposition functions, ~D were found"
 	(length  *decomposition-functions*))

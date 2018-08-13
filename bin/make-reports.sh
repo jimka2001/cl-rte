@@ -16,6 +16,7 @@ x=""
 for bucket in $(seq 0 9) ; do
     x=$x:`qsub -l walltime=20000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/big-report.lisp`
     x=$x:`qsub -l walltime=10000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/best-report.lisp`
+    x=$x:`qsub -l walltime=10000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/baker-report.lisp`
     x=$x:`qsub -l walltime=16000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/parameterization-report.lisp`
     x=$x:`qsub -l walltime=16000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/mdtd-report.lisp`
 done

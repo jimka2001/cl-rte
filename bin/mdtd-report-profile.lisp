@@ -28,8 +28,8 @@
 (defvar *decompose-function-index* (parse-integer (sb-posix:getenv "DECOMPOSE-INDEX")))
 (defvar *decompose* (or (nth *decompose-function-index* *decomposition-functions*)
                         (error "no *decompose* function found with index ~D" *decompose-function-index*)))
-(assert (= 13 (length  *decomposition-functions*)) ()
-	"make-profile-reports.sh assumes there are exactly 13 decomposition functions, ~D were found"
+(assert (= 12 (length  *decomposition-functions*)) ()
+	"make-profile-reports.sh assumes there are exactly 12 decomposition functions, ~D were found"
 	(length  *decomposition-functions*))
 (defvar *broadcast* (format nil "cluster.~A/broadcast.mdtd-report-profile-~A-~D-~D"
 			    (sb-posix:getenv "CLUSTER_JOB_NUM")

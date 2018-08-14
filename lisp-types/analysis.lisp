@@ -747,6 +747,7 @@ to a set of types returned from %bdd-decompose-types."
                       (when hilite-min
                         (format stream ",\\~%\   \"-\" using 1:2 with lines ls ~D" min-curve-line-style)
                         (format stream " title ~S~%" "unknown"))
+		      (format stream "~%")
                       (mapc #'plot-curve sorted)
                       (when hilite-min
                         (plot-curve min-curve)))))))))
@@ -1665,10 +1666,13 @@ SUITE-TIME-OUT is the number of time per call to TYPES/CMP-PERFS."
 			     (eq (car triple) key))))
 	    (format stream "\\multirow{~D}{*}{~A}~%" (length same-key) key)
 	    (dolist (triple (cond
-                              ((find t same-key :key #'cadr)
-                               same-key)
-                              (t
-                               (remove nil same-key :key #'cadr))))
+			      ;; if the values of the cadr's contains
+			      ;; a nil, the remove that value unless t
+			      ;; is also such a value.
+			      ((find t same-key :key #'cadr)
+			       same-key)
+			      (t
+			       (remove nil same-key :key #'cadr))))
 	      (format stream " & ~A  & ~A \\\\~%" (cadr triple) (caddr triple)))
 	    (format stream "\\hline~%"))))
       (format stream "\\end{tabular}~%"))))

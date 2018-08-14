@@ -964,6 +964,7 @@ FRACTION: number between 0 and 1 to indicate which portion of the given populati
 							     :finally (setf max-value ma
 									    min-value mi
 									    end-value average-size))
+						       :thick t
                                                        :thick t
 						       :logx logx
 						       :logy logy)
@@ -1002,7 +1003,7 @@ FRACTION: number between 0 and 1 to indicate which portion of the given populati
 							     :finally (setf min-value mi
 									    max-value ma
 									    end-value sigma))
-                                                       :thick t
+						       :thick t
 						       :logx logx
 						       :logy logy)
 					      (let ((excursion-percent (float (* 100.0 (/ (- max-value min-value) end-value)) 1.0)))
@@ -1102,6 +1103,7 @@ FRACTION: number between 0 and 1 to indicate which portion of the given populati
                                               '("ylabel" "Residual compression ratio")
                                               '("legend style" (("at" "{(1,1)}")
 								("anchor" "north east")
+								("label style" ("font" "\\tiny"))
 								("font" "\\tiny")))
                                               (list "xtick"
                                                     (format nil "{~A}"

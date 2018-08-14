@@ -63,7 +63,7 @@
   (:precedence ((:left ())
                 (:left <or>)))
   
-  ;; <RE>            ::= <union> | <simple-RE>
+  ;; <RE>            ::= <union> | <intersection> | <simple-RE>
   (<RE>
    <union>
    <intersection>

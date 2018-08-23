@@ -12,7 +12,7 @@ echo starting jobs in cluster.$$
 BIN="$HOME/sw/regular-type-expression/bin/"
 
 x=""
-# there are 10 bucket-reports (0..9) and 13 (0..12) decomposition functions
+# there are 10 bucket-reports (0..9) and 15 (0..14) decomposition functions
 # it is important that all the calls to mdtd-report-profile.lisp be done on the same architecture
 for bucket in $(seq 0 9) ; do
     for decompose in $(seq 0 12) ; do

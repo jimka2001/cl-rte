@@ -1,6 +1,6 @@
 #!/lrde/home/jnewton/opt/sbcl/bin/sbcl --script
 #|
-#PBS -m ea
+#PBS -m a
 |#
 
 (require :asdf)
@@ -40,6 +40,7 @@
   (format t "-------------------------------------------------~%")
   (finish-output)
   (time (baker-report :create-png-p nil
+		      :multiplier 5
 		       :bucket-reporters (list *bucket*)
 		       :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finshed baker-report ~A ~%" *bucket*))

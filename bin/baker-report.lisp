@@ -40,8 +40,9 @@
   (format t "-------------------------------------------------~%")
   (finish-output)
   (time (baker-report :create-png-p nil
-		       :bucket-reporters (list *bucket*)
-		       :destination-dir "/lrde/home/jnewton/analysis/."))
+                      :multiplier 5
+                      :bucket-reporters (list *bucket*)
+                      :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finshed baker-report ~A ~%" *bucket*))
 
 

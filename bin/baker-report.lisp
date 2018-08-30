@@ -1,4 +1,4 @@
-#!/usr/bin/env sbcl --script
+#!/lrde/home/jnewton/opt/sbcl/bin/sbcl --script
 #|
 #PBS -m a
 |#

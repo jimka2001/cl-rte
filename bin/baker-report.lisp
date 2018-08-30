@@ -48,7 +48,7 @@
   (format t "-------------------------------------------------~%")
   (finish-output)
   (time (baker-report :create-png-p nil
-                      :multiplier 5
+                      :multiplier 8
                       :bucket-reporters (list *bucket*)
                       :destination-dir (format nil "~Aanalysis/." (directory-namestring (user-homedir-pathname)))))
   (format t "finshed baker-report ~A ~%" *bucket*))

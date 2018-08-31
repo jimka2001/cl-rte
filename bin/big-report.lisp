@@ -40,6 +40,7 @@
   (format t "-------------------------------------------------~%")
   (finish-output)
   (time (big-test-report :create-png-p nil
+			 :multiplier 6
 			 :num-tries 1
 			 :bucket-reporters (list *bucket*)
 			 :prefix "big-"

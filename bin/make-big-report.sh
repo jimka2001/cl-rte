@@ -13,7 +13,7 @@ BIN="$HOME/sw/regular-type-expression/bin/"
 
 # there are 10 bucket-reports (0..9)
 for bucket in $(seq 0 9) ; do
-    qsub -q infinite -l walltime=20000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/big-report.lisp
+    qsub -q infinite -l walltime=40000 -v CLUSTER_JOB_NUM="$CLUSTER_JOB_NUM",BUCKET-INDEX="$bucket" $BIN/big-report.lisp
 done
 
 

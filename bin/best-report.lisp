@@ -40,6 +40,7 @@
   (format t "-------------------------------------------------~%")
   (finish-output)
   (time (best-2-report :create-png-p nil
+		       :multiplier 8
 		       :bucket-reporters (list *bucket*)
 		       :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finshed best-2-report ~A ~%" *bucket*))

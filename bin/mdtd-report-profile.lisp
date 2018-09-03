@@ -9,8 +9,8 @@
       (pid  (sb-posix:getpid)))
   (setf asdf::*user-cache* (ensure-directories-exist (format nil "/tmp~A~D/~D/" home uid pid))))
 
-;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
-(declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
+(declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
+;; (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
 #-quicklisp
 (let ((quicklisp-init
@@ -51,7 +51,9 @@
 			     :num-tries 2
 			     :prefix (format nil "mdtd-profile-single-~A-" *decompose*)
 			     :create-png-p nil
-			     :multiplier 6.0
+			     :multiplier 8.0
+			     :suite-time-out (* 10 60 60) ; 10 hours
+			     :time-out 150
 			     :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 

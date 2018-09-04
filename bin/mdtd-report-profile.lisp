@@ -51,9 +51,9 @@
 			     :num-tries 2
 			     :prefix (format nil "mdtd-profile-single-~A-" *decompose*)
 			     :create-png-p nil
-			     :multiplier 8.0
+			     :multiplier 13.0
 			     :suite-time-out (* 10 60 60) ; 10 hours
-			     :time-out 150
+			     :time-out 120
 			     :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 

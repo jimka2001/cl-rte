@@ -107,9 +107,9 @@ to-be-done
   (assert (equal '(nil t) (multiple-value-list (smarter-subtypep '(not keyword) '(eql :x)))))
   (assert (equal '(nil t) (multiple-value-list (smarter-subtypep '(not (eql :x)) 'keyword))))
 ```
-#### DECOMPOSE-TYPES
+#### MDTD-BASELINE
 ```lisp
-  (decompose-types '(float integer bignum string seqeunce))
+  (mdtd-baseline '(float integer bignum string seqeunce))
 ==>
   (string
    (and sequence (not string))

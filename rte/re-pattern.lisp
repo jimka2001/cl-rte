@@ -648,7 +648,7 @@ consists of values whose types match PATTERN."
 		   (t
 		    (push re done)
 		    (let (transitions)
-		      (dolist (type (decompose-types (uniquify (first-types re))))
+		      (dolist (type (mdtd-baseline (uniquify (first-types re))))
 			(let ((deriv (derivative re type)))
 			  (case deriv
 			    ((:empty-set)

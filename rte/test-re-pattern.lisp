@@ -58,7 +58,7 @@
 			  (:OR (:CAT (EQL :X) T)
 			   :EMPTY-WORD)))))))
 
-(define-test type/typep-2
+(define-test type/typep-2b
   (assert-true (typep '(:x 3 :y 4)
 		      '(RTE
 			(:OR
@@ -160,7 +160,7 @@
    	   '((1 1) (2 3) (5 6.0)))
   )
 
-(define-test type/declaration2
+(define-test type/declaration2b
   (assert-true (type/declaration2)))
 
 (define-test type/declaration

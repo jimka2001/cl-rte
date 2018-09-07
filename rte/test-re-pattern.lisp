@@ -169,12 +169,12 @@
 				 (declare (type (rte (:0-* t))
 						x))
 				 x) '(1 2 3))))
-  (assert-error 'error (funcall (lambda (x)
+  (assert-error error (funcall (lambda (x)
 				  (declare (type (rte (:0-* symbol))
 						 x))
 				  x) '(1 2 3)))
   
-  (assert-error 'error
+  (assert-error error
    		(funcall (lambda (x)
    			   (declare (type (rte
    					   (:1-* (rte (:0-* symbol))))
@@ -187,7 +187,7 @@
    					 x))
 			  x)
    			'((1 1) (2 3) (5 6.0))))
-  (assert-error 'error
+  (assert-error error
    		(funcall (lambda (x)
    			   (declare (type (rte
    					   (:1-* (rte
@@ -642,7 +642,7 @@
 				    (destructuring-lambda-list-to-rte '(a b c &key x y))))
   
   ;; assert an error because &optional cannot follow &key
-  (assert-error 'error (destructuring-lambda-list-to-rte '(a b c &key x y &optional r)))
+  (assert-error error (destructuring-lambda-list-to-rte '(a b c &key x y &optional r)))
   
   (assert-true (equivalent-patterns '(:CAT (:CAT T T T)
 				      (:? T

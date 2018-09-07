@@ -459,7 +459,7 @@
 		       (declare (type fixnum a b c)
 				(ignore a b c))
 		       3))))
-  (assert-error 'error (destructuring-methods '(1 2 3) (:call-next-method cnm)
+  (assert-error error (destructuring-methods '(1 2 3) (:call-next-method cnm)
 			 ((a b)
 			  (declare (ignore a b))
 			  1)
@@ -668,7 +668,7 @@
 (define-test test/destructuring-case-allow-other-keys-2
   (let ((data '(1 (2 3)
 		:x name :y 3.14 :z 14)))
-    (assert-error 'error
+    (assert-error error
 		  (destructuring-bind (&whole llist a (b c) 
 				       &rest keys
 				       &key (x t) (y "") z &allow-other-keys) data

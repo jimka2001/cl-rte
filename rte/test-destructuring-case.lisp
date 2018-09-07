@@ -161,9 +161,12 @@
 							    (y string)
 							    (z list))))
 
+(defmacro assert-equal (a b)
+  `(assert-test (equal ,a ,b)))
+
 (define-test test/destructuring-case-8
   ;; with &allow-other-keys
-  (assert-true (canonicalize-pattern (destructuring-lambda-list-to-rte '(&key x y z &allow-other-keys)))
+  (assert-equal (canonicalize-pattern (destructuring-lambda-list-to-rte '(&key x y z &allow-other-keys)))
 	       (canonicalize-pattern
 		'(:and (:* t)
 		  (:cat (:cat) (:cat)

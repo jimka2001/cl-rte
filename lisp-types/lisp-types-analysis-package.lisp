@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :lisp-types-analysis
-  (:use :cl :lisp-types :cl-robdd :cl-robdd-analysis)
+  (:use :cl :cl-fad :lisp-types :cl-robdd :cl-robdd-analysis)
   (:export
    "*DECOMPOSE-FUN-PARAMETERIZED-NAMES*"
    "*BUCKET-REPORTERS*"

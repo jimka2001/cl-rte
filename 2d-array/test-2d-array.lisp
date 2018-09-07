@@ -21,16 +21,12 @@
 
 
 (defpackage :2d-array.test
-  (:use :cl :2d-array :lisp-unit))
+  (:use :cl :2d-array :jimka-test))
 
 (in-package :2d-array.test)
 
 (defun test ()
-  (let ((*print-summary* t)
-	(*print-failures* t)
-	(*summarize-results* t)
-	(*print-errors* t))
-    (run-tests :all (list :2d-array.test))))
+  (run-package-tests :2d-array.test))
 
 (define-test 2d-array/test1
   (let* ((arr (make-array '(3 2) :initial-contents '((1 2)

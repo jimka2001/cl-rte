@@ -20,16 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :rte-regexp.test
-  (:use :cl :rte-regexp :rte :lisp-unit))
+  (:use :cl :rte-regexp :rte :jimka-test))
 
 (in-package :rte-regexp.test)
 
 (defun test ()
-  (let ((*print-summary* t)
-	(*print-failures* t)
-	(*summarize-results* t)
-	(*print-errors* t))
-    (run-tests :all (list :rte-regexp.test))))
+  (run-package-tests :rte-regexp.test))
 
 
 

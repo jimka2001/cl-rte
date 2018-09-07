@@ -24,7 +24,7 @@
   :depends-on (;;:rte
 	       :rte-regexp-test
 	       :2d-array
-	       (:version :lisp-unit "0.9.0")
+	       :jimka-test
 	       :2d-array-test
 	       :ndfa-test
 	       :lisp-types-test)

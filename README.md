@@ -239,10 +239,10 @@ to-be-done
 
 ## Tests
 
-Testing is done using [LispUnit](https://github.com/OdonataResearchLLC/lisp-unit).  You may load
+Testing is done using JimkaTest.  You may load
 the system code without the tests via rte.asd, ndfa.asd, 2d-array.asd, or lisp-types.asd.
 But if you wish to run the tests, the starting points are respectively rte-test.asd, ndfa-test.asd, 2d-array-test.asd, and lisp-types-test.asd.
-Within each corresponding subdirectory the files contining LispUnit test cases are all prefixed by "test-".
+Within each corresponding subdirectory the files contining JimkaTest test cases are all prefixed by "test-".
 To run the tests, you'll need to use ASDF to load the corresponding asdf system definition, e.g.,
 
 ```lisp

@@ -1,4 +1,4 @@
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
+;; Copyright (c) 2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,16 +19,12 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(defpackage :rte.test
-  (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :jimka-test))
 
-(do-symbols (name :rte)
-  (import name :rte.test))
-
-(in-package :rte.test)
-
-
-(defun test ()
-  (run-package-tests :rte.test))
-
+(asdf:defsystem :jimka-test
+  :depends-on ()
+  :components
+  ((:module "jimka-test"
+    :components
+    ((:file "jimka-test-package")
+     (:file "define-test")
+     ))))

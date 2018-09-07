@@ -20,13 +20,13 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(defpackage :2d-array.test
+(defpackage :2d-array-test
   (:use :cl :2d-array :jimka-test))
 
-(in-package :2d-array.test)
+(in-package :2d-array-test)
 
 (defun test ()
-  (run-package-tests :2d-array.test))
+  (run-package-tests :2d-array-test))
 
 (define-test 2d-array/test1
   (let* ((arr (make-array '(3 2) :initial-contents '((1 2)

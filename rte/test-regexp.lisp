@@ -19,13 +19,13 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(defpackage :rte-regexp.test
+(defpackage :rte-regexp-test
   (:use :cl :rte-regexp :rte :jimka-test))
 
-(in-package :rte-regexp.test)
+(in-package :rte-regexp-test)
 
 (defun test ()
-  (run-package-tests :rte-regexp.test))
+  (run-package-tests :rte-regexp-test))
 
 
 
@@ -46,7 +46,7 @@
   (regexp-to-rte "ab+b(c*)"))
 
 
-(define-test type/regexp-parsing
+(define-test type/regexp-parsing-2
   ;; a+b
   (assert-true (match-sequence "ab"  (regexp-to-rte "a+b")))
   (assert-true (match-sequence "aab"  (regexp-to-rte "a+b")))

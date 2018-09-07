@@ -21,8 +21,8 @@
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
-(asdf:load-system :lisp-types-analysis)
-(in-package :lisp-types-analysis)
+(asdf:load-system :lisp-types-baker-analysis)
+(in-package :lisp-types-baker-analysis)
 
 (defvar *bucket-index* (parse-integer (or (pop (cdr sb-ext:*posix-argv*))
 					  (sb-posix:getenv "BUCKET-INDEX"))))

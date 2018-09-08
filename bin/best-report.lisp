@@ -46,6 +46,5 @@
   (format t "finshed best-2-report ~A ~%" *bucket*))
 
 
-(sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
-		    :search t)
+(run-program "rm" (list "-r" asdf::*user-cache*))
 (qstat-f)

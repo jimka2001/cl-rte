@@ -21,6 +21,7 @@
 
 (asdf:defsystem :rte-regexp-test
   :depends-on (:rte
+	       :jimka-addons
 	       :rte-regexp
 	       :jimka-test)
   :components

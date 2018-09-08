@@ -21,6 +21,7 @@
 
 (asdf:defsystem :rte
   :depends-on (:ndfa
+	       :jimka-addons
 	       :lisp-types
 	       )
   :components

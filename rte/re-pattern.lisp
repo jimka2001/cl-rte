@@ -419,12 +419,12 @@ a fixed point is found."
 				  ;; (warn "~A and ~A are mutually exclusive~%" wrt-type single-type-pattern)
 				  :empty-set)
 				 ((null (nth-value 1 (smarter-subtypep wrt-type single-type-pattern)))
-				  (warn 'ambiguous-subtype :sub wrt-type :super single-type-pattern
-							   :consequence "assuming :empty-word")
+				  (warn-ambiguous-subtype :sub wrt-type :super single-type-pattern
+							  :consequence "assuming :empty-word")
 				  :empty-word)
 				 ((null (nth-value 1 (smarter-subtypep single-type-pattern wrt-type)))
-				  (warn 'ambiguous-subtype :sub single-type-pattern :super wrt-type
-							   :consequence "assuming :empty-word")
+				  (warn-ambiguous-subtype :sub single-type-pattern :super wrt-type
+							  :consequence "assuming :empty-word")
 				  :empty-word)
 				 ((smarter-subtypep single-type-pattern wrt-type)
 				  (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S because ~S is a subtype of ~S--assuming :empty-word"
@@ -515,9 +515,9 @@ a fixed point is found."
 	 (vector-next `(prog1 (aref seq i)
 			 (incf i)))
 
-	 (sequence-end `(or (sequence:emptyp seq)
+	 #+sbcl (sequence-end `(or (sequence:emptyp seq)
 			    (>= i len)))
-	 (sequence-next `(prog1 (sequence:elt seq i)
+	 #+sbcl (sequence-next `(prog1 (sequence:elt seq i)
 			   (incf i))))
 	 
     (labels ((state-name (state)
@@ -580,6 +580,7 @@ a fixed point is found."
 		    (len (length seq)))
 		(declare (type fixnum i len) (ignorable len))
 		,(dump-tagbody vector-end vector-next)))
+	     #+sbcl
 	     (sequence		 ; case to handle extensible sequences
 	      (let ((i 0)
 		    (len (sequence:length seq))) ; sequence (such as infinite sequence) might not support length

@@ -53,6 +53,5 @@
          :interval (* 60 5)))
   (format t "finished distribution-report ~A~%" *num-vars*))
 
-(sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
-		    :search t)
+(run-program "rm" (list "-r" asdf::*user-cache*))
 (qstat-f)

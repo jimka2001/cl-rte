@@ -84,6 +84,7 @@
 
 
 
+#+sbcl
 (define-test type/match-sequence
   (assert-true (rte:match-sequence '(1 2 3) '(:cat number number number)))
 
@@ -100,6 +101,7 @@
 
   
 
+#+sbcl
 (define-test type/2d-array
   
   (let ((2d (make-array '(5 4)

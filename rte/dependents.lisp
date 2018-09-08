@@ -39,13 +39,17 @@
 			       :f-type #'(lambda (type-name)
 					   (when (and (symbolp type-name)
 						      (find-class type-name nil))
-					     (sb-mop:add-dependent (find-class type-name) dependent))))))
+					     (#+sbcl sb-mop:add-dependent
+					      #+allegro mop:add-dependent
+					      (find-class type-name) dependent))))))
     (dolist (state (ndfa:states sm))
       (register-class-names (ndfa:state-label state)
 			    (make-instance 'dependent :ndfa sm)))
     sm))
 
-(defmethod sb-mop:update-dependent ((class standard-class) (dep dependent) &rest init-args)
+(defmethod #+sbcl sb-mop:update-dependent
+  #+allegro mop:update-dependent
+  ((class standard-class) (dep dependent) &rest init-args)
   (declare (ignore init-args))
   (let (to-remove)
     (maphash (lambda (pattern sm)

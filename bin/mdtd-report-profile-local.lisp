@@ -57,6 +57,5 @@
 			     :destination-dir "/tmp/jimka/."))
   (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 
-(sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
-		    :search t)
+(run-program "rm" (list "-r" asdf::*user-cache*))
 

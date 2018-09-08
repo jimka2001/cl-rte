@@ -162,7 +162,7 @@
 							    (z list))))
 
 (defmacro assert-equal (a b)
-  `(assert-test (equal ,a ,b)))
+  `(assert-true (equal ,a ,b)))
 
 (define-test test/destructuring-case-8
   ;; with &allow-other-keys

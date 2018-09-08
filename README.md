@@ -247,8 +247,8 @@ To run the tests, you'll need to use ASDF to load the corresponding asdf system 
 
 ```lisp
 CL-USER> (asdf:load-system :rte-test)
-CL-USER> (in-package :rte.test)
-TEST> (rte.test::test)
+CL-USER> (in-package :rte-test)
+TEST> (rte-test::test)
 ```
 
 

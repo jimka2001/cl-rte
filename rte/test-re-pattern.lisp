@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(in-package :rte.test)
+(in-package :rte-test)
 
 
 ;; TODO add some tests with satisfies types. (satisfies oddp) (satisfies evenp) etc.

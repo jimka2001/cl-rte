@@ -22,24 +22,6 @@
 (in-package :rte)
 
 
-(defun lconc (buf items)
-  (cond
-    ((null buf)
-     (cons items (last items)))
-    ((null (car buf))
-     (setf (car buf) items)
-     (setf (cdr buf) (last items))
-     buf)
-    ((null items)
-     buf)
-    (t
-     (setf (cdr (cdr buf)) items)
-     (setf (cdr buf) (last items))
-     buf)))
-
-(defun tconc (buf &rest items)
-  (lconc buf items))
-
 (defun find-keyword (keyvar lambda-list)
   "an &key argument in a lambda list can be declared in several different ways.
 FIND-KEYWORD finds and returns the keyword (symbol from keyword package) associated

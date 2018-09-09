@@ -40,8 +40,7 @@
   (finish-output) 
   ;; make the bdd-ws files
   (time (mdtd-report :create-png-p nil
-		    :bucket-reporters (list *bucket*)
-		    :destination-dir "/lrde/home/jnewton/analysis/."))
+		    :bucket-reporters (list *bucket*)))
   (format t "finished mdtd-report ~A~%" *bucket*))
 
 (run-program "rm" (list "-r" asdf::*user-cache*))

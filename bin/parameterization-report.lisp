@@ -41,8 +41,7 @@
   (finish-output)
   ;; make param- files
   (time (parameterization-report :create-png-p nil
-				 :bucket-reporters (list *bucket*)
-				 :destination-dir "/lrde/home/jnewton/analysis/."))
+				 :bucket-reporters (list *bucket*)))
   (format t "finished parameterization-report ~A ~%" *bucket*))
 
 (run-program "rm" (list "-r" asdf::*user-cache*))

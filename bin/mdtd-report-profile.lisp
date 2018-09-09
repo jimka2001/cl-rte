@@ -53,8 +53,7 @@
 			     :create-png-p nil
 			     :multiplier 13.0
 			     :suite-time-out (* 10 60 60) ; 10 hours
-			     :time-out 120
-			     :destination-dir "/lrde/home/jnewton/analysis/."))
+			     :time-out 120))
   (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 
 

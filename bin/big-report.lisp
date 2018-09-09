@@ -43,8 +43,7 @@
 			 :multiplier 6
 			 :num-tries 1
 			 :bucket-reporters (list *bucket*)
-			 :prefix "big-"
-			 :destination-dir "/lrde/home/jnewton/analysis/."))
+			 :prefix "big-"))
   (format t "finished big-test-report ~A~%" *bucket*))
 
 (run-program "rm" (list "-r" asdf::*user-cache*))

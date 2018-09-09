@@ -22,10 +22,11 @@
 (asdf:defsystem :rte-test
   :defsystem-depends-on (:rte)
   :depends-on (;;:rte
+	       :jimka-addons
 	       :rte-regexp-test
-	       :2d-array
-	       (:version :lisp-unit "0.9.0")
-	       :2d-array-test
+	       #+sbcl :2d-array
+	       :jimka-test
+	       #+sbcl :2d-array-test
 	       :ndfa-test
 	       :lisp-types-test)
   :components

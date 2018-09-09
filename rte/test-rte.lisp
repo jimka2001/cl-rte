@@ -19,20 +19,16 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(defpackage :rte.test
+(defpackage :rte-test
   (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :lisp-unit))
+  (:use :cl :rte :jimka-test))
 
 (do-symbols (name :rte)
-  (import name :rte.test))
+  (import name :rte-test))
 
-(in-package :rte.test)
+(in-package :rte-test)
 
 
 (defun test ()
-  (let ((*print-summary* t)
-	(*print-failures* t)
-	(*summarize-results* t)
-	(*print-errors* t))
-    (run-tests :all (list :rte.test))))
+  (run-package-tests :rte-test))
 

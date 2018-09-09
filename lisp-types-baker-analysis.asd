@@ -1,4 +1,4 @@
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
+;; Copyright (c) 2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -20,37 +20,19 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(defpackage :regular-type-expression
-  (:use :cl :ndfa :lisp-types :jimka-addons)
-  (:nicknames "RTE")
-  (:export
-   "LIST-OF"
-   "RTE"
-   "MATCH-SEQUENCE"
-   "RTE-RESET"
-   "DESTRUCTURING-CASE"
-   "DESTRUCTURING-METHODS"
-   "REDUCED-TYPECASE"
-   "CANONICALIZE-PATTERN"
-   "GATHER-TYPE-DECLARATIONS"
-   "DESTRUCTURING-LAMBDA-LIST-TO-RTE"
-   "DEFRTE"
-   ))
-
-(in-package :rte)
-
-(deftype rte-keyword ()
-  '(member :cat :1
-    :0-* :* :0-or-more
-    :1-* :+ :1-or-more
-    :0-1 :?
-    :and :or
-    :permute))
-
-(defvar *type-functions* (make-hash-table)
-  "Hash tble mapping parameterized type name to function which can be used with (SATISFIES ...)")
-(defvar *state-machines* (make-hash-table :test #'equal)
-  "Hash table mapping rte pattern to state-machine object.")
-(defvar *rte-types* (make-hash-table :test #'equal)
-  "Hash table mapping rte-pattern to lisp-type:  
-E.g., ((1-* SYMBOL NUMBER)) --> (AND SEQUENCE (SATISFIES \" \"((:1-* SYMBOL NUMBER))))")
+(asdf:defsystem :lisp-types-baker-analysis
+  :depends-on (:lisp-types
+	       :cl-robdd
+	       :cl-robdd-test
+	       :lisp-types-analysis
+	       :lisp-types-test
+               :fr.epita.lrde.subtypep
+	       :jimka-addons
+	       :jimka-test)
+  :components
+  ((:module "lisp-types"
+    :components
+    ((:file "lisp-types-baker-analysis-package")
+     (:file "analysis-baker")
+     (:file "test-baker")
+     ))))

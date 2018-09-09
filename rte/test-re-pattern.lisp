@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(in-package :rte.test)
+(in-package :rte-test)
 
 
 ;; TODO add some tests with satisfies types. (satisfies oddp) (satisfies evenp) etc.
@@ -58,7 +58,7 @@
 			  (:OR (:CAT (EQL :X) T)
 			   :EMPTY-WORD)))))))
 
-(define-test type/typep-2
+(define-test type/typep-2b
   (assert-true (typep '(:x 3 :y 4)
 		      '(RTE
 			(:OR
@@ -84,6 +84,7 @@
 
 
 
+#+sbcl
 (define-test type/match-sequence
   (assert-true (rte:match-sequence '(1 2 3) '(:cat number number number)))
 
@@ -100,6 +101,7 @@
 
   
 
+#+sbcl
 (define-test type/2d-array
   
   (let ((2d (make-array '(5 4)
@@ -160,7 +162,7 @@
    	   '((1 1) (2 3) (5 6.0)))
   )
 
-(define-test type/declaration2
+(define-test type/declaration2b
   (assert-true (type/declaration2)))
 
 (define-test type/declaration
@@ -169,12 +171,12 @@
 				 (declare (type (rte (:0-* t))
 						x))
 				 x) '(1 2 3))))
-  (assert-error 'error (funcall (lambda (x)
+  (assert-error error (funcall (lambda (x)
 				  (declare (type (rte (:0-* symbol))
 						 x))
 				  x) '(1 2 3)))
   
-  (assert-error 'error
+  (assert-error error
    		(funcall (lambda (x)
    			   (declare (type (rte
    					   (:1-* (rte (:0-* symbol))))
@@ -187,7 +189,7 @@
    					 x))
 			  x)
    			'((1 1) (2 3) (5 6.0))))
-  (assert-error 'error
+  (assert-error error
    		(funcall (lambda (x)
    			   (declare (type (rte
    					   (:1-* (rte
@@ -642,7 +644,7 @@
 				    (destructuring-lambda-list-to-rte '(a b c &key x y))))
   
   ;; assert an error because &optional cannot follow &key
-  (assert-error 'error (destructuring-lambda-list-to-rte '(a b c &key x y &optional r)))
+  (assert-error error (destructuring-lambda-list-to-rte '(a b c &key x y &optional r)))
   
   (assert-true (equivalent-patterns '(:CAT (:CAT T T T)
 				      (:? T

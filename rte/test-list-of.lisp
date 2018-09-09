@@ -21,7 +21,7 @@
 
 
 
-(in-package :rte.test)
+(in-package :rte-test)
 
 
 (define-test type/list-of

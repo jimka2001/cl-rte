@@ -21,8 +21,9 @@
 
 (asdf:defsystem :rte-regexp-test
   :depends-on (:rte
+	       :jimka-addons
 	       :rte-regexp
-	       (:version :lisp-unit "0.9.0"))
+	       :jimka-test)
   :components
   ((:module "rte"
     :components

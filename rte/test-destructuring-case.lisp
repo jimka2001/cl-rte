@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :rte.test)
+(in-package :rte-test)
 
 
 
@@ -161,9 +161,12 @@
 							    (y string)
 							    (z list))))
 
+(defmacro assert-equal (a b)
+  `(assert-true (equal ,a ,b)))
+
 (define-test test/destructuring-case-8
   ;; with &allow-other-keys
-  (assert-true (canonicalize-pattern (destructuring-lambda-list-to-rte '(&key x y z &allow-other-keys)))
+  (assert-equal (canonicalize-pattern (destructuring-lambda-list-to-rte '(&key x y z &allow-other-keys)))
 	       (canonicalize-pattern
 		'(:and (:* t)
 		  (:cat (:cat) (:cat)
@@ -459,7 +462,7 @@
 		       (declare (type fixnum a b c)
 				(ignore a b c))
 		       3))))
-  (assert-error 'error (destructuring-methods '(1 2 3) (:call-next-method cnm)
+  (assert-error error (destructuring-methods '(1 2 3) (:call-next-method cnm)
 			 ((a b)
 			  (declare (ignore a b))
 			  1)
@@ -668,7 +671,7 @@
 (define-test test/destructuring-case-allow-other-keys-2
   (let ((data '(1 (2 3)
 		:x name :y 3.14 :z 14)))
-    (assert-error 'error
+    (assert-error error
 		  (destructuring-bind (&whole llist a (b c) 
 				       &rest keys
 				       &key (x t) (y "") z &allow-other-keys) data

@@ -47,6 +47,5 @@
 			 :destination-dir "/lrde/home/jnewton/analysis/."))
   (format t "finished big-test-report ~A~%" *bucket*))
 
-(sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
-		    :search t)
+(run-program "rm" (list "-r" asdf::*user-cache*))
 (qstat-f)

@@ -21,7 +21,7 @@
 
 (asdf:defsystem :2d-array-test
   :depends-on (:2d-array
-	       (:version :lisp-unit "0.9.0"))
+	       :jimka-test)
   :components
   ((:module "2d-array"
     :components

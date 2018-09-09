@@ -19,6 +19,5 @@
 (asdf:load-system :lisp-types-analysis)
 (in-package :lisp-types-analysis)
 
-(sb-ext:run-program "rm" (list "-r" asdf::*user-cache*)
-		    :search t)
+(run-program "rm" (list "-r" asdf::*user-cache*))
 (qstat-f)

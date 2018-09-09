@@ -40,31 +40,29 @@
 
 (in-package :jimka-addons)
 
-(defun run-program (program args &rest options &key (wait t) output error if-output-exists)
+(defun run-program (program args &key (wait t) output error if-output-exists)
   (declare (type (or null string) output)
 	   (type (or null stream) error))
-  #+sbcl (apply #'sb-ext:run-program program args
-		:search t
-		:wait wait
-		:output output
-		:error error
-		:if-output-exists if-output-exists
-		options)
+  #+sbcl (sb-ext:run-program program args
+			     :search t
+			     :wait wait
+			     :output output
+			     :error error
+			     :if-output-exists if-output-exists)
   #+allegro (if (and wait output)
 		(with-open-file (s output :direction :output
 					  :if-exists if-output-exists)
-		  (apply #'excl:run-shell-command
-			 (apply #'vector (cons program args))
-			 :wait wait
-			 :error-output error
-			 :output s
-			 options))
-		(apply #'excl:run-shell-command
-		       (apply #'vector (cons program args))
-		       :wait wait
-		       :error-output error
-		       :output output
-		       options))
+		  (excl:run-shell-command
+		   (apply #'vector (cons program args))
+		   :wait wait
+		   :error-output error
+		   :output s))
+		(excl:run-shell-command
+		 (apply #'vector (cons program args))
+		 :wait wait
+		 :error-output error
+		 :if-output-exists if-output-exists
+		 :output output))
   )
 
 (defun getenv (envvar)

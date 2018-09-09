@@ -33,6 +33,7 @@
    "RUN-PROGRAM"
    "SETOF"
    "TCONC"
+   "TYPE-EXPAND"
    "USER-READ"
    "WHILE"
 ))
@@ -107,8 +108,7 @@ than as keywords."
 (defun tconc (buf &rest items)
   (lconc buf items))
 
-
-
-
-
-
+(defun type-expand (type)
+  "Expand a type, similar to macro-expand, if the given type specifier is not a user defined type, then an EQUAL type is returned."
+  #+sbcl (sb-ext:typexpand type)
+  #+allegro (excl::deftype-expand type))

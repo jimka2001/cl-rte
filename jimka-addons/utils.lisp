@@ -55,8 +55,8 @@
 
 (defun process-kill (process signal)
   #+sbcl (sb-ext:process-kill process signal)
-  (progn (excl.osi:kill process signal)
-	 (sys:reap-os-subprocess :pid process)))
+  #+allegro (progn (excl.osi:kill process signal)
+		   (sys:reap-os-subprocess :pid process)))
 
 (defmacro exists (obj data &body body)
   (typecase obj

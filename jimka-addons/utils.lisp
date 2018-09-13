@@ -85,14 +85,30 @@
      `(member-if (lambda (,obj) ,@body) ,data))))
 
 (defmacro forall (var data &body body)
-  `(every #'(lambda (,var) ,@body) ,data))
+  (typecase var
+    (list
+     (let ((v (gensym "forall")))
+       `(every #'(lambda (,v)
+		   (destructuring-bind ,var ,v
+		     ,@body)) ,data)))
+    (t
+     `(every #'(lambda (,var) ,@body) ,data))))
+
+
+(defmacro setof (var data &body body)
+  (typecase var
+    (list
+     (let ((v (gensym "setof")))
+       `(remove-if-not (lambda (,v)
+			 (destructuring-bind var ,v
+			   ,@body)) ,data)))
+    (t
+     `(remove-if-not (lambda (,var) ,@body) ,data))))
+
 
 (defmacro while (test &body body)
   `(loop :while ,test
 	 :do (progn ,@body)))
-
-(defmacro setof (var data &body body)
-  `(remove-if-not (lambda (,var) ,@body) ,data))
 
 (defun getter (field)
   (lambda (obj) (getf obj field)))

@@ -21,7 +21,7 @@
 
 (asdf:defsystem :rte-regexp
   :version "1.0"
-  :description ""
+  :description "Simple string regular expression matcher based on rte"
   :license "MIT"
   :depends-on (:rte
 	       :yacc

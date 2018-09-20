@@ -21,7 +21,7 @@
 
 (asdf:defsystem :rte-regexp-test
   :version "1.0"
-  :description ""
+  :description "Test cases for rte-regexp"
   :license "MIT"
   :depends-on (:rte
 	       :jimka-addons

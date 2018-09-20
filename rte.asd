@@ -21,7 +21,7 @@
 
 (asdf:defsystem :rte
   :version "1.0"
-  :description ""
+  :description "Regular type expressions implementation"
   :license "MIT"
   :depends-on (:ndfa
 	       :jimka-addons

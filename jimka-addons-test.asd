@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :jimka-addons-test
+  :version "1.0"
+  :description "Test cases for jimka-addons package/system"
+  :license "MIT"
   :components
   ((:module "jimka-addons"
     :components

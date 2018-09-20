@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :jimka-test
+  :version "1.0"
+  :description "Unit Test Facility, similar but simpler then lisp-unit.  Slime-compatible"
+  :license "MIT"
   :depends-on ()
   :components
   ((:module "jimka-test"

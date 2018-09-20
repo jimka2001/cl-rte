@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :2d-array
+  :version "1.0"
+  :description "Extensible sequence classes to represent vertical and horizontal slices of 2d arrays"
+  :license "MIT"
   :components
   ((:module "2d-array"
     :components

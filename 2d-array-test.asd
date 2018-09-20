@@ -20,6 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :2d-array-test
+  :version "1.0"
+  :description "Testing code for 2d-array package/system"
+  :license "MIT"
   :depends-on (:2d-array
 	       :jimka-test)
   :components

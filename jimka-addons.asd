@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :jimka-addons
+  :version "1.0"
+  :description "Various utility functions and macros used in several packages."
+  :license "MIT"
   :components
   ((:module "jimka-addons"
     :components

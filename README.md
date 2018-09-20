@@ -6,7 +6,7 @@ This project contains several Common Lisp packages.  The packages fall into thre
 * Used for testing other packages in. 
 
 ## Packages usable for the general public.
-### cl-robdd [REAME](cl-robdd/README.md)
+### cl-robdd [README](cl-robdd/README.md)
 
 Implementation of ROBDD
 

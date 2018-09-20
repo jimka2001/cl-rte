@@ -22,7 +22,7 @@
 (asdf:defsystem :rte-test
   :version "1.0"
   :description ""
-  :license ""
+  :license "MIT"
   :defsystem-depends-on (:rte)
   :depends-on (;;:rte
 	       :jimka-addons

@@ -22,7 +22,7 @@
 (asdf:defsystem :rte
   :version "1.0"
   :description ""
-  :license ""
+  :license "MIT"
   :depends-on (:ndfa
 	       :jimka-addons
 	       :lisp-types

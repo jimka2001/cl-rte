@@ -23,7 +23,7 @@
 (asdf:defsystem :jimka-addons
   :version "1.0"
   :description ""
-  :license ""
+  :license "MIT"
   :components
   ((:module "jimka-addons"
     :components

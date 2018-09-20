@@ -22,7 +22,7 @@
 (asdf:defsystem :2d-array-test
   :version "1.0"
   :description ""
-  :license ""
+  :license "MIT"
   :depends-on (:2d-array
 	       :jimka-test)
   :components

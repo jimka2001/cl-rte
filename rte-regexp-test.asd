@@ -22,7 +22,7 @@
 (asdf:defsystem :rte-regexp-test
   :version "1.0"
   :description ""
-  :license ""
+  :license "MIT"
   :depends-on (:rte
 	       :jimka-addons
 	       :rte-regexp

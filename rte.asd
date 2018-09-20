@@ -20,6 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :rte
+  :version "1.0"
+  :description ""
+  :license ""
   :depends-on (:ndfa
 	       :jimka-addons
 	       :lisp-types

@@ -20,6 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :rte-test
+  :version "1.0"
+  :description ""
+  :license ""
   :defsystem-depends-on (:rte)
   :depends-on (;;:rte
 	       :jimka-addons

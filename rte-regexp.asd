@@ -20,9 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :rte-regexp
-    :depends-on (:rte
-		 :yacc
-		 :jimka-addons)
+  :version "1.0"
+  :description ""
+  :license ""
+  :depends-on (:rte
+	       :yacc
+	       :jimka-addons)
   :components
   ((:module "rte-regexp"
     :components

@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :2d-array
+  :version "1.0"
+  :description ""
+  :license ""
   :components
   ((:module "2d-array"
     :components

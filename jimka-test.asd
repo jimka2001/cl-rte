@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :jimka-test
+  :version "1.0"
+  :description ""
+  :license ""
   :depends-on ()
   :components
   ((:module "jimka-test"

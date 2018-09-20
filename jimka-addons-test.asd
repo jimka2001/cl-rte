@@ -21,6 +21,9 @@
 
 
 (asdf:defsystem :jimka-addons-test
+  :version "1.0"
+  :description ""
+  :license ""
   :components
   ((:module "jimka-addons"
     :components

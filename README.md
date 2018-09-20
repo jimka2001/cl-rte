@@ -5,6 +5,13 @@ This project contains several Common Lisp packages.  The packages fall into thre
 * Used for analysis in PhD thesis.
 * Used for testing other packages in. 
 
+## Motivation
+
+The implementation of rational type expression is the main result of this project.
+However, several intermediate results might be useful as well, so they are made
+available.
+
+
 ## Packages usable for the general public.
 ### cl-robdd [README](cl-robdd/README.md)
 
@@ -50,11 +57,6 @@ Implementation of non-deterministed finite automata
 
 
 
-## Motivation
-
-The implementation of rational type expression is the main result of this project.
-However, several intermediate results might be useful as well, so they are made
-available.
 
 ## Installation
 
@@ -68,8 +70,6 @@ as starting points.
 
 to-be-done
 
-
-## Code Examples
 
 ## Tests
 

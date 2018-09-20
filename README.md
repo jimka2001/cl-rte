@@ -13,7 +13,7 @@ Implementation of ROBDD
 ### jimka-test  [README](jimka-test/README.md)
 Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
 
-### rte [README.md](jimka-test/README.md)
+### rte [README.md](rte/README.md)
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
 
 ### rte-regexp [README](rte-regexp/README.md)

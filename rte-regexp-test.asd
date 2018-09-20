@@ -25,6 +25,6 @@
 	       :rte-regexp
 	       :jimka-test)
   :components
-  ((:module "rte"
+  ((:module "rte-regexp"
     :components
     ((:file "test-regexp")))))

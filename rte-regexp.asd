@@ -24,6 +24,6 @@
 		 :yacc
 		 :jimka-addons)
   :components
-  ((:module "rte"
+  ((:module "rte-regexp"
     :components
     ((:file "regexp")))))

@@ -16,8 +16,9 @@ Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.
 ### rte [README.md](jimka-test/README.md)
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
 
-### rte-regexp [README](rte-regexp.md)
-
+### rte-regexp [README](rte-regexp/README.md)
+Simple string regular expression matcher based on rte
+    
 ### 2d-array [README](2d-array/README.md)
 Extensible sequence classes to represent vertical and horizontal "slices" of 2d arrays
 

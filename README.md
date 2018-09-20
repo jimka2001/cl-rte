@@ -1,10 +1,38 @@
 ## Synopsis
 
-This project contains several Common Lisp sub-projects,
+This project contains several Common Lisp packages.  The packages fall into three categories.
+* Usable to the general public.
+* Used for analysis in PhD thesis.
+* Used for testing other packages in. 
+
+## Packages usable for the general public.
+### cl-robdd
+
+Implementation of ROBDD
+
+### jimka-test
+
+Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
+
+* define-test -- defines a test and a function of the same name.  This and other tests may be run by calling `(run-tests)`
+* assert-true -- assert that a single expression returns non-nil.  E.g.,   
+`(assert-true (= (+ a b) (- c d)))`
+* assert-false -- assert that a single expression returns non-nil.  E.g.,   
+`(assert-false (= (+ a b) (- c d)))`
+* assert-error -- assert that evaluating a given expression signals a named condition   E.g.,   
+`(assert-error error (= (f a b) (g c d)))`  
+`(assert-error my-condition (format (f a b) (g c d)))`
+* run-tests -- runs all loaded tests by default.  `:tests` specifies a test-name or list thereof to run. `:break-on-error` specifies to go into the debugger (or otherwise default error handler) if an error condition is triggered.  Otherwise test is simply marked as failed and reported later.
+* run-1-test -- like `run-tests` but runs a single test. `:break-on-error` can be used as well
+* run-package-tests -- run tests whose name is the designated package or list of packages.  E.g.,  
+  `(run-package-tests "MY-PACKAGE")`  
+  `(run-package-tests '(:pack1 :pack2) :break-on-error t)`
+
+I found my unit-testing needs were diverging from what was offered in lisp-unit, and the lisp-unit maintainers for whatever reason did not accomodate my pull requests.  On the other hand my unit-testing needs were pretty simply, so I built my own unit-testing package using the same API which I was using from lisp-unit.
 
 ### rte
 
-definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
+Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
       For information about this project and related publications , see [Efficient dynamic type checking of heterogeneous sequences](https://www.lrde.epita.fr/wiki/Publications/newton.16.rte.report)
 
 ### 2d-array
@@ -18,6 +46,16 @@ Utilities dealing with CL types
 ### ndfa
 
 Implementation of non-deterministed finite automata
+
+### jimka-addons 
+
+
+## Used for analsis in PhD thesis.
+### cl-robdd-analysis
+
+## Used for testing other packages.
+### cl-robdd-test
+### cl-robdd-analysis-test
 
 
 ## Motivation
@@ -260,24 +298,22 @@ The majority of the code development has been done by Jim Newton, doctoral candi
 ## License
 
 ```
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
-;;
-;; Permission is hereby granted, free of charge, to any person obtaining
-;; a copy of this software and associated documentation
-;; files (the "Software"), to deal in the Software without restriction,
-;; including without limitation the rights to use, copy, modify, merge,
-;; publish, distribute, sublicense, and/or sell copies of the Software,
-;; and to permit persons to whom the Software is furnished to do so,
-;; subject to the following conditions:
-;;
-;; The above copyright notice and this permission notice shall be
-;; included in all copies or substantial portions of the Software.
-;;
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-;; LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```

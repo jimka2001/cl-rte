@@ -6,56 +6,47 @@ This project contains several Common Lisp packages.  The packages fall into thre
 * Used for testing other packages in. 
 
 ## Packages usable for the general public.
-### cl-robdd
+### cl-robdd [REAME](cl-robdd/README.md)
 
 Implementation of ROBDD
 
-### jimka-test
-
+### jimka-test  [README](jimka-test/README.md)
 Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
 
-* define-test -- defines a test and a function of the same name.  This and other tests may be run by calling `(run-tests)`
-* assert-true -- assert that a single expression returns non-nil.  E.g.,   
-`(assert-true (= (+ a b) (- c d)))`
-* assert-false -- assert that a single expression returns non-nil.  E.g.,   
-`(assert-false (= (+ a b) (- c d)))`
-* assert-error -- assert that evaluating a given expression signals a named condition   E.g.,   
-`(assert-error error (= (f a b) (g c d)))`  
-`(assert-error my-condition (format (f a b) (g c d)))`
-* run-tests -- runs all loaded tests by default.  `:tests` specifies a test-name or list thereof to run. `:break-on-error` specifies to go into the debugger (or otherwise default error handler) if an error condition is triggered.  Otherwise test is simply marked as failed and reported later.
-* run-1-test -- like `run-tests` but runs a single test. `:break-on-error` can be used as well
-* run-package-tests -- run tests whose name is the designated package or list of packages.  E.g.,  
-  `(run-package-tests "MY-PACKAGE")`  
-  `(run-package-tests '(:pack1 :pack2) :break-on-error t)`
-
-I found my unit-testing needs were diverging from what was offered in lisp-unit, and the lisp-unit maintainers for whatever reason did not accomodate my pull requests.  On the other hand my unit-testing needs were pretty simply, so I built my own unit-testing package using the same API which I was using from lisp-unit.
-
-### rte
-
+### rte [README.md](jimka-test/README.md)
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
-      For information about this project and related publications , see [Efficient dynamic type checking of heterogeneous sequences](https://www.lrde.epita.fr/wiki/Publications/newton.16.rte.report)
 
-### 2d-array
+### rte-regexp
 
+### 2d-array [README](2d-array/README.md)
 Extensible sequence classes to represent vertical and horizontal "slices" of 2d arrays
 
-### lisp-types
-
+### lisp-types [README](lisp-types/README.md)
 Utilities dealing with CL types
 
-### ndfa
+### ndfa [README](ndfa/README.md)
 
 Implementation of non-deterministed finite automata
 
-### jimka-addons 
+### jimka-addons [README](jimka-addons/README.md)
 
 
 ## Used for analsis in PhD thesis.
+### research
 ### cl-robdd-analysis
+### lisp-types-baker-analysis
+### lisp-types-analysis
 
 ## Used for testing other packages.
 ### cl-robdd-test
 ### cl-robdd-analysis-test
+### rte-test
+### 2d-array-test
+### lisp-types-test
+### rte-regexp-test
+### ndfa-test
+### jimka-addons-test
+
 
 
 ## Motivation

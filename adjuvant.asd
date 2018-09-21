@@ -20,12 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(asdf:defsystem :jimka-addons
+(asdf:defsystem :adjuvant
   :version "1.0"
   :description "Various utility functions and macros used in several packages."
   :license "MIT"
   :components
-  ((:module "jimka-addons"
+  ((:module "adjuvant"
     :components
-    ((:file "utils")
+    ((:file "adjuvant")
      ))))

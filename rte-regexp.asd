@@ -25,7 +25,7 @@
   :license "MIT"
   :depends-on (:rte
 	       :yacc
-	       :jimka-addons)
+	       :adjuvant)
   :components
   ((:module "rte-regexp"
     :components

@@ -21,7 +21,7 @@
 
 
 (defpackage :regular-type-expression
-  (:use :cl :ndfa :lisp-types :jimka-addons)
+  (:use :cl :ndfa :lisp-types :adjuvant)
   (:nicknames "RTE")
   (:export
    "LIST-OF"

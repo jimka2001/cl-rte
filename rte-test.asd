@@ -25,7 +25,7 @@
   :license "MIT"
   :defsystem-depends-on (:rte)
   :depends-on (;;:rte
-	       :jimka-addons
+	       :adjuvant
 	       :rte-regexp-test
 	       #+sbcl :2d-array
 	       :scrutiny

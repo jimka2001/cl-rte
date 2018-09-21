@@ -21,7 +21,7 @@
 
 
 
-(defpackage :jimka-addons
+(defpackage :adjuvant
   (:use :cl)
   (:export
    "EXISTS"
@@ -38,7 +38,7 @@
    "WHILE"
 ))
 
-(in-package :jimka-addons)
+(in-package :adjuvant)
 
 (defun run-program (program args &key (wait t) output error if-output-exists)
   (declare (type (or null string) output)

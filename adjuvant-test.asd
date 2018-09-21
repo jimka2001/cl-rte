@@ -20,12 +20,12 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(asdf:defsystem :jimka-addons-test
+(asdf:defsystem :adjuvant-test
   :version "1.0"
-  :description "Test cases for jimka-addons package/system"
+  :description "Test cases for adjuvant package/system"
   :license "MIT"
   :components
-  ((:module "jimka-addons"
+  ((:module "adjuvant"
     :components
     ((:file "test-utils")
      ))))

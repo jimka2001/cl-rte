@@ -24,7 +24,7 @@
   :description "Regular type expressions implementation"
   :license "MIT"
   :depends-on (:ndfa
-	       :jimka-addons
+	       :adjuvant
 	       :lisp-types
 	       )
   :components

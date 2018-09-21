@@ -38,7 +38,7 @@ Utilities dealing with CL types
 
 Implementation of non-deterministed finite automata
 
-### jimka-addons [README](jimka-addons/README.md)
+### adjuvant [README](adjuvant/README.md)
 
 
 ## Used for analsis in PhD thesis.
@@ -55,7 +55,7 @@ Implementation of non-deterministed finite automata
 ### lisp-types-test
 ### rte-regexp-test
 ### ndfa-test
-### jimka-addons-test
+### adjuvant-test
 
 
 

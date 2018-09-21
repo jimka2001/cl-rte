@@ -21,10 +21,10 @@
 
 
 
-(defpackage :jimka-addons-test
-  (:use :cl :jimka-addons :scrutiny))
+(defpackage :adjuvant-test
+  (:use :cl :adjuvant :scrutiny))
 
-(in-package :jimka-addons-test)
+(in-package :adjuvant-test)
 
 (define-test test/exists
   (assert-true (exists x '(1 3 2 7) (evenp x)))

@@ -24,7 +24,7 @@
   :description "Test cases for rte-regexp"
   :license "MIT"
   :depends-on (:rte
-	       :jimka-addons
+	       :adjuvant
 	       :rte-regexp
 	       :scrutiny)
   :components

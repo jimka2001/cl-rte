@@ -40,6 +40,12 @@ Implementation of non-deterministed finite automata
 
 ### adjuvant [README](adjuvant/README.md)
 
+Certain utilities used in many other packages
+
+### dispatch [README](dispatch/README.md)
+Implementation of the function `SPECIALIZER-INTERSECTION`
+    
+
 
 ## Used for analsis in PhD thesis.
 ### research

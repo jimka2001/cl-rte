@@ -21,7 +21,7 @@
 
 (asdf:defsystem :dispatch-test
   :depends-on (:dispatch
-	       (:version :lisp-unit "0.9.0"))
+	       :jimka-test)
   :components
   ((:module "src"
     :components

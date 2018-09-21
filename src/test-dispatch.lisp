@@ -19,17 +19,13 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(defpackage :dispatch.test
-  (:use :cl :dispatch :lisp-unit))
+(defpackage :dispatch-test
+  (:use :cl :dispatch :jimka-test))
 
-(in-package :dispatch.test)
+(in-package :dispatch-test)
 
 (defun test ()
-  (let ((*print-summary* t)
-	(*print-failures* t)
-	(*summarize-results* t)
-	(*print-errors* t))
-    (run-tests :all (list :dispatch.test))))
+  (run-package-tests :dispatch-test))
 
 (defclass T1 () ())
 (defclass T2 () ())
@@ -65,7 +61,7 @@
 (defmethod foo2 ((a list) b))
 (defmethod foo2 (b (a sequence)))
 
-(define-test dispatch/find-method-ambiguities
+(define-test dispatch/find-method-ambiguities-2
   (let ((ambig (dispatch::find-method-ambiguities 'foo2)))
     (flet ((getter (key)
 	     (lambda (x)

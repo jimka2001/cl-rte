@@ -43,7 +43,14 @@
 				    ((3 4) ((3 4))))
 				  :test #'equal))
   (assert-false (set-exclusive-or '((1 ("a")) (2 ("ab" "ba")))
-				  (group-by '("ba" "a" "b") :key #'strlen)
+				  (group-by '("ba" "a" "b") :key #'length)
+				  :test #'equal))
+  (assert-false (set-exclusive-or '((#\e (#\e))
+				    (#\d (#\d))
+				    (#\c (#\c #\c))
+				    (#\b (#\b #\b))
+				    (#\a (#\a #\a)))
+				  (group-by "abcabcde" :test #'char=)
 				  :test #'equal)))
 
 (define-test test/exists

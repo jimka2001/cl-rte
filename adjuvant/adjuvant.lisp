@@ -35,6 +35,7 @@
    "SETOF"
    "TCONC"
    "TYPE-EXPAND"
+   "UNIONF"
    "USER-READ"
    "WHILE"
 ))
@@ -144,13 +145,18 @@ than as keywords."
   #+sbcl (sb-ext:typexpand type)
   #+allegro (excl::deftype-expand type))
 
-(defun group-by (data &key (key #'identity) (test #'eql))
-  (declare (type list data)
+(defun group-by (sequence &key (key #'identity) (test #'eql))
+  (declare (type sequence sequence)
            (type (function (t) t) key)
            (type (function (t t) t) test))
-  (let ((hash (make-hash-table :test test)))
-    (dolist (item data)
-      (push item (gethash (funcall key item) hash nil)))
-    (loop for key being the hash-keys of hash
-          collect (list key (gethash key hash)))))
+  (let (alist)
+    (map nil (lambda (item &aux (index (funcall key item)) (hit (assoc index alist :test test)))
+	       (if hit
+		   (push item (car (cdr hit)))
+		   (push (list index (list item)) alist)))
+	 sequence)
+    alist))
+
+(define-modify-macro unionf (&rest args) union)
+
 

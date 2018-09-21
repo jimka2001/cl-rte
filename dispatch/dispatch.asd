@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :dispatch
-  :depends-on (:closer-mop)
+  :depends-on (:closer-mop :adjuvant)
   :components
   ((:module "src"
     :components

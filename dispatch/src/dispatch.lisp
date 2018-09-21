@@ -21,18 +21,9 @@
 
 (defpackage :dispatch
   (:export "SPECIALIZER-INTERSECTIONS")
-  (:use :closer-common-lisp))
+  (:use :closer-common-lisp :adjuvant))
 
 (in-package :dispatch)
-
-(defun make-assoc-mapping (sequence key &key (test #'eql))
-  (let (alist)
-    (flet ((file (item &aux (index (funcall key item)) (hit (assoc index alist :test test)))
-	     (if hit
-		 (push item (cdr hit))
-		 (push (list index item) alist))))
-      (map nil #'file sequence))
-    alist))
 
 (defun standard-method-combination-p (comb)
   (eql comb
@@ -43,54 +34,18 @@
   (when (fboundp gf)
     (make-assoc-method-qualifiers (fdefinition gf))))
 (defmethod make-assoc-method-qualifiers ((gf cl:standard-generic-function))
-  (make-assoc-mapping (generic-function-methods gf)
-		      #'method-qualifiers
-		      :test #'equal))
+  (group-by (generic-function-methods gf)
+	    :key #'method-qualifiers
+	    :test #'equal))
 
 
+;; TODO goes in adjuvant ?
 (defun map-pairs (binary data-list)
   "Call the given binary function once on each pair of objects from the given data-list."
   (mapl (lambda (tail &aux (head (car tail)))
 	  (dolist (item (cdr tail))
 	    (funcall binary head item)))
 	data-list))
-
-(defmacro setof (var data &body body)
-  `(remove-if-not #'(lambda (,var) ,@body) ,data))
-
-(defmacro exists (var data &body body)
-  `(member-if #'(lambda (,var) ,@body) ,data))
-
-(defmacro forall (vars data &body body)
-  (if (symbolp vars)
-      `(forall (,vars) (,data) ,@body)
-      `(every (lambda ,vars ,@body) ,@data)))
-
-
-(defun lconc (buf items)
-  (cond
-    ((null buf)
-     (cons items (last items)))
-    ((null (car buf))
-     (setf (car buf) items)
-     (setf (cdr buf) (last items))
-     buf)
-    ((null items)
-     buf)
-    (t
-     (setf (cdr (cdr buf)) items)
-     (setf (cdr buf) (last items))
-     buf)))
-
-(defun tconc (buf &rest items)
-  (lconc buf items))
-
-(defun getter (key)
-  #'(lambda (obj)
-      (getf obj key)))
-
-
-(define-modify-macro unionf (&rest args) union)
 
 (defgeneric specializer-intersections (spec1 spec2)
   (:documentation
@@ -185,7 +140,7 @@ omit C in the return list."))
 	     (setof method methods
 	       (every #'spec>= intersection-types (method-specializers method))))
 	   (method<= (m1 m2)
-	     (forall (spec1 spec2) ((method-specializers m1) (method-specializers m2))
+	     (forall (spec1 spec2) (list (method-specializers m1) (method-specializers m2))
 	       (spec>= spec2 spec1))))
     (let ((applicable-methods (applicable-methods)))
       (declare (notinline set-difference))

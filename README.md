@@ -1,3 +1,5 @@
+# REGULAR-TYUPE-EXPRESSION (RTE)
+
 ## Synopsis
 
 This project contains several Common Lisp packages.  The packages fall into three categories.
@@ -15,7 +17,7 @@ available.
 ## Packages usable for the general public.
 ### cl-robdd [README](cl-robdd/README.md)
 
-Implementation of ROBDD
+Implementation of ROBDD, Reduced Ordered Binary Decision Diagram
 
 ### jimka-test  [README](jimka-test/README.md)
 Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 

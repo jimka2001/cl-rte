@@ -452,15 +452,19 @@
 
   )
 
-(defrte (:CAT NUMBER NUMBER NUMBER))
-(defrte (:CAT (:* NUMBER NUMBER NUMBER)))
-(defrte (:CAT (:* FIXNUM FIXNUM FIXNUM)))
-(defrte (:CAT FIXNUM FIXNUM FIXNUM))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defrte (:CAT NUMBER NUMBER NUMBER)))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defrte (:CAT (:* NUMBER NUMBER NUMBER))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defrte (:CAT (:* FIXNUM FIXNUM FIXNUM))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defrte (:CAT FIXNUM FIXNUM FIXNUM)))
 
 (define-test test/destructuring-methods-2
   (assert-true (typep '(1 2 3)
 		      '(RTE (:CAT NUMBER NUMBER NUMBER))))
-  (assert-true (= 3 (COND
+  (assert-true (= 6 (COND
 		      ((TYPEP '(1 2 3)
 			      '(RTE (:CAT NUMBER NUMBER NUMBER)))
 		       (* 2 (COND ((TYPEP '(1 2 3)
@@ -469,7 +473,7 @@
 				  (t 0))))
 		      ((TYPEP  '(1 2 3)
 			       '(RTE (:CAT (:* FIXNUM FIXNUM FIXNUM)))) 3))))
-  (assert-true (= 3
+  (assert-true (= 6
 		    (TYPECASE '(1 2 3)
 		      ((RTE (:CAT NUMBER NUMBER NUMBER))
 		       (* 2 (TYPECASE '(1 2 3)

@@ -25,7 +25,7 @@
   :description "Test cases for adjuvant package/system"
   :license "MIT"
   :components
-  ((:module "adjuvant"
+  ((:module "src"
     :components
     ((:file "test-utils")
      ))))

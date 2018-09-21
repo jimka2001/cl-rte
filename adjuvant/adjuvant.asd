@@ -25,7 +25,7 @@
   :description "Various utility functions and macros used in several packages."
   :license "MIT"
   :components
-  ((:module "adjuvant"
+  ((:module "src"
     :components
     ((:file "adjuvant")
      ))))

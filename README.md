@@ -1,4 +1,4 @@
-# REGULAR-TYUPE-EXPRESSION (RTE)
+# REGULAR-TYPE-EXPRESSION (RTE)
 
 ## Synopsis
 
@@ -20,18 +20,23 @@ available.
 Implementation of ROBDD, Reduced Ordered Binary Decision Diagram
 
 ### scrutiny  [README](scrutiny/README.md)
-Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
+
+Slime-friendly Unit Testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
 
 ### rte [README.md](rte/README.md)
+
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
 
 ### rte-regexp [README](rte-regexp/README.md)
+
 Simple string regular expression matcher based on rte
     
 ### 2d-array [README](2d-array/README.md)
+
 Extensible sequence classes to represent vertical and horizontal "slices" of 2d arrays
 
 ### lisp-types [README](lisp-types/README.md)
+
 Utilities dealing with CL types
 
 ### ndfa [README](ndfa/README.md)
@@ -43,6 +48,7 @@ Implementation of non-deterministed finite automata
 Certain utilities used in many other packages
 
 ### dispatch [README](dispatch/README.md)
+
 Implementation of the function `SPECIALIZER-INTERSECTION`
     
 
@@ -62,7 +68,7 @@ Implementation of the function `SPECIALIZER-INTERSECTION`
 ### rte-regexp-test
 ### ndfa-test
 ### adjuvant-test
-
+### scrutiny-test
 
 
 

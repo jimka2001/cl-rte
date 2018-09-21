@@ -24,6 +24,7 @@
 (defpackage :adjuvant
   (:use :cl)
   (:export
+   "BOOLEAN-EXPR-TO-LATEX"
    "EXISTS"
    "FORALL"
    "GETENV"
@@ -34,6 +35,7 @@
    "RUN-PROGRAM"
    "SETOF"
    "TCONC"
+   "TREE-REDUCE"
    "TYPE-EXPAND"
    "UNIONF"
    "USER-READ"
@@ -160,3 +162,72 @@ than as keywords."
 (define-modify-macro unionf (&rest args) union)
 
 
+(defun tree-reduce (function object-list &key initial-value (key #'identity))
+  (declare (type (function (t t) t) function)
+	   (type (function (t) t) key)
+	   (type list object-list)
+	   (optimize (speed 3) (debug 0) (compilation-speed 0)))
+  (cond
+    ((cdr object-list)
+     (labels ((compactify (stack)
+		(if (null (cdr stack))
+		    stack
+		    (destructuring-bind ((n1 obj1) (n2 obj2) &rest tail) stack
+		      (declare (type (and fixnum unsigned-byte) n1 n2))
+		      (if (= n1 n2)
+			  (compactify (cons (list (1+ n1) (funcall function obj1 obj2)) tail))
+			  stack))))
+	      (finish-stack (acc stack)
+		(if stack
+		    (finish-stack (funcall function acc (cadr (car stack)))
+				  (cdr stack))
+		    acc)))
+       (destructuring-bind ((_ obj) &rest tail) (reduce (lambda (stack item)
+							  (compactify (cons (list 1 (funcall key item)) stack)))
+							(cdr object-list)
+							:initial-value (list (list 1 (funcall key (car object-list)))))
+	 (declare (ignore _))
+	 (finish-stack obj tail))))
+    (object-list
+     (car object-list))
+    (t
+     initial-value)))
+    
+(defvar *tmp-dir-root* (format nil "/tmp/~A/" (or (getenv "USER")
+						  "unknown-user")))
+
+(defun make-temp-dir (suffix)
+  (format nil "~A/~A/" *tmp-dir-root* suffix))
+
+(defun boolean-expr-to-latex (expr &optional (stream t))
+  (etypecase expr
+    ((eql nil)
+     (format stream "\\bot"))
+    ((eql t)
+     (format stream "\\top"))
+    ((not list)
+     (format stream "~A" expr))
+    ((cons (eql and))
+          (format stream "(")
+     (boolean-expr-to-latex (cadr expr) stream)
+     (dolist (subexpr (cddr expr))
+       (format stream " \\wedge ")
+       (boolean-expr-to-latex subexpr stream))
+     (format stream ")")
+     )
+    ((cons (eql or))
+     (format stream "(")
+     (boolean-expr-to-latex (cadr expr) stream)
+     (dolist (subexpr (cddr expr))
+       (format stream " \\vee ")
+       (boolean-expr-to-latex subexpr stream))
+     (format stream ")")
+     )
+    ((cons (eql not))
+     (format stream "\\neg ")
+     (boolean-expr-to-latex (cadr expr) stream))))
+
+(defun garbage-collect ()
+  #+sbcl (sb-ext::gc :full t)
+  #+allegro (excl:gc t)
+)

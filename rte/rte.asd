@@ -28,7 +28,7 @@
 	       :lisp-types
 	       )
   :components
-  ((:module "rte"
+  ((:module "src"
     :components
     ((:file "rte")
      (:file "asdf")

@@ -33,7 +33,7 @@
 	       :ndfa-test
 	       :lisp-types-test)
   :components
-  ((:module "rte"
+  ((:module "src"
     :components
     ((:file "test-rte")
      (:file "test-list-of")

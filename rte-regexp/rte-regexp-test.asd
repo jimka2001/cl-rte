@@ -19,14 +19,15 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(asdf:defsystem :rte-regexp
+(asdf:defsystem :rte-regexp-test
   :version "1.0"
-  :description "Simple string regular expression matcher based on rte"
+  :description "Test cases for rte-regexp"
   :license "MIT"
   :depends-on (:rte
-	       :yacc
-	       :adjuvant)
+	       :adjuvant
+	       :rte-regexp
+	       :scrutiny)
   :components
-  ((:module "rte-regexp"
+  ((:module "src"
     :components
-    ((:file "regexp")))))
+    ((:file "test-regexp")))))

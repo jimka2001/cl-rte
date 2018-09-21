@@ -1,4 +1,4 @@
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
+;; Copyright (c) 2018 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,15 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(asdf:defsystem :rte-regexp-test
+(asdf:defsystem :rte-regexp
   :version "1.0"
-  :description "Test cases for rte-regexp"
+  :description "Simple string regular expression matcher based on rte"
   :license "MIT"
   :depends-on (:rte
-	       :adjuvant
-	       :rte-regexp
-	       :scrutiny)
+	       :yacc
+	       :adjuvant)
   :components
-  ((:module "rte-regexp"
+  ((:module "src"
     :components
-    ((:file "test-regexp")))))
+    ((:file "regexp")))))

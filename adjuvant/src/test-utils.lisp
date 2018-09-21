@@ -43,7 +43,7 @@
 				    ((3 4) ((3 4))))
 				  :test #'equal))
   (assert-false (set-exclusive-or '((1 ("a")) (2 ("ab" "ba")))
-				  (group-by '("ba" "a" "b") :key #'length)
+				  (group-by '("ba" "a" "ab") :key #'length)
 				  :test #'equal))
   (assert-false (set-exclusive-or '((#\e (#\e))
 				    (#\d (#\d))
@@ -55,7 +55,7 @@
 
 (define-test test/exists
   (assert (exists x '(1 3 2 7) (evenp x)))
-  (assert (exists x '(1 3 5 7) (evenp x)))
+  (assert (not (exists x '(1 3 5 7) (evenp x))))
   (assert (exists (&key (x 0)) '((:x 1) (:x 3) (:x 2) (:x 7)) (evenp x)))
   (assert (not (exists (&key (x 0) &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 3 :x 2) (:x 7)) (evenp x)))))
 

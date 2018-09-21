@@ -26,7 +26,7 @@
   :depends-on (:rte
 	       :jimka-addons
 	       :rte-regexp
-	       :jimka-test)
+	       :scrutiny)
   :components
   ((:module "rte-regexp"
     :components

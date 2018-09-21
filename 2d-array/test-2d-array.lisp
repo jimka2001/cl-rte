@@ -21,7 +21,7 @@
 
 
 (defpackage :2d-array-test
-  (:use :cl :2d-array :jimka-test))
+  (:use :cl :2d-array :scrutiny))
 
 (in-package :2d-array-test)
 

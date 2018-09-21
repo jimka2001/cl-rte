@@ -24,7 +24,7 @@
   :description "Testing code for 2d-array package/system"
   :license "MIT"
   :depends-on (:2d-array
-	       :jimka-test)
+	       :scrutiny)
   :components
   ((:module "2d-array"
     :components

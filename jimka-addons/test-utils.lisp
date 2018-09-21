@@ -22,7 +22,7 @@
 
 
 (defpackage :jimka-addons-test
-  (:use :cl :jimka-addons :jimka-test))
+  (:use :cl :jimka-addons :scrutiny))
 
 (in-package :jimka-addons-test)
 

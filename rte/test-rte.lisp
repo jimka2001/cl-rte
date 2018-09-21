@@ -21,7 +21,7 @@
 
 (defpackage :rte-test
   (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :jimka-test))
+  (:use :cl :rte :scrutiny))
 
 (do-symbols (name :rte)
   (import name :rte-test))

@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :rte-regexp-test
-  (:use :cl :rte-regexp :rte :jimka-test))
+  (:use :cl :rte-regexp :rte :scrutiny))
 
 (in-package :rte-regexp-test)
 

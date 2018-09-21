@@ -19,7 +19,7 @@ available.
 
 Implementation of ROBDD, Reduced Ordered Binary Decision Diagram
 
-### jimka-test  [README](jimka-test/README.md)
+### scrutiny  [README](scrutiny/README.md)
 Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
 
 ### rte [README.md](rte/README.md)
@@ -75,10 +75,10 @@ to-be-done
 
 ## Tests
 
-Testing is done using jimka-test.  You may load
+Testing is done using scrutiny.  You may load
 the system code without the tests via rte.asd, ndfa.asd, 2d-array.asd, or lisp-types.asd.
 But if you wish to run the tests, the starting points are respectively rte-test.asd, ndfa-test.asd, 2d-array-test.asd, and lisp-types-test.asd.
-Within each corresponding subdirectory the files containing jimka-test test cases are all prefixed by "test-".
+Within each corresponding subdirectory the files containing scrutiny test cases are all prefixed by "test-".
 To run the tests, you'll need to use ASDF to load the corresponding asdf system definition, e.g.,
 
 ```lisp

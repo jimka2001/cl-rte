@@ -1,4 +1,4 @@
-# JIMKA-TEST
+# SCRUTINY
 
 ## Synopsis
 
@@ -28,7 +28,7 @@ Slime-friendly Unit testing package, based loosely on lisp-unit (https://github.
 
 ## Slime Support
 
-jimka-test supports severel types of development using slime.
+scrutiny supports severel types of development using slime.
     
 * `M-.` -- `slime-edit-definition` -- since tests are defined symbols as functions, `M-.` works normally, causing emacs to visit the file containing the defintion and to lookup the definition of the name at the point.
 * `C-c C-c` -- `slime-compile-defun`  -- Compile the test at the point, but don't run the test.   Postfix arguments work exactly the same.  If there are compiler errors or warnings, they will be displayed in the buffer as you expect when compiling a normal function with `C-c C-c`.
@@ -47,7 +47,7 @@ You can use normal slime debugging from that point.
 
 
 ````
-MY-APP> (run-1-test 'jimka-test::jimka-test-1 :break-on-error t)
+MY-APP> (run-1-test 'scrutiny::scrutiny-1 :break-on-error t)
 
 The assertion NIL failed.
    [Condition of type SIMPLE-ERROR]
@@ -60,11 +60,11 @@ Restarts:
 
 Backtrace:
   0: (SB-KERNEL:ASSERT-ERROR NIL NIL NIL NIL)
-  1: (JIMKA-TEST::JIMKA-TEST-1)
-  2: (JIMKA-TEST:RUN-TESTS :TESTS (JIMKA-TEST::JIMKA-TEST-1) :BREAK-ON-ERROR T)
-  3: (JIMKA-TEST:RUN-1-TEST JIMKA-TEST::JIMKA-TEST-1 :BREAK-ON-ERROR T)
-  4: (SB-INT:SIMPLE-EVAL-IN-LEXENV (JIMKA-TEST:RUN-1-TEST (QUOTE JIMKA-TEST::JIMKA-TEST-1) :BREAK-ON-ERROR T) #<NULL-LEXENV>)
-  5: (EVAL (JIMKA-TEST:RUN-1-TEST (QUOTE JIMKA-TEST::JIMKA-TEST-1) :BREAK-ON-ERROR T))
+  1: (SCRUTINY::SCRUTINY-1)
+  2: (SCRUTINY:RUN-TESTS :TESTS (SCRUTINY::SCRUTINY-1) :BREAK-ON-ERROR T)
+  3: (SCRUTINY:RUN-1-TEST SCRUTINY::SCRUTINY-1 :BREAK-ON-ERROR T)
+  4: (SB-INT:SIMPLE-EVAL-IN-LEXENV (SCRUTINY:RUN-1-TEST (QUOTE SCRUTINY::SCRUTINY-1) :BREAK-ON-ERROR T) #<NULL-LEXENV>)
+  5: (EVAL (SCRUTINY:RUN-1-TEST (QUOTE SCRUTINY::SCRUTINY-1) :BREAK-ON-ERROR T))
 ````
 
 
@@ -74,9 +74,9 @@ Backtrace:
 If a test references a macro, then when the code (implementation) of
 the macro changes, the test MUST BE RECOMPLED to see the effect of the
 change.  The semantics are exactly the same for normal functions.
-jimka-test does absolutely nothing to circumvent the normal Lisp
+scrutiny does absolutely nothing to circumvent the normal Lisp
 evaluation rules of code being tested.  This is an important semantic
-difference between jimka-test and lisp-unit.  lisp-unit attempts to
+difference between scrutiny and lisp-unit.  lisp-unit attempts to
 recompile your tests from the user given s-expression before running
 the tests.
 
@@ -101,7 +101,7 @@ was expected or vice-versa, a message is generated which reports the operands,
 unevaluated, along with evaluated values, the value which was returned and
 what was expected, and the name of the compare function.
 
-Tests are normally written in their own package, but jimka-test makes absolutely
+Tests are normally written in their own package, but scrutiny makes absolutely
 no effort to enforce this.  A useful pattern is the following, defining an application
 in a package, `"MY-APPLICATION"` and the tests in `"MY-APPLICATION-TEST"`.
 
@@ -171,21 +171,21 @@ package into another.
 When the tests run, output such as the following is printed to `*standard-output*`:
 ```
 Summary of tests:
-PACKAGES: (JIMKA-TEST 2D-ARRAY-TEST DISPATCH-TEST CL-ROBDD-TEST LISP-TYPES-TEST
+PACKAGES: (SCRUTINY 2D-ARRAY-TEST DISPATCH-TEST CL-ROBDD-TEST LISP-TYPES-TEST
            LISP-TYPES-BAKER-ANALYSIS NDFA-TEST RTE-REGEXP-TEST RTE-TEST)
 TOTAL TESTS: 181
 ASSERTIONS PASSED: 1867
 ASSERTIONS FAILED: 4
   1 failed assertions in LISP-TYPES-BAKER-ANALYSIS::BAKER/DECOMPOSE-5
   1 failed assertions in LISP-TYPES-BAKER-ANALYSIS::BAKER/DECOMPOSE-2
-  2 failed assertions in JIMKA-TEST::JIMKA-TEST-1
+  2 failed assertions in SCRUTINY::SCRUTINY-1
 ERRORS: 1
-  JIMKA-TEST::JIMKA-TEST-1
+  SCRUTINY::SCRUTINY-1
 ELAPSED TIME: 12 minutes 22 seconds
 ```
 While tests are running, incremental output will be printed to `*standard-output*` such as the following.
 ```
-Running tests from packages: (JIMKA-TEST 2D-ARRAY-TEST DISPATCH-TEST
+Running tests from packages: (SCRUTINY 2D-ARRAY-TEST DISPATCH-TEST
                               CL-ROBDD-TEST LISP-TYPES-TEST
                               LISP-TYPES-BAKER-ANALYSIS NDFA-TEST
                               RTE-REGEXP-TEST RTE-TEST)
@@ -208,7 +208,7 @@ Finished: Thu Sep 20 12:06:59 2018
 
 Here is an example of the output if a test assertion fails.
 ```
-(define-test jimka-test-1
+(define-test scrutiny-1
   (assert-false (= 1 2))
   (assert-false (= 1 3))
   (assert-true (= 1 1))
@@ -226,34 +226,34 @@ Here is an example of the output if a test assertion fails.
   (assert-error error
 		(error "some error")))
 ```
-The test can be run with `(run-1-test 'jimka-test-1)` to see the following output.  Notice that when test assertions fail, not only the unevaluated arguments are shown but their values, if different.
+The test can be run with `(run-1-test 'scrutiny-1)` to see the following output.  Notice that when test assertions fail, not only the unevaluated arguments are shown but their values, if different.
 ```
-Running tests from packages: (JIMKA-TEST)
+Running tests from packages: (SCRUTINY)
 Starting: Thu Sep 20 12:18:25 2018
-Running: 1/1 JIMKA-TEST::JIMKA-TEST-1
-  Failed: (STRING-EQUAL JIMKA-TEST::A JIMKA-TEST::B)
-      JIMKA-TEST::A
+Running: 1/1 SCRUTINY::SCRUTINY-1
+  Failed: (STRING-EQUAL SCRUTINY::A SCRUTINY::B)
+      SCRUTINY::A
         => "abc"
-      JIMKA-TEST::B
+      SCRUTINY::B
         => "ABCD"
     Expected: T
     Got:      NIL
-  Failed: (STRING-EQUAL (CONCATENATE 'STRING JIMKA-TEST::A JIMKA-TEST::B)
-                        (FORMAT NIL "~A~A" JIMKA-TEST::B JIMKA-TEST::A))
-      (CONCATENATE 'STRING JIMKA-TEST::A JIMKA-TEST::B)
+  Failed: (STRING-EQUAL (CONCATENATE 'STRING SCRUTINY::A SCRUTINY::B)
+                        (FORMAT NIL "~A~A" SCRUTINY::B SCRUTINY::A))
+      (CONCATENATE 'STRING SCRUTINY::A SCRUTINY::B)
         => "abcABCD"
-      (FORMAT NIL "~A~A" JIMKA-TEST::B JIMKA-TEST::A)
+      (FORMAT NIL "~A~A" SCRUTINY::B SCRUTINY::A)
         => "ABCDabc"
     Expected: T
     Got:      NIL
 Finished: Thu Sep 20 12:18:25 2018
 ------------------
 Summary of tests:
-PACKAGES: (JIMKA-TEST)
+PACKAGES: (SCRUTINY)
 TOTAL TESTS: 1
 ASSERTIONS PASSED: 8
 ASSERTIONS FAILED: 2
-  2 failed assertions in JIMKA-TEST::JIMKA-TEST-1
+  2 failed assertions in SCRUTINY::SCRUTINY-1
 ERRORS: 0
 ELAPSED TIME: 0 seconds
 ```

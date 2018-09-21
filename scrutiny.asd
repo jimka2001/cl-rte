@@ -20,14 +20,14 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(asdf:defsystem :jimka-test
+(asdf:defsystem :scrutiny
   :version "1.0"
   :description "Unit Test Facility, similar but simpler then lisp-unit.  Slime-compatible"
   :license "MIT"
   :depends-on ()
   :components
-  ((:module "jimka-test"
+  ((:module "scrutiny"
     :components
-    ((:file "jimka-test-package")
+    ((:file "scrutiny-package")
      (:file "define-test")
      ))))

@@ -28,7 +28,7 @@
 	       :jimka-addons
 	       :rte-regexp-test
 	       #+sbcl :2d-array
-	       :jimka-test
+	       :scrutiny
 	       #+sbcl :2d-array-test
 	       :ndfa-test
 	       :lisp-types-test)

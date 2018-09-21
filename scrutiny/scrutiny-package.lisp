@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-(defpackage :jimka-test
+(defpackage :scrutiny
   (:use :cl)
   (:export
    "DEFINE-TEST"

@@ -19,7 +19,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package :jimka-test)
+(in-package :scrutiny)
 
 (defvar *tests* nil "list of tests, symbols which have been 
 registered, presumably with DEFINE-TEST.")
@@ -45,7 +45,7 @@ will be defined."
 	 :reader test-condition-test
 	 :initform *current-test*
 	 :type (or null symbol)))
-  (:documentation "Parent condition for the conditions in the jimka-test package."))
+  (:documentation "Parent condition for the conditions in the scrutiny package."))
 (define-condition test-pass (test-condition)
   ())
 (define-condition test-fail (test-condition)
@@ -312,7 +312,7 @@ raised."
 
 
 
-(define-test jimka-test-1
+(define-test scrutiny-1
   (assert-false (= 1 2))
   (assert-false (= 1 3))
   (assert-true (= 1 1))

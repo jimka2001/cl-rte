@@ -451,13 +451,40 @@
 		       :test #'equal))
 
   )
+
+(defrte (:CAT NUMBER NUMBER NUMBER))
+(defrte (:CAT (:* NUMBER NUMBER NUMBER)))
+(defrte (:CAT (:* FIXNUM FIXNUM FIXNUM)))
+(defrte (:CAT FIXNUM FIXNUM FIXNUM))
+
+(define-test test/destructuring-methods-2
+  (assert-true (typep '(1 2 3)
+		      '(RTE (:CAT NUMBER NUMBER NUMBER))))
+  (assert-true (= 3 (COND
+		      ((TYPEP '(1 2 3)
+			      '(RTE (:CAT NUMBER NUMBER NUMBER)))
+		       (* 2 (COND ((TYPEP '(1 2 3)
+					  '(RTE (:CAT (:* FIXNUM FIXNUM FIXNUM))))
+				   3)
+				  (t 0))))
+		      ((TYPEP  '(1 2 3)
+			       '(RTE (:CAT (:* FIXNUM FIXNUM FIXNUM)))) 3))))
+  (assert-true (= 3
+		    (TYPECASE '(1 2 3)
+		      ((RTE (:CAT NUMBER NUMBER NUMBER))
+		       (* 2 (TYPECASE '(1 2 3)
+			      ((RTE (:CAT (:* FIXNUM FIXNUM FIXNUM)))
+			       3)
+			      (t 0))))
+		      ((RTE (:CAT (:* FIXNUM FIXNUM FIXNUM)))
+		       3)))))
 								 
 (define-test test/destructuring-methods
   (assert-true (= 6 (destructuring-methods '(1 2 3) (:call-next-method cnm)
 		      ((a b c)
 		       (declare (type number a b c)
 				(ignore a b c))
-		       (* 2 (cnm)))
+		       (* 2 (or (cnm) 0)))
 		      ((a b c)
 		       (declare (type fixnum a b c)
 				(ignore a b c))
@@ -839,4 +866,3 @@
    file
    :transition-legend t
    :state-legend t))
-

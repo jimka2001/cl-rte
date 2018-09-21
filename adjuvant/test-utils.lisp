@@ -26,26 +26,48 @@
 
 (in-package :adjuvant-test)
 
+(define-test test/group-by
+  (assert-true (null (group-by nil)))
+  (assert-false (set-exclusive-or '((1 (1 1 1)) (2 (2 2 2)) (3 (3 3)) (4 (4)))
+				  (group-by '(1 2 1 2 3 1 2 3 4))
+				  :test #'equal))
+  (assert-false (set-exclusive-or (group-by '((1 2) (1) (1 2) (2)) :test #'equal)
+				  '(((1 2) ((1 2) (1 2))) ((1) ((1))) ((2) ((2))))
+				  :test #'equal))
+				  
+  (assert-false (set-exclusive-or (group-by '((3 1 2) (1) (1 2) (2) (3 4)) :test #'equal)
+				  '(((3 1 2) ((3 1 2)))
+				    ((1) ((1)))
+				    ((1 2) ((1 2)))
+				    ((2) ((2)))
+				    ((3 4) ((3 4))))
+				  :test #'equal))
+  (assert-false (set-exclusive-or '((1 ("a")) (2 ("ab" "ba")))
+				  (group-by '("ba" "a" "b") :key #'strlen)
+				  :test #'equal)))
+
 (define-test test/exists
-  (assert-true (exists x '(1 3 2 7) (evenp x)))
-  (assert-false (exists x '(1 3 5 7) (evenp x)))
-  (assert-true (exists (&key x) '((:x 1) (:x 3) (:x 2) (:x 7)) (evenp x)))
-  (assert-false (exists (&key x &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 3 :x 2) (:x 7)) (evenp x))))
+  (assert (exists x '(1 3 2 7) (evenp x)))
+  (assert (exists x '(1 3 5 7) (evenp x)))
+  (assert (exists (&key (x 0)) '((:x 1) (:x 3) (:x 2) (:x 7)) (evenp x)))
+  (assert (not (exists (&key (x 0) &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 3 :x 2) (:x 7)) (evenp x)))))
 
 (define-test test/forall
-  (assert-true (forall x '(1 3 5 7) (oddp x)))
-  (assert-false (forall x '(1 3 2 7) (oddp x)))
-  (assert-true (forall (&key x) '((:x 1) (:x 3) (:x 5) (:x 7)) (oddp x)))
-  (assert-false (forall (&key x &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 2 :x 3) (:x 7)) (oddp x))))
+  (assert (forall x '(1 3 5 7) (oddp x)))
+  (assert (not (forall x '(1 3 2 7) (oddp x))))
+  (assert (forall (&key (x 0)) '((:x 1) (:x 3) (:x 5) (:x 7)) (oddp x)))
+  (assert (not (forall (&key (x 0) &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 2 :x 3) (:x 7)) (oddp x)))))
 
 (define-test test/setof
-  (assert-true (set-equalp '(1 3 5)
-			   (setof x '( 1 2 3 5 2 8)
-			     (oddp x))))
+  (assert-false (set-exclusive-or '(1 3 5)
+				  (setof x '( 1 2 3 5 2 8)
+				    (oddp x))))
 
-  (assert-true (set-equalp '((:y 0 :x 1) (:x 3 :z 1) (:x 7))
-			   (setof (&key x &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 2 :x 3) (:x 7))
-			     (oddp x)))))
+  (assert-false (set-exclusive-or '((:y 0 :x 1) (:x 3 :z 1) (:x 7))
+				 (setof (&key (x 0) &allow-other-keys) '((:y 0 :x 1) (:x 3 :z 1) (:x 2 :x 3) (:x 7))
+				   (oddp x))
+				 :test #'equal)))
+    
 
 
   

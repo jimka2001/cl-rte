@@ -28,6 +28,7 @@
    "FORALL"
    "GETENV"
    "GETTER"
+   "GROUP-BY"
    "LCONC"
    "PROCESS-KILL"
    "RUN-PROGRAM"
@@ -100,7 +101,7 @@
     (list
      (let ((v (gensym "setof")))
        `(remove-if-not (lambda (,v)
-			 (destructuring-bind var ,v
+			 (destructuring-bind ,var ,v
 			   ,@body)) ,data)))
     (t
      `(remove-if-not (lambda (,var) ,@body) ,data))))
@@ -119,8 +120,6 @@ The effect of this is that symbols like NIL and - get read as COMMON-LISP:NIL an
 than as keywords."
   (let ((*package* (find-package :cl-user)))
     (apply #'read args)))
-
-
 
 (defun lconc (buf items)
   (cond
@@ -144,3 +143,14 @@ than as keywords."
   "Expand a type, similar to macro-expand, if the given type specifier is not a user defined type, then an EQUAL type is returned."
   #+sbcl (sb-ext:typexpand type)
   #+allegro (excl::deftype-expand type))
+
+(defun group-by (data &key (key #'identity) (test #'eql))
+  (declare (type list data)
+           (type (function (t) t) key)
+           (type (function (t t) t) test))
+  (let ((hash (make-hash-table :test test)))
+    (dolist (item data)
+      (push item (gethash (funcall key item) hash nil)))
+    (loop for key being the hash-keys of hash
+          collect (list key (gethash key hash)))))
+

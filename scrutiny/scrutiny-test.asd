@@ -19,18 +19,14 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(asdf:defsystem :research
+
+(asdf:defsystem :scrutiny-test
   :version "1.0"
-  :description "Top level package which loads everything to do analsis in PhD research"
+  :description "Test cases for scrutiny package"
   :license "MIT"
-  :depends-on (#+sbcl :2d-array-test
-               :adjuvant
-	       :adjuvant-test
-               :dispatch-test
-               #+sbcl :lisp-types-baker-analysis
-               :ndfa-test
-               :rte-test
-               :rte-regexp-test
-               :dispatch-test
-               :scrutiny
-	       :scrutiny-test))
+  :depends-on ()
+  :components
+  ((:module "src"
+    :components
+    ((:file "test-scrutiny")
+     ))))

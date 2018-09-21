@@ -1,4 +1,4 @@
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
+;; Copyright (c) 2016,18 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -25,6 +25,6 @@
   :description "Extensible sequence classes to represent vertical and horizontal slices of 2d arrays"
   :license "MIT"
   :components
-  ((:module "2d-array"
+  ((:module "src"
     :components
     ((:file "2d-array")))))

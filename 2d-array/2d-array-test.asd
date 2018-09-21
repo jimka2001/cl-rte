@@ -26,7 +26,7 @@
   :depends-on (:2d-array
 	       :scrutiny)
   :components
-  ((:module "2d-array"
+  ((:module "src"
     :components
     ((:file "test-2d-array")
      ))))

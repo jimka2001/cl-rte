@@ -21,7 +21,7 @@
 
 (asdf:defsystem :dispatch-test
   :depends-on (:dispatch
-	       :jimka-test)
+	       :scrutiny)
   :components
   ((:module "src"
     :components

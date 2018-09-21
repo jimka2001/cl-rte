@@ -20,7 +20,7 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :dispatch-test
-  (:use :cl :dispatch :jimka-test))
+  (:use :cl :dispatch :scrutiny))
 
 (in-package :dispatch-test)
 

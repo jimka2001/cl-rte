@@ -22,6 +22,7 @@
 (defpackage :rte-regexp
   (:use :cl :rte)
   (:export
+   "RTE-STRING-MATCHER"
    "REGEXP-TO-RTE"))
 
 (in-package   :rte-regexp)
@@ -175,7 +176,17 @@
   )
   
 
+(defun rte-string-matcher (str-regexp)
+  "Given a regular-expression as a string, STR-REGEXP, returns a unary function which when called with a target string
+will return TRUE or FALSE indicating whether the target string matches the regular expression, STR-REGEXP"
+  (declare (type string str-regexp))
+  (let ((rte `(rte ,(regexp-to-rte str-regexp))))
+    (lambda (str)
+      (declare (type string str))
+      (typep str rte))))
+
 (defun regexp-to-rte (regexp &key (reduce t))
+  "Given a regular expressions as a string, return an equivalent regular type expression"
   (declare (type string regexp))
   (cond
     (reduce

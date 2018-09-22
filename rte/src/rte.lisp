@@ -24,13 +24,13 @@
   (:use :cl :ndfa :lisp-types :adjuvant)
   (:nicknames "RTE")
   (:export
+   "CANONICALIZE-PATTERN"
+   "DEFRTE"
+   "DESTRUCTURING-CASE"
+   "DESTRUCTURING-METHODS"
    "LIST-OF"
    "RTE"
    "RTE-RESET"
-   "DESTRUCTURING-CASE"
-   "DESTRUCTURING-METHODS"
-   "CANONICALIZE-PATTERN"
-   "DEFRTE"
    ))
 
 (in-package :rte)

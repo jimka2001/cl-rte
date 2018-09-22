@@ -1,5 +1,28 @@
+# RTE-REGEXP
+
 ## Synopsis
 Simple string regular expression matcher based on rte
+
+## API
+* `regexp-to-rte` -- convert a string regular expression into a regular type expression E.g.,
+````lisp
+(regexp-to-rte "a*b+c")
+===> (:CAT (:0-* (EQL #\a)) (EQL #\b) (:0-* (EQL #\b)) (EQL #\c))
+````
+
+* `rte-string-matcher` --  Given a regular-expression as a string, `str-regexp`, returns a unary function which when called with a target string will return `TRUE` or `FALSE` indicating whether the target string matches the regular expression, `str-regexp`.
+````lisp
+PKG> (defvar *match-me* (rte-regexp::rte-string-matcher "a*b+c"))
+*MATCH-ME*
+CL-USER> (funcall *match-me* "aaaaabbbbbc")
+T
+CL-USER> (funcall *match-me* "abcccc")
+NIL
+````
+
+
+
+    
 
 
 ## License

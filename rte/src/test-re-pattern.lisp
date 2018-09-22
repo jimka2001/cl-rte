@@ -86,7 +86,7 @@
 
 #+sbcl
 (define-test type/match-sequence
-  (assert-true (rte:match-sequence '(1 2 3) '(:cat number number number)))
+  (assert-true (rte::match-sequence '(1 2 3) '(:cat number number number)))
 
   (let ((2d (make-array '(5 4)
 			:initial-contents '((b0 b1 b2 b3)
@@ -94,9 +94,9 @@
 					    (b0 2  3  b3)
 					    (b0 4  5  b3)
 					    (b0 b1 b2 b3)))))
-    (assert-true (rte:match-sequence (make-instance '2d-array:row-vector :2d-array 2d :row 0)
+    (assert-true (rte::match-sequence (make-instance '2d-array:row-vector :2d-array 2d :row 0)
 				     '(:1-* symbol)))
-    (assert-true (rte:match-sequence (make-instance '2d-array:column-vector :2d-array 2d :column 1)
+    (assert-true (rte::match-sequence (make-instance '2d-array:column-vector :2d-array 2d :column 1)
 				     '(:cat symbol (:0-* number) symbol)))))
 
   

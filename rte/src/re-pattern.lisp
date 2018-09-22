@@ -730,7 +730,6 @@ consists of values whose types match PATTERN."
   (match-sequence input-sequence (or (find-state-machine pattern)
 				     (remember-state-machine (make-state-machine pattern) pattern))))
 
-
 (defun make-rte-function-name (pattern)
   (when (and (consp pattern)
 	     (symbolp (car pattern))

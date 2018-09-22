@@ -153,6 +153,10 @@ is selected from the nth element of sub-lists."
     (work (reverse sub-lists) nil)))
 
 (defun find-method-ambiguities (gf)
+  "Return a list of plists.
+Each plist has keys :qualifiers :methods :arg-types.
+Each plist represents a method ambiguity, ie methods which have the same precedence if
+   argument precedence is ignored."
   (let ((gf (typecase gf
 	      ((and symbol (satisfies fboundp))
 	       (fdefinition gf))

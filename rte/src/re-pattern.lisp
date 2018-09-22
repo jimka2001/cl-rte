@@ -783,6 +783,7 @@ a valid regular type expression.
       (define-rte pattern)))
 
 (defmacro defrte (pattern)
+  "Declare a given RTE patter so that that it can be used when loaded from fasl."
   (let* ((dfa (make-state-machine pattern))
 	 (name (make-rte-function-name pattern))
 	 (code (dump-code dfa)))
@@ -792,6 +793,7 @@ a valid regular type expression.
        (defun ,name ,@(cdr code)))))
 
 (defun rte-reset ()
+  "Forget all regular type expressions."
   (maphash (lambda (pattern type)
 	     (declare (ignore type))
 	     (let ((name (make-rte-function-name pattern)))

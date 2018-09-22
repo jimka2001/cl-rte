@@ -264,7 +264,7 @@
     (assert-true (equal '(:cat (:0-* float) (:or float string))
 			(canonicalize-pattern '(:cat (:0-* float) (:or string float)))))
 
-    (assert-true (equal '(:OR (:AND A D E F) ;; currently failing, must fix
+    (assert-true (equal '(:OR (:AND A D E F)
 			      (:AND A D E G)
 			      (:AND B D E F)
 			      (:AND B D E G)

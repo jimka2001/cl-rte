@@ -363,11 +363,11 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 	   ,@(mapcar #'transform-clause clauses))))))
 
 (defmacro destructuring-case (object-form &body clauses)
-  "Similar to CASE except that the object is matches against destructuring-lambda-lists and
+  "Similar to CASE except that the object is matched against destructuring-lambda-lists and
 optional type constraints.  The first clauses matching the structure and types is evaluated.
 Each clause is of the form (destructuring-lambda-lists constraint-alist &body body)
 Where constraint-alist is an car/cdr alist mapping a type specifier to a list of variable
-names of that type.   The variables will be implicitly declare in the body.
+names of that type.   The variables will be implicitly declared in the body.
 E.g.,
   (destructuring-case '(1 2 :x 3)
     ((a b c) ((integer a b) (symbol c))
@@ -410,5 +410,18 @@ E.g.,
 		,@(maplist #'transform-clause clauses))))))
 
 (defmacro destructuring-methods (object-form (&key (call-next-method 'call-next-method)) &body clauses)
+  "A variant of DESTRUCTURING-CASE, but allows a call-next-method feature.
+The first matching clause is executed, if it calls the call-next-method function
+then the next matching method is executed.
+The call-next-method function defaults to CALL-NEXT-METHOD, but may be renamed
+using the :CALL-NEXT-METHOD keyword argument.
+E.g.
+(destructuring-methods '(1 2 3) (:call-next-method cnm)
+  ((a b c)
+   (declare (type number a b c))
+   (* 2 (or (cnm) 1)))
+  ((a b c)
+   (declare (type fixnum a b c))
+   3))"
   (expand-destructuring-methods object-form clauses call-next-method))
 

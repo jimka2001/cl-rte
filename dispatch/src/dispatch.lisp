@@ -132,8 +132,8 @@ omit C in the return list."))
 	     (setof method methods
 	       (every #'spec>= intersection-types (method-specializers method))))
 	   (method<= (m1 m2)
-	     (forall (spec1 spec2) (list (method-specializers m1) (method-specializers m2))
-	       (spec>= spec2 spec1))))
+	     (every (lambda (spec1 spec2)
+		      (spec>= spec2 spec1)) (method-specializers m1) (method-specializers m2))))
     (let ((applicable-methods (applicable-methods)))
       (declare (notinline set-difference))
       (set-difference applicable-methods

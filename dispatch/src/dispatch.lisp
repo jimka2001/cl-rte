@@ -174,7 +174,7 @@ Each plist represents a method ambiguity, ie methods which have the same precede
       (t
        (let (ambiguities)
 	 (dolist (qualifiers-methods (make-assoc-method-qualifiers gf))
-	   (destructuring-bind (qualifiers &rest methods) qualifiers-methods
+	   (destructuring-bind (qualifiers methods) qualifiers-methods
 	     (map-pairs (lambda (meth1 meth2
 				 &aux (type-intersections (mapcar #'specializer-intersections
 								  (method-specializers meth1)

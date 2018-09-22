@@ -50,6 +50,7 @@
 (in-package :adjuvant)
 
 (defun run-program (program args &key (wait t) output error if-output-exists)
+  "Wrapper around the implementation dependent (sbcl/Allegro) shell command function"
   (declare (type (or null string) output)
 	   (type (or null stream) error))
   #+sbcl (sb-ext:run-program program args
@@ -75,15 +76,18 @@
   )
 
 (defun getenv (envvar)
+  "Wrapper around the implementation dependent (sbcl/Allegro) UNIX environment variable reader."
   #+sbcl (sb-posix:getenv envvar)
   #+allegro (sys:getenv envvar))
 
 (defun process-kill (process signal)
+  "Kill a process started by RUN-PROGRAM, if it was started with (run-program ... :wait t)"
   #+sbcl (sb-ext:process-kill process signal)
   #+allegro (progn (excl.osi:kill process signal)
 		   (sys:reap-os-subprocess :pid process)))
 
 (defmacro exists (obj data &body body)
+  "Tests whether there exists an element which satisfies an expression.  E.g., (exists x '(1 2 3) (evenp x))"
   (typecase obj
     (list
      (let ((var (gensym "exists")))
@@ -94,6 +98,7 @@
      `(member-if (lambda (,obj) ,@body) ,data))))
 
 (defmacro forall (var data &body body)
+  "Tests whether all the elements in a given list satisfies an expression.  E.g., (forall x '(2 4 6 8 10) (evenp x))"
   (typecase var
     (list
      (let ((v (gensym "forall")))
@@ -105,6 +110,7 @@
 
 
 (defmacro setof (var data &body body)
+  "Construct a new list of all the elements which satisfy an expression.  E.g., (setof x '(2 3 5 6 7) (evenp x))"
   (typecase var
     (list
      (let ((v (gensym "setof")))
@@ -116,6 +122,7 @@
 
 
 (defmacro while (test &body body)
+  "Loop while condition true. E.g., (while (evenp x) (setf x (g x)))"
   `(loop :while ,test
 	 :do (progn ,@body)))
 

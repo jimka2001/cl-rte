@@ -75,6 +75,22 @@
 				   (oddp x))
 				 :test #'equal)))
 
+(define-test test/tree-reduce2
+  (flet ((sqr (x)
+	   (* x x)))
+    ;; sum of the squares of 1 ... 8
+    (assert-true (= (tree-reduce #'+ '(1 2 3 4 5 6 7 8)
+				 :initial-value 0
+				 :key #'sqr)
+		    (reduce #'+ '(1 2 3 4 5 6 7 8) :initial-value 0 :key #'sqr)))))
+
+(define-test test/tree-reduce3
+  (assert-true (equal '(0)
+		      (tree-reduce #'+ nil :initial-value '(0))))
+  (assert-true (equal '1
+		      ;; make sure KEY is apoplied to first element of singleton list
+		      (tree-reduce #'+ '((1)) :initial-value 0 :key #'car))))
+
 (define-test test/tree-reduce
   (assert-true (= (+ 1 2 3 4 5 6 7 8 9 )
 		  (tree-reduce #'+ '(1 2 3 4 5 6 7 8 9)

@@ -167,8 +167,22 @@ than as keywords."
 (define-modify-macro unionf (&rest args) union)
 
 
-(defun tree-reduce (function object-list &key initial-value (key #'identity))
-  (declare (type (function (t t) t) function)
+(defun tree-reduce (fold-function object-list &key initial-value (key #'identity))
+  "Same semantics as CL:REDUCE, but does the evaluation tree-wise rather than left-to-right.
+I.e., it attempts to (+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7))),
+Of course this is only possible if the number of objects given is a power of 2.
+Otherwise, there will be a somewhat lopsided tree.
+
+FOLD-FUNCTION -- associative binary function, this function is called pairwise
+   on the accumulated value and the next value from the OBJECT-LIST, after KEY
+   has been applied to the next value of the OBJECT-LIST.
+   The first call to the FOLD-FUNCTION is on the first two elements of the OBJECT-LIST
+   (after application of KEY to both).
+INITIAL-VALUE -- the value to return if the OBJECT-LIST is empty, otherwise it is unused,
+   this value is returned as-is, and the KEY function is not applied to it.
+KEY -- binary function, applied to each element of the OBJECT-LIST before it is passed
+   to the FOLD-FUNCTION."
+  (declare (type (function (t t) t) fold-function)
 	   (type (function (t) t) key)
 	   (type list object-list)
 	   (optimize (speed 3) (debug 0) (compilation-speed 0)))
@@ -180,11 +194,11 @@ than as keywords."
 		    (destructuring-bind ((n1 obj1) (n2 obj2) &rest tail) stack
 		      (declare (type (and fixnum unsigned-byte) n1 n2))
 		      (if (= n1 n2)
-			  (compactify (cons (list (1+ n1) (funcall function obj1 obj2)) tail))
+			  (compactify (cons (list (1+ n1) (funcall fold-function obj1 obj2)) tail))
 			  stack))))
 	      (finish-stack (acc stack)
 		(if stack
-		    (finish-stack (funcall function acc (cadr (car stack)))
+		    (finish-stack (funcall fold-function acc (cadr (car stack)))
 				  (cdr stack))
 		    acc)))
        (destructuring-bind ((_ obj) &rest tail) (reduce (lambda (stack item)
@@ -194,7 +208,7 @@ than as keywords."
 	 (declare (ignore _))
 	 (finish-stack obj tail))))
     (object-list
-     (car object-list))
+     (funcall key (car object-list)))
     (t
      initial-value)))
     

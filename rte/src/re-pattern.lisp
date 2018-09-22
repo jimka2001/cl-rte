@@ -787,10 +787,11 @@ a valid regular type expression.
   (let* ((dfa (make-state-machine pattern))
 	 (name (make-rte-function-name pattern))
 	 (code (dump-code dfa)))
-    `(unless (and (fboundp ',name )
-		  (symbol-function ',name))
-       (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern)
-       (defun ,name ,@(cdr code)))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (unless (and (fboundp ',name )
+		    (symbol-function ',name))
+	 (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern)
+	 (defun ,name ,@(cdr code))))))
 
 (defun rte-reset ()
   "Forget all regular type expressions."

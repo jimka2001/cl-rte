@@ -237,7 +237,7 @@ than as keywords."
   #+allegro (excl:gc t)
 )
 
-(defun encode-time (time &aux (decoded-time (multiple-value-list (decode-universal-time time))))
+(defun encode-time (&optional (time (get-universal-time)) &aux (decoded-time (multiple-value-list (decode-universal-time time))))
   "Create a string similar to the UNIX date command: e.g., \"Thu Aug  3 10:39:18 2017\""
   (destructuring-bind (second minute hour date month year day-of-week ;; (0 = Monday)
                        daylight-savings-times ;; T (daylight savings times) or NIL (standard time)

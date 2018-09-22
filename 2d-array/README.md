@@ -1,7 +1,21 @@
+# 2D-ARRAY
+    
 ## Synopsis
+
 Extensible sequence classes to represent vertical and horizontal "slices" of 2d arrays
+
+## API
+
+*   `row-vector`    -- Class representing a horizontal slice out of a 2d `array`
+*   `column-vector` -- Class representing a vertical slice out of a 2d `array`
+*   `vector-of-rows` -- Class representing a 2d `array` as a vector of horizontal rows
+*   `vector-of-columns` -- Class representing a 2d `array` as a vector of vertical columns
+*   `(2d-array-get obj row column)` --  setf-able Generic function -- given either a normal `array` or a `2d-array-as-sequence` return the element at the specified row and column.
+*   `(setf 2d-array-get)` -- `setf` function for `2d-array-get`.
+
+
 ## Code Examples
-### 2D-ARRAY
+
 ```lisp
 (let* ((arr (make-array '(3 2) :initial-contents '((1 2)
                                                    (3 4)

@@ -33,19 +33,11 @@
 (defmethod make-assoc-method-qualifiers ((gf symbol))
   (when (fboundp gf)
     (make-assoc-method-qualifiers (fdefinition gf))))
+
 (defmethod make-assoc-method-qualifiers ((gf cl:standard-generic-function))
   (group-by (generic-function-methods gf)
-	    :key #'method-qualifiers
-	    :test #'equal))
-
-
-;; TODO goes in adjuvant ?
-(defun map-pairs (binary data-list)
-  "Call the given binary function once on each pair of objects from the given data-list."
-  (mapl (lambda (tail &aux (head (car tail)))
-	  (dolist (item (cdr tail))
-	    (funcall binary head item)))
-	data-list))
+  	    :key #'method-qualifiers
+  	    :test #'equal))
 
 (defgeneric specializer-intersections (spec1 spec2)
   (:documentation

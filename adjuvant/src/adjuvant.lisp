@@ -35,6 +35,7 @@
    "GETTER"
    "GROUP-BY"
    "LCONC"
+   "MAP-PAIRS"
    "PROCESS-KILL"
    "RUN-PROGRAM"
    "SETOF"
@@ -248,3 +249,9 @@ than as keywords."
         (format str "~A ~A" day-of-week month)
         (format str " ~2D ~2D:~2,'0D:~2,'0D ~S" date hour minute second year)))))
 
+(defun map-pairs (binary data-list)
+  "Call the given binary function once on each pair of objects from the given data-list."
+  (mapl (lambda (tail &aux (head (car tail)))
+	  (dolist (item (cdr tail))
+	    (funcall binary head item)))
+	data-list))

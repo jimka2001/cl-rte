@@ -15,39 +15,39 @@ available.
 
 
 ## Packages usable for the general public.
-### cl-robdd [README](cl-robdd/README.md)
+### [cl-robdd](cl-robdd/README.md)
 
 Implementation of ROBDD, Reduced Ordered Binary Decision Diagram
 
-### scrutiny  [README](scrutiny/README.md)
+### [scrutiny](scrutiny/README.md)
 
 Slime-friendly Unit Testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
 
-### rte [README.md](rte/README.md)
+### [rte](rte/README.md)
 
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
 
-### rte-regexp [README](rte-regexp/README.md)
+### [rte-regexp](rte-regexp/README.md)
 
 Simple string regular expression matcher based on rte
     
-### 2d-array [README](2d-array/README.md)
+### [2d-array](2d-array/README.md)
 
 Extensible sequence classes to represent vertical and horizontal "slices" of 2d arrays
 
-### lisp-types [README](lisp-types/README.md)
+### [lisp-types](lisp-types/README.md)
 
 Utilities dealing with CL types
 
-### ndfa [README](ndfa/README.md)
+### [ndfa](ndfa/README.md)
 
 Implementation of non-deterministed finite automata
 
-### adjuvant [README](adjuvant/README.md)
+### [adjuvant](adjuvant/README.md)
 
 Certain utilities used in many other packages
 
-### dispatch [README](dispatch/README.md)
+### [dispatch](dispatch/README.md)
 
 Implementation of the function `SPECIALIZER-INTERSECTION`
     

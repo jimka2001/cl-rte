@@ -83,6 +83,17 @@ PKG> *x*
 (3 1 2 4 6 8)
 ````
 
+* `shuffle-list` -- Return a new list with the elements of the given list in randomized order.
+
+* `choose-randomly` --  Return a list of `N` elements from `DATA` chosen at random, (in random order).
+If `N > (length of data)` then a permutation of `DATA` is returned.
+
+* `rnd-element` -- Returns a list of two elements 1) a randomly selected element of `DATA`
+  and 2) a copy of DATA with the element removed, sharing a tail of `DATA`.
+
+
+
+
 ### Iterators
 * `exists` -- Tests whether there exists an element which satisfies an expression.  E.g., `(exists x '(1 2 3) (evenp x))`
 * `forall` -- Tests whether all the elements in a given list satisfies an expression.  E.g., `(forall x '(2 4 6 8 10) (evenp x))`

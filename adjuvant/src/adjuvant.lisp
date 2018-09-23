@@ -24,21 +24,24 @@
 (defpackage :adjuvant
   (:use :cl)
   (:export
-   "BOOLEAN-EXPR-TO-LATEX"
-   "EXISTS"
-   "ENCODE-TIME"
    "*TMP-DIR-ROOT*"
-   "MAKE-TEMP-DIR"
+   "BOOLEAN-EXPR-TO-LATEX"
+   "CHOOSE-RANDOMLY"
+   "ENCODE-TIME"
+   "EXISTS"
    "FORALL"
    "GARBAGE-COLLECT"
    "GETENV"
    "GETTER"
    "GROUP-BY"
    "LCONC"
+   "MAKE-TEMP-DIR"
    "MAP-PAIRS"
    "PROCESS-KILL"
+   "RND-ELEMENT"
    "RUN-PROGRAM"
    "SETOF"
+   "SHUFFLE-LIST"
    "TCONC"
    "TREE-REDUCE"
    "TYPE-EXPAND"
@@ -276,3 +279,26 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
 	  (dolist (item (cdr tail))
 	    (funcall binary head item)))
 	data-list))
+
+(defun rnd-element (data n &aux (r (random n)) (tail (nthcdr r data)))
+  "DATA list of objects.
+N length of DATA.
+returns a list of two elements 1) a randomly selected element of DATA
+  and 2) a copy of DATA with the element removed, sharing a tail of DATA."
+  (list (car tail) (nconc (ldiff data tail) (cdr tail))))
+
+(defun choose-randomly (data n)
+  "return a list of N elements from DATA chosen at random, (in random order).
+If N > (length of data) then a permutation of DATA is returned"
+  (let ((len (length data))
+        random-data)
+    (dotimes (_ (min n len))
+      (destructuring-bind (r tail) (rnd-element data len)
+        (setf data tail)
+        (push r random-data)
+        (decf len)))
+    random-data))
+
+(defun shuffle-list (data)
+  "Return a new list with the elements of the given list in randomized order."
+  (choose-randomly data (length data)))

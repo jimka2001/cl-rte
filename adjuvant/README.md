@@ -148,6 +148,13 @@ PKG> (mapcar (getter :x) '((:x 1 :y 2)
 The effect of this is that symbols like `NIL` and `-` get read as `COMMON-LISP:NIL` and `COMMON-LISP:-` rather 
 than as keywords.
 
+* `def-cache-fun` -- macro -  Define three functions named by FUN-NAME and WITH-NAME a derived name.  The lambda list of the 
+first function is given by LAM-LIST.  The semantics of the first function will be
+to normally simply return the value of BODY.  However, if the call site to the
+first function is within the dymamic extent of the second function, the
+the return value will be cached, and the arguments are found in the cache
+BODY is not evaluated but simply the cached value of the return value will be
+returned.
 
 ## License
 

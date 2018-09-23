@@ -24,8 +24,40 @@ PKG> (group-by '("aaa" "aAA" "AAA" "b" "BA" "bA" "AaA") :key #'identity :test #'
      ("aaa" ("AaA" "AAA" "aAA" "aaa")))
 ````
 
-* `tconc` -- Standard function missing from Common Lisp
-* `lconc` -- Standard function missing from Common Lisp
+* `tconc` -- Standard function missing from Common Lisp, adds an item to the END of a conc structure.
+1. Initialize a conc structure by calling `(tconc nil)`, this returns a structure which should be reused
+in successive calls to `tconc` or `lconc`.  E.g., `(setf *buf* (tconc nil))`.
+2. Destructively add one item to the end of the list with `tconc`, e.g.,
+`(tconc *buf* 'the-item)`.
+3. Destructively add muliple explicit items: `(tconc *buf* 'item1 'item2 'item3)`.
+4. Destructively splice in multiple items: E.g., `(lconc *buf* '(item1 item2 item3)`.  Beware, the given list becomes the tail of the conc list.  Therefore successives calls to `tconc` or `lconc` will modify this list.
+````lisp
+PKG> (tconc *buf* *x*)
+PKG> (tconc *buf* 'item) ;; as a side effect, *x* has been destructively to contain `item`.
+````
+5. Non-destructively extract the collected list with `car`. E.g., `(car *buf*)`
+````lisp
+PKG> (defvar *buf* (tconc nil))
+*BUF*
+PKG> *buf*
+(NIL)
+PKG> (tconc *buf* 'a)
+((A) A)
+PKG> (tconc *buf* 'b)
+((A B) B)
+PKG> (tconc *buf* 'c 'd 'e)
+((A B C D E) E)
+PKG> (car *buf*)
+(A B C D E)
+PKG> (lconc *buf* '(u v w))
+((A B C D E U V W) W)
+PKG> (lconc *buf* '(x y z))
+((A B C D E U V W X Y Z) Z)
+PKG> (car *buf*)
+(A B C D E U V W X Y Z)
+````
+* `lconc` -- Standard function missing from Common Lisp; like tconc but adds multiple items to the end of a conc structure.
+See `tconc` for example.
 * `map-pairs` -- Call a given function over all the x,y pairs from a given list
 ````lisp
 PKG> (let (pairs)
@@ -34,8 +66,22 @@ PKG> (let (pairs)
        pairs)
 ===> ((C D) (B D) (B C) (A D) (A C) (A B))
 ````
-* `tree-reduce` -- 
-* `unionf` -- 
+* `tree-reduce` -- Same semantics as `CL:REDUCE`, but does the evaluation tree-wise rather than left-to-right.
+I.e., it attempts to evaluate as `(+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7)))`, rather than 
+`(+ (+ (+ (+ (+ (+ (+ x0 x1) x2) x3) x4) x5) z6) z7)`.
+Of course this is only possible if the number of objects given is a power of 2.
+Otherwise, it will tree-fold what it can, and use a simple `cl:reduce` with the remaining elements.
+
+
+* `unionf` -- destructive union operator.
+````lisp
+PKG> (setf *x* '(1 2 3 4))
+(1 2 3 4)
+PKG> (unionf *x* '(2 4 6 8))
+(3 1 2 4 6 8)
+PKG> *x*
+(3 1 2 4 6 8)
+````
 
 ### Iterators
 * `exists` -- Tests whether there exists an element which satisfies an expression.  E.g., `(exists x '(1 2 3) (evenp x))`

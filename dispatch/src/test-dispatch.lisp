@@ -39,7 +39,7 @@
 (closer-mop:finalize-inheritance (find-class 'T8))
 
 (define-test dispatch/intersections
-  (assert-false (set-exclusive-or (dispatch::specializer-intersections (find-class 'T1) (find-class 'T2))
+  (assert-false (set-exclusive-or (specializer-intersections (find-class 'T1) (find-class 'T2))
 				  (mapcar #'find-class '(T3 T4 T8)))))
 
 
@@ -48,12 +48,11 @@
 (defmethod foo1 (b (a number)))
 
 (define-test dispatch/find-method-ambiguities
-  (destructuring-bind ((&key qualifiers methods arg-types)) (dispatch::find-method-ambiguities 'foo1)
+  (destructuring-bind ((&key qualifiers methods arg-types)) (find-method-ambiguities 'foo1)
     (assert-true (equal arg-types (list (find-class 'number)
 					(find-class 'number))))
     (assert-true (equal qualifiers nil))
     (assert-true (equal 2 (length methods)))))
-
 
 (defgeneric foo2 (a b))
 (defmethod foo2 ((a number) b))
@@ -62,7 +61,7 @@
 (defmethod foo2 (b (a sequence)))
 
 (define-test dispatch/find-method-ambiguities-2
-  (let ((ambig (dispatch::find-method-ambiguities 'foo2)))
+  (let ((ambig (find-method-ambiguities 'foo2)))
     (flet ((getter (key)
 	     (lambda (x)
 	       (getf x key))))
@@ -102,5 +101,5 @@
 (define-test dispatch/tricky
   (assert-false
    (set-exclusive-or
-    (dispatch::specializer-intersections (find-class 'A) (find-class 'B))
+    (specializer-intersections (find-class 'A) (find-class 'B))
     (list (find-class 'C11) (find-class 'C8)))))

@@ -20,7 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :dispatch
-  (:export "SPECIALIZER-INTERSECTIONS")
+  (:export "SPECIALIZER-INTERSECTIONS"
+	   "FIND-METHOD-AMBIGUITIES")
   (:use :closer-common-lisp :adjuvant))
 
 (in-package :dispatch)

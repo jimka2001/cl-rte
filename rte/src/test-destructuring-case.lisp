@@ -737,7 +737,7 @@
 		   '((declare (type symbol x)
 		      (type string y)))))))
     (format t "~S~%" pattern)
-    (ndfa::ndfa-to-dot
+    (ndfa-to-dot
      (make-state-machine pattern)
      #p"/tmp/dfa2.png" :state-legend nil)))
 
@@ -754,7 +754,7 @@
 		      (type string y)
 		      (type fixnum z)))))))
     (format t "~S~%" pattern)
-    (ndfa::ndfa-to-dot 
+    (ndfa-to-dot 
      (make-state-machine pattern)
      #p"/tmp/dfa3.png"
      :transition-abrevs '((t t1)
@@ -796,7 +796,7 @@
 		   ;; the first :z is followed by a fixnum
 		   (:cat (:* (not (eql :z)) t) (:? (eql :z) fixnum (:* t))))))
     (format t "~S~%" pattern)
-    (ndfa::ndfa-to-dot 
+    (ndfa-to-dot 
      (make-state-machine pattern)
      #p"/tmp/dfa3.png"
      :transition-abrevs '((t t1)
@@ -863,7 +863,7 @@
 
 (defun test-graph-3keys-d (pattern &key (file #p"/tmp/dfa4.png") (trim t))
   (format t "~S~%" pattern)
-  (ndfa::ndfa-to-dot 
+  (ndfa-to-dot 
    (if trim
        (trim-state-machine (make-state-machine pattern))
        (make-state-machine pattern))

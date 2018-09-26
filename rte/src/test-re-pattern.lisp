@@ -86,7 +86,7 @@
 
 #+sbcl
 (define-test type/match-sequence
-  (assert-true (rte::match-sequence '(1 2 3) '(:cat number number number)))
+  (assert-true (match-sequence '(1 2 3) '(:cat number number number)))
 
   (let ((2d (make-array '(5 4)
 			:initial-contents '((b0 b1 b2 b3)
@@ -94,9 +94,9 @@
 					    (b0 2  3  b3)
 					    (b0 4  5  b3)
 					    (b0 b1 b2 b3)))))
-    (assert-true (rte::match-sequence (make-instance '2d-array:row-vector :2d-array 2d :row 0)
+    (assert-true (match-sequence (make-instance '2d-array:row-vector :2d-array 2d :row 0)
 				     '(:1-* symbol)))
-    (assert-true (rte::match-sequence (make-instance '2d-array:column-vector :2d-array 2d :column 1)
+    (assert-true (match-sequence (make-instance '2d-array:column-vector :2d-array 2d :column 1)
 				     '(:cat symbol (:0-* number) symbol)))))
 
   
@@ -200,10 +200,6 @@
    		)
   )
 
-
-
-
-
 (define-test type/remove-redundant-types-2
     ;; canot remove any redundant if one of the types is not a valid lisp type
     (assert-true (equal (remove-redundant-types '(t (:cat t t)) :and)
@@ -286,8 +282,6 @@
     (assert-true (equal :empty-word (canonicalize-pattern '(:AND (:0-* T) :empty-word))))
     )
 
-
-
 (define-test type/traverse-pattern
   (assert-true (equal :empty-word (traverse-pattern :empty-word :client #'identity)))
   (assert-true (equal :empty-set (traverse-pattern :empty-set :client #'identity)))
@@ -338,7 +332,6 @@
 				 (:0-* number))))
   (assert-false (nullable '(:or string
 				 (:1-* number)))))
-  
 
 (define-test type/derivative
 
@@ -377,30 +370,29 @@
   (assert-true (equivalent-patterns '(:or (:cat (:0-* float) (:0-* (:or float string)))
 					   (:0-* (:or float string)))
 					 (derivative '(:cat (:0-* float) (:0-* (:or string float))) 'float)))
-
   )
 
 (define-test type/derivative-2
   (assert-true (equivalent-patterns (derivative '(:OR
-							    (:CAT (:OR (:CAT (EQL :X) T)
-								   :EMPTY-WORD)
-							     (:OR (:CAT (EQL :Y) T)
-							      :EMPTY-WORD))
-							    (:CAT (:OR (:CAT (EQL :Y) T)
-								   :EMPTY-WORD)
-							     (:OR (:CAT (EQL :X) T)
-							      :EMPTY-WORD)))
-							  '(eql :y))
-					 `(:or ,(derivative '(:CAT (:OR (:CAT (EQL :X) T)
-									 :EMPTY-WORD)
-								   (:OR (:CAT (EQL :Y) T)
-								    :EMPTY-WORD))
-								 '(eql :y))
-					       ,(derivative '(:CAT (:OR (:CAT (EQL :Y) T)
-									 :EMPTY-WORD)
-								   (:OR (:CAT (EQL :X) T)
-								    :EMPTY-WORD))
-								 '(eql :y))))))
+						  (:CAT (:OR (:CAT (EQL :X) T)
+							 :EMPTY-WORD)
+						   (:OR (:CAT (EQL :Y) T)
+						    :EMPTY-WORD))
+						  (:CAT (:OR (:CAT (EQL :Y) T)
+							 :EMPTY-WORD)
+						   (:OR (:CAT (EQL :X) T)
+						    :EMPTY-WORD)))
+						'(eql :y))
+				    `(:or ,(derivative '(:CAT (:OR (:CAT (EQL :X) T)
+							       :EMPTY-WORD)
+							 (:OR (:CAT (EQL :Y) T)
+							  :EMPTY-WORD))
+						       '(eql :y))
+					  ,(derivative '(:CAT (:OR (:CAT (EQL :Y) T)
+							       :EMPTY-WORD)
+							 (:OR (:CAT (EQL :X) T)
+							  :EMPTY-WORD))
+						       '(eql :y))))))
 
 
 (define-test type/derivative-3

@@ -4,6 +4,21 @@
 
 Implementation of the function `SPECIALIZER-INTERSECTION`
     
+## API
+
+* `find-method-ambiguities` --  Return a list of plists.
+Each plist has keys `:qualifiers` `:methods` `:arg-types`.
+Each plist represents a method ambiguity, i.e., methods which have the same precedence if
+argument precedence is ignored.
+
+
+* `specializer-intersections` --    Compute and return a list of all the specializers (classes for
+example) which inherit from both `spec1` and `spec2`, but disregarding
+specializers which inherit from another one of the calculated
+specializers.  E.g., If spec1=`<class A>` and spec2=`<class B>`, then
+calculate the list of all classes inheriting from both A and B.  But
+if C and D both inherit from A and B, but C also inherits from D then
+omit C in the return list.
 
 ## License
 

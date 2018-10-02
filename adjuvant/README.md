@@ -56,8 +56,10 @@ PKG> (lconc *buf* '(x y z))
 PKG> (car *buf*)
 (A B C D E U V W X Y Z)
 ````
+
 * `lconc` -- Standard function missing from Common Lisp; like tconc but adds multiple items to the end of a conc structure.
 See `tconc` for example.
+
 * `map-pairs` -- Call a given function over all the x,y pairs from a given list
 ````lisp
 PKG> (let (pairs)
@@ -66,6 +68,7 @@ PKG> (let (pairs)
        pairs)
 ===> ((C D) (B D) (B C) (A D) (A C) (A B))
 ````
+
 * `tree-reduce` -- Same semantics as `CL:REDUCE`, but does the evaluation tree-wise rather than left-to-right.
 I.e., it attempts to evaluate as `(+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7)))`, rather than 
 `(+ (+ (+ (+ (+ (+ (+ x0 x1) x2) x3) x4) x5) z6) z7)`.
@@ -110,18 +113,24 @@ PKG> (deftype and-not (x y)
 PKG> (type-expand '(and-not integer fixnum))
 ==> (AND INTEGER (NOT FIXNUM))
 ````
+
 * `process-kill` -- Kill a process started by `run-program` if it was started with `(run-program ... :wait t)`
+
 * `run-program` -- Wrapper around the implementation dependent (sbcl/Allegro) shell command function.
+
 * `getenv` -- Wrapper around the implementation dependent (sbcl/Allegro) UNIX environment variable reader.
+
 * `garbage-collect` -- run the garbage collector
 
 ### Other
+
 * `boolean-expr-to-latex` -- Generate LaTeX code, and print to `*standard-output*` to post into a tex document to represent a Boolean expression  E.g.,
 ````lisp
 PKG> (boolean-expr-to-latex '(and (or a b (not c)) (not (or c d))))
 ((A \vee B \vee \neg C) \wedge \neg (C \vee D))
 ==> NIL
 ````
+
 * `encode-time` -- Generate a time string in human readable format.  E.g.,
 ````lisp
 PKG> (encode-time)
@@ -131,12 +140,15 @@ PKG> (let ((time (get-universal-time)))
        (encode-time time))
 ==> "Sat Sep 22 18:35:43 2018"
 ````
+
 * `*tmp-dir-root*` -- Special global variable used as the base directory for `make-temp-dir`
+
 * `make-temp-dir` -- Return a string indicating the full path to a temporary directory.  E.g.,
 ````lisp
 PKG> (make-temp-dir "mydir")
 ==> "/tmp/jimka/mydir/"
 ````
+
 * `getter` -- Given a field name, return a unary function which will retrieve the value of the field from the given object.
 ````lisp
 PKG> (mapcar (getter :x) '((:x 1 :y 2)
@@ -144,6 +156,7 @@ PKG> (mapcar (getter :x) '((:x 1 :y 2)
                            (:a 3 :b 4 :x 4 :y 4)))
 ==> (1 2 4)
 ````
+
 * `user-read` --  Calls `cl:read` with the specified arguments, but with `*PACKAGE*` bound to the CL-USER package.  
 The effect of this is that symbols like `NIL` and `-` get read as `COMMON-LISP:NIL` and `COMMON-LISP:-` rather 
 than as keywords.
@@ -155,6 +168,8 @@ first function is within the dymamic extent of the second function, the
 the return value will be cached, and the arguments are found in the cache
 BODY is not evaluated but simply the cached value of the return value will be
 returned.
+
+* `compare-objects` -- Deterministic compare function:  returns a symbol in `(< > =)`.
 
 ## License
 

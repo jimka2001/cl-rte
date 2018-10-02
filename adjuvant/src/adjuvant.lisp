@@ -27,6 +27,7 @@
    "*TMP-DIR-ROOT*"
    "BOOLEAN-EXPR-TO-LATEX"
    "CHOOSE-RANDOMLY"
+   "COMPARE-OBJECTS"
    "DEF-CACHE-FUN"
    "ENCODE-TIME"
    "EXISTS"
@@ -405,3 +406,65 @@ If N > (length of data) then a permutation of DATA is returned"
                        ',fun-name
                        (lambda () ,access-count)
                        (lambda () (incf ,access-count)))))))
+
+
+(defun compare-objects (t1 t2)
+  "Deterministic compare function:  returns a symbol in (< > =)."
+  (cond
+    ((equal t1 t2)
+     '=)
+    ((null t1)
+     '<)
+    ((null t2)
+     '>)
+    ((and (listp t1)
+          (not (listp t2)))
+     '>)
+    ((and (listp t2)
+          (not (listp t1)))
+     '<)
+    ((not (eql (class-of t1) (class-of t2))) 
+     (compare-objects (class-name (class-of t1)) (class-name (class-of t2))))
+    (t
+     ;; thus they are the same type, but they are not equal
+     (typecase t1
+       (list
+        (let (value)
+          (while (and t1
+                      t2
+                      (eq '= (setf value (compare-objects (car t1) (car t2)))))
+            (pop t1)
+            (pop t2))
+          (cond
+            ((and t1 t2)
+             value)
+            (t1    '>)
+            (t2    '<)
+            (t     '=))))
+       (symbol
+        (cond
+          ((not (eql (symbol-package t1) (symbol-package t2)))
+           ;; call compare-objects because symbol-package might return nil
+           ;;  don't call string= directly
+           (compare-objects (symbol-package t1) (symbol-package t2)))
+          ((string< t1 t2) ;; same package
+           '<)
+          (t
+           '>)))
+       (package
+        (compare-objects (package-name t1) (package-name t2)))
+       (string
+        ;; know they're not equal, thus not string=
+        (cond
+          ((string< t1 t2)
+           '<)
+          (t
+           '>)))
+       (number
+        (cond ((< t1 t2)
+               '<)
+              (t
+               '>)))
+       (t
+        (error "cannot compare a ~A with a ~A" (class-of t1) (class-of t2)))))))
+

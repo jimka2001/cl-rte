@@ -22,6 +22,7 @@
 
 (asdf:defsystem :adjuvant-test
   :version "1.0"
+  :author "Jim Newton"
   :description "Test cases for adjuvant package/system"
   :license "MIT"
   :components

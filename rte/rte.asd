@@ -21,6 +21,7 @@
 
 (asdf:defsystem :rte
   :version "1.0"
+  :author "Jim Newton"
   :description "Regular type expressions implementation"
   :license "MIT"
   :depends-on (:ndfa

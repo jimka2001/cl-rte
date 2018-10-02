@@ -21,6 +21,7 @@
 
 (asdf:defsystem :rte-regexp-test
   :version "1.0"
+  :author "Jim Newton"
   :description "Test cases for rte-regexp"
   :license "MIT"
   :depends-on (:rte

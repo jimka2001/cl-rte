@@ -22,6 +22,7 @@
 
 (asdf:defsystem :adjuvant
   :version "1.0"
+  :author "Jim Newton"
   :description "Various utility functions and macros used in several packages."
   :license "MIT"
   :components

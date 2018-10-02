@@ -20,6 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :dispatch
+  :version "1.0"
+  :author "Jim Newton"
+  :license "MIT"
   :depends-on (:closer-mop :adjuvant)
   :components
   ((:module "src"

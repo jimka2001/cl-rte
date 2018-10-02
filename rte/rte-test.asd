@@ -21,6 +21,7 @@
 
 (asdf:defsystem :rte-test
   :version "1.0"
+  :author "Jim Newton"
   :description "Test cases for rte package/system"
   :license "MIT"
   :defsystem-depends-on (:rte)

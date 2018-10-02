@@ -22,6 +22,7 @@
 
 (asdf:defsystem :2d-array
   :version "1.0"
+  :author "Jim Newton"
   :description "Extensible sequence classes to represent vertical and horizontal slices of 2d arrays"
   :license "MIT"
   :components

@@ -20,6 +20,9 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (asdf:defsystem :dispatch-test
+  :version "1.0"
+  :license "MIT"
+  :author "Jim Newton"
   :depends-on (:dispatch
 	       :scrutiny)
   :components

@@ -21,6 +21,7 @@
 
 (asdf:defsystem :2d-array-test
   :version "1.0"
+  :author "Jim Newton"
   :description "Testing code for 2d-array package/system"
   :license "MIT"
   :depends-on (:2d-array

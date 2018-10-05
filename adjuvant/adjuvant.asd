@@ -21,7 +21,7 @@
 
 
 (asdf:defsystem :adjuvant
-  :version "1.0"
+  :version (:read-file-form "../version.lisp")
   :author "Jim Newton"
   :description "Various utility functions and macros used in several packages."
   :license "MIT"

@@ -28,9 +28,9 @@
   :depends-on (;;:rte
 	       :adjuvant
 	       :rte-regexp-test
-	       #+sbcl :2d-array
+	       (:feature :sbcl :2d-array)
 	       :scrutiny
-	       #+sbcl :2d-array-test
+	       (:feature :sbcl :2d-array-test)
 	       :ndfa-test
 	       :lisp-types-test)
   :components

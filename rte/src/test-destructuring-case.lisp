@@ -72,7 +72,7 @@
     (assert-false (equivalent-patterns `(:and (:not ,rte-float) ,rte-number) :empty-set))))
 
 
-(define-test test/destructuring-case-5
+(define-test test/destructuring-case-alt-5
   (destructuring-bind (u v &key x ((:y (y1 y2)) '(nil nil))) '(1 2 :x 3 :y (4 5))
     (assert-true (= u 1))
     (assert-true (= v 2))
@@ -81,7 +81,7 @@
     (assert-true (= y2 5)))
   (let ((a '(1 2 :x 3 :y (4 5)))
 	(n 0))
-    (destructuring-case a
+    (destructuring-case-alt a
       ((u v &key x ((:y (y1 y2)) '(nil nil))) ()
        (incf n)
        (assert-true (= u 1))
@@ -91,7 +91,7 @@
        (assert-true (= y2 5))))
     (assert-true (= n 1))))
 
-(define-test test/destructuring-case-6
+(define-test test/destructuring-case-alt-6
   (LET ((N 0)
 	(A '(1 2 :x 3 :y (4 5))))
     (TYPECASE A
@@ -122,7 +122,7 @@
 	 (ASSERT-TRUE (= Y2 5)))))
     (assert-true (= n 1))))
 
-(define-test test/destructuring-case-7
+(define-test test/destructuring-case-alt-7
   (LET ((N 0)
 	(A '( :x 3 :y (4 5))))
     (TYPECASE A
@@ -152,7 +152,7 @@
     (assert-true (= n 1))))
 
 
-(define-test test/destructuring-case-8b
+(define-test test/destructuring-case-alt-8b
   (destructuring-lambda-list-to-rte '(&whole llist a (b c) &rest keys &key x y z &allow-other-keys)
 					 :type-specifiers '((a fixnum)
 							    (b fixnum)
@@ -164,7 +164,7 @@
 (defmacro assert-equal (a b)
   `(assert-true (equal ,a ,b)))
 
-(define-test test/destructuring-case-8
+(define-test test/destructuring-case-alt-8
   ;; with &allow-other-keys
   (assert-equal (canonicalize-pattern (destructuring-lambda-list-to-rte '(&key x y z &allow-other-keys)))
 	       (canonicalize-pattern
@@ -184,7 +184,7 @@
 
     (map-permutations (lambda (perm)
 			(assert-true (equal :here
-					    (destructuring-case (mapcan (lambda (key)
+					    (destructuring-case-alt (mapcan (lambda (key)
 									  (list key 12))
 									perm)
 					      ((&key (x 1) (y 1) (z 1)) ((fixnum x y z))
@@ -196,7 +196,7 @@
 
   (map-permutations (lambda (perm)
 		      (assert-true (equal :here
-					  (destructuring-case (mapcan (lambda (key)
+					  (destructuring-case-alt (mapcan (lambda (key)
 									(list key 12))
 								      perm)
 					    ((&key (x 1) (y 1) (z 1) &allow-other-keys) ((fixnum x y z))
@@ -206,18 +206,18 @@
 					     :here)))))
 		    '(:w :x :y :z)))
 
-(define-test test/destructuring-case-9
+(define-test test/destructuring-case-alt-9
   (let ((n 0))
-    (destructuring-case '(:x (1 2))
+    (destructuring-case-alt '(:x (1 2))
       ((&key ((:x (a b)) '(nil nil))) ()
        (assert-true (equal a 1))
        (assert-true (equal b 2))
        (incf n)))
     (assert-true (equal n 1))))
 
-(define-test test/destructuring-case-10
+(define-test test/destructuring-case-alt-10
   (let ((n 0))
-    (destructuring-case '(:x (1 2))
+    (destructuring-case-alt '(:x (1 2))
       ((&key ((:x (a b c)) '(nil nil nil))) ()
        (declare (ignore a b c))
        nil)
@@ -228,9 +228,9 @@
     (assert-true (equal n 1))))
 
 
-(define-test test/destructuring-case-11
+(define-test test/destructuring-case-alt-11
   (let ((n 0))
-    (destructuring-case '(:x (1 2) :y (10 20 30))
+    (destructuring-case-alt '(:x (1 2) :y (10 20 30))
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil)))
          ()
@@ -247,9 +247,9 @@
        (incf n)))
     (assert-true (equal n 1))))
 
-(define-test test/destructuring-case-12
+(define-test test/destructuring-case-alt-12
   (let ((n 0))
-    (destructuring-case '(:x (1 2) :y (10 20 30))
+    (destructuring-case-alt '(:x (1 2) :y (10 20 30))
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil))) ()
        (declare (ignore a b c d))
@@ -265,9 +265,9 @@
     (assert-true (equal n 1))))
 
 
-(define-test test/destructuring-case-13
+(define-test test/destructuring-case-alt-13
   (let ((n 0))
-    (destructuring-case '(:x (1 2) :y (10 20 30) :z 100)
+    (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100)
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil))) ()
        (declare (ignore a b c d))
@@ -289,9 +289,9 @@
     
     (assert-true (equal n 1))))
 
-(define-test test/destructuring-case-13b
+(define-test test/destructuring-case-alt-13b
   (let ((n 0))
-    (destructuring-case '(:x (1 2) :y (10 20 30) :y -1 :z 100 :x -2)
+    (destructuring-case-alt '(:x (1 2) :y (10 20 30) :y -1 :z 100 :x -2)
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil))) ()
        (declare (ignore a b c d))
@@ -313,9 +313,9 @@
     
     (assert-true (equal n 1))))
 
-(define-test test/destructuring-case-14
+(define-test test/destructuring-case-alt-14
   (let ((n 0))
-    (destructuring-case '(:x (1 2) :y (10 20 30) :z 100)
+    (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100)
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil))
 	     &allow-other-keys) ()
@@ -338,9 +338,9 @@
     
     (assert-true (equal n 1))))
 
-(define-test test/destructuring-case-14b
+(define-test test/destructuring-case-alt-14b
   (let ((n 0))
-    (destructuring-case '(:x (1 2) :y (10 20 30) :z 100 :a 12)
+    (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100 :a 12)
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil))
 	     &allow-other-keys) ()
@@ -364,9 +364,9 @@
     (assert-true (equal n 1))))
 
 
-(define-test test/destructuring-case-15
+(define-test test/destructuring-case-alt-15
   (let ((n 0))
-    (destructuring-case '((1 2) 3)
+    (destructuring-case-alt '((1 2) 3)
       ((a b c) ((float a b) (integer c))
        (list a b c))
       ((a b c) ((fixnum a b) (integer c))
@@ -380,9 +380,9 @@
        (assert-true (= c 3))))
     (assert-true (= 1 n))))
 
-(define-test test/destructuring-case-15b
+(define-test test/destructuring-case-alt-15b
   (let ((n 0))
-    (destructuring-case '((1 2) 3)
+    (destructuring-case-alt '((1 2) 3)
       ((a b c) ((float a b) (integer c))
        (list a b c))
       ((a b c) ((fixnum a b) (integer c))
@@ -391,30 +391,30 @@
        (list a b c)))
     (assert-true (= 0 n))))
 
-(define-test test/destructuring-case-16
+(define-test test/destructuring-case-alt-16
   (assert-true (equal '(1 x 0)
-		      (destructuring-case '(x)
+		      (destructuring-case-alt '(x)
 			((name &key (count 0)) ((fixnum count))
 			 (list 1 name count))
 			((name &key count) ()
 			 (list 2 name count)))))
 
   (assert-true (equal '(2 x y)
-		      (destructuring-case '(x :count y)
+		      (destructuring-case-alt '(x :count y)
 			((name &key (count 0)) ((fixnum count))
 			 (list 1 name count))
 			((name &key (count 'z))	 ((symbol count))
 			 (list 2 name count)))))
 
   (assert-true (equal '(1 x 0)
-		      (destructuring-case '(x)
+		      (destructuring-case-alt '(x)
 			((name &key (count 0)) ((fixnum count))
 			 (list 1 name count))
 			((name &key (count 42)) ((fixnum count))
 			 (list 2 name count))))))
 
-(define-test test/destructuring-case-17
-  (let ((expanded (macroexpand-1 '(destructuring-case x
+(define-test test/destructuring-case-alt-17
+  (let ((expanded (macroexpand-1 '(destructuring-case-alt x
 				   ((arg1)    ( ( number arg1))
 				    (list arg1))
 				   ((arg1)  ((float arg1))
@@ -431,6 +431,38 @@
 		    
 
 (define-test test/gather-type-declarations
+  (assert-false (set-exclusive-or '((a list))
+				  (gather-type-declarations '("docstring"
+							      (declare (type list a))
+							      (cons a)))
+				  :test #'equal))
+  (assert-false (set-exclusive-or '((a list))
+				  (gather-type-declarations '((declare (type list a))
+							      "docstring"
+							      (cons a)))
+				  :test #'equal))
+  (assert-false (set-exclusive-or '((a list)
+				    (b string))
+				  (gather-type-declarations '("docstring"
+							      (declare (type list a) (type string b))
+							      (or a b)))
+				  :test #'equal))
+  (assert-false (set-exclusive-or '((a list)
+				    (b string))
+				  (gather-type-declarations '("docstring"
+							      (declare (type list a))
+							      (declare (type string b))
+							      (or a b)))
+				  :test #'equal))
+  (assert-false (set-exclusive-or '((a list)
+				    (b string))
+				  (gather-type-declarations '((declare (type list a))
+							      (declare (type string b))
+							      "docstring"
+							      (or a b)))
+				  :test #'equal))
+
+  
   (assert-false (set-exclusive-or '((a fixnum)
 				    (b fixnum)
 				    (c string)
@@ -502,7 +534,7 @@
 			  (cnm)))))
 
 
-(define-test test/destructuring-case-allow-other-keys
+(define-test test/destructuring-case-alt-allow-other-keys
   (let ((data '(1 (2 3) :a 12
 		:x name :x "not-symbol"
 		:b 13 :z nil :z 14 :y "hello" :a 15 :x 16 :y 17 :z 18)))
@@ -520,7 +552,7 @@
 
     (assert-false
      (null
-      (destructuring-case data
+      (destructuring-case-alt data
 	((&whole llist a (b c) 
 		 &rest keys
 		 &key (x t) (y "") z &allow-other-keys)
@@ -699,7 +731,7 @@
 
   )
 
-(define-test test/destructuring-case-allow-other-keys-2
+(define-test test/destructuring-case-alt-allow-other-keys-2
   (let ((data '(1 (2 3)
 		:x name :y 3.14 :z 14)))
     (assert-error error
@@ -715,7 +747,7 @@
     (assert-true
      (equal
       'default
-      (destructuring-case data
+      (destructuring-case-alt data
 	((&whole llist a (b c) 
 		 &rest keys
 		 &key (x t) (y "") z &allow-other-keys)
@@ -870,3 +902,103 @@
    file
    :transition-legend t
    :state-legend t))
+
+;; ================
+
+
+(define-test test/destructuring-case-15
+  (let ((n 0))
+    (destructuring-case '((1 2) 3)
+      ((a b c)
+       (declare (type float a b)
+		(type integer c))
+       (list a b c))
+      ((a b c)
+       (declare (type fixnum a b)
+		(type integer c))
+       (list a b c))
+      (((a b) c)
+       (declare (type float a b) (type integer c))
+       (list a b c))
+      (((a b) c)
+       (declare (type integer a b) (type integer c))
+       (incf n)
+       (assert-true (= a 1))
+       (assert-true (= b 2))
+       (assert-true (= c 3))))
+    (assert-true (= 1 n))))
+
+(define-test test/destructuring-case-15-931
+  (let ((n 0))
+    (DESTRUCTURING-CASE-ALT '((1 2) 3)
+      ((A B C) ((INTEGER C) (FLOAT B) (FLOAT A))
+       (DECLARE (TYPE FLOAT A B)
+		(TYPE INTEGER C))
+       (LIST A B C))
+      ((A B C) ((INTEGER C) (FIXNUM B) (FIXNUM A))
+       (DECLARE (TYPE FIXNUM A B)
+		(TYPE INTEGER C))
+       (LIST A B C))
+      (((A B) C) ((INTEGER C) (FLOAT B) (FLOAT A))
+       (DECLARE (TYPE FLOAT A B)
+		(TYPE INTEGER C))
+       (LIST A B C))
+      (((A B) C) ((INTEGER C) (INTEGER B) (INTEGER A))
+       (DECLARE (TYPE INTEGER A B)
+		(TYPE INTEGER C))
+       (INCF N) (ASSERT-TRUE (= A 1)) (ASSERT-TRUE (= B 2)) (ASSERT-TRUE (= C 3))))
+    
+    (assert-true (= 1 n))))
+
+
+(define-test test/destructuring-case-15b
+  (let ((n 0))
+    (destructuring-case '((1 2) 3)
+      ((a b c) (declare (type float a b) (type integer c))
+       (list a b c))
+      ((a b c) (declare (type fixnum a b) (type integer c))
+       (list a b c))
+      (((a b) c) (declare (type float a b) (type integer c))
+       (list a b c)))
+    (assert-true (= 0 n))))
+
+(define-test test/destructuring-case-16
+  (assert-true (equal '(1 x 0)
+		      (destructuring-case '(x)
+			((name &key (count 0)) (declare (type fixnum count))
+			 (list 1 name count))
+			((name &key count)
+			 (list 2 name count)))))
+
+  (assert-true (equal '(2 x y)
+		      (destructuring-case '(x :count y)
+			((name &key (count 0)) (declare (type fixnum count))
+			 (list 1 name count))
+			((name &key (count 'z))	 (declare (type symbol count))
+			 (list 2 name count)))))
+
+  (assert-true (equal '(1 x 0)
+		      (destructuring-case '(x)
+			((name &key (count 0)) (declare (type fixnum count))
+			 (list 1 name count))
+			((name &key (count 42)) (declare (type fixnum count))
+			 (list 2 name count))))))
+
+(define-test test/destructuring-case-17
+  (let* ((expanded1 (macroexpand-1 '(destructuring-case x
+				   ((arg1)
+				    (declare (type number arg1))
+				    (list arg1))
+				   ((arg1)
+				    (declare (type float arg1))
+				    (list arg1)))))
+	 (expanded2 (macroexpand-1 expanded1)))
+
+    (destructuring-bind (_ignore _ignore ; let arglist
+				 (_ignore _ignore ; typecase var
+					  _ignore ; case1
+					  _ignore ; case2
+				  (type3 &rest _ignore ))) expanded2
+      (declare (ignore _ignore))
+      (assert-false (reduce-lisp-type type3)))))
+      

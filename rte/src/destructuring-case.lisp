@@ -1,4 +1,4 @@
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
+;; Copyright (c) 2016,18 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -74,40 +74,40 @@ with the given KEYVAR form"
 
 (defun gather-type-declarations (body)
   "BODY is the body of some destructuring-bind form.  This function, gather-type-declaration,
-examines zero, one, or more declarations in the leading position of the body to find
-type declarations.  An assoc list (car/cadr) is returned of the form
-((var1 typespec1) (var2 typespec2)...)
-If the same variable is declared more than once, the resulting type is the intersection
-of the individual types.
-
-CL-SPEC> Declaration TYPE
-         ...
-CL-SPEC> If nested type declarations refer to the same variable, then the value of the
-CL-SPEC> variable must be a member of the intersection of the declared types.
-"
+ examines zero, one, or more declarations in the leading position of the body to find
+ type declarations.  An assoc list (car/cadr) is returned of the form
+ ((var1 typespec1) (var2 typespec2)...)
+ If the same variable is declared more than once, the resulting type is the intersection
+ of the individual types.
+ 
+ CL-SPEC> Declaration TYPE
+          ...
+ CL-SPEC> If nested type declarations refer to the same variable, then the value of the
+ CL-SPEC> variable must be a member of the intersection of the declared types.
+ "
   (let (var-declarations)
-    (loop :while (and body
-		      (car body)
-		      (listp (car body))
-		      (eq 'declare (car (car body))))
-	  :do (progn
-		(dolist (decl (cdr (car body)))
-		  (unless (member (car decl) '(dynamic-extent ignore optimize ftype inline special ignorable notinline type)
-				  :test #'eq)
-		    (push 'type decl))
-		  (when (eq 'type (car decl))
-		    (destructuring-bind (_ typespec &rest vars) decl
-		      (declare (ignore _))
+    ;; allow one but only one optional "docstring"
+    (when (stringp (car body))
+      (format t "skipping docstring ~S~%" (car body))
+      (pop body))
+    (loop :while (typep body '(cons (cons (eql declare))))
+	  :do (dolist (decl (cdr (car body)))
+		(unless (member (car decl) '(dynamic-extent ignore optimize ftype inline special ignorable notinline type)
+				:test #'eq)
+		  (push 'type decl))
+                (when (typep decl '(cons (eql type)))
+		  (destructuring-bind (_ typespec &rest vars) decl
+		    (declare (ignore _))
                        ;; need to handle the case that the same
                        ;; variable appears twice with two different
                        ;; declarations.  Need to check with the spec
                        ;; to see what the defined semantics are.
-		      (dolist (var vars)
-			(if (assoc var var-declarations)
-			    (setf (cadr (assoc var var-declarations))
-				  (list 'and typespec (cadr (assoc var var-declarations))))
-			    (push (list var typespec) var-declarations)))))
-		  (pop body))))
+		    (dolist (var vars)
+		      (if (assoc var var-declarations)
+			  (setf (cadr (assoc var var-declarations))
+				(list 'and typespec (cadr (assoc var var-declarations))))
+			  (push (list var typespec) var-declarations)))))
+		(pop body)))
     var-declarations))
 
 (defun destructuring-lambda-list-to-rte (lambda-list &key type-specifiers)
@@ -333,7 +333,7 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 		 (:cat ,req-pattern
 		       ,tail-pattern))))))
 
-(defun expand-destructuring-case (object-form clauses)
+(defun expand-destructuring-case-alt (object-form clauses)
   (let ((object (gensym))
 	previous-anti-patterns)
     (flet ((transform-clause (clause)
@@ -362,20 +362,46 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 	   ((not list) nil)
 	   ,@(mapcar #'transform-clause clauses))))))
 
-(defmacro destructuring-case (object-form &body clauses)
-  "Similar to CASE except that the object is matched against destructuring-lambda-lists and
-optional type constraints.  The first clauses matching the structure and types is evaluated.
-Each clause is of the form (destructuring-lambda-lists constraint-alist &body body)
-Where constraint-alist is an car/cdr alist mapping a type specifier to a list of variable
-names of that type.   The variables will be implicitly declared in the body.
-E.g.,
-  (destructuring-case '(1 2 :x 3)
+(defmacro destructuring-case-alt (object-form &body clauses)
+  "Symantically similar to CASE except that the object is matched against destructuring-lambda-lists and
+ optional type constraints.  The first clauses matching the structure and types is evaluated.
+ Each clause is of the form (destructuring-lambda-lists constraint-alist &body body)
+ Where constraint-alist is an car/cdr alist mapping a type specifier to a list of variable
+ names of that type.   The variables will be implicitly declared in the body.
+ E.g.,
+  (destructuring-case-alt '(1 2 :x 3)
     ((a b c) ((integer a b) (symbol c))
      :first)
     ((a &optional (b 0) &key (x 0) (y 0)) ((integer a b x y))
      :second))
 ==> :second"
-  (expand-destructuring-case object-form clauses))
+  (expand-destructuring-case-alt object-form clauses))
+
+(defmacro destructuring-case (object-form &body clauses)
+  "Similar to CASE except that the object is matched against destructuring-lambda-lists and
+ declared type constraints.  The first clauses matching the structure and types is evaluated.
+ Each clause is of the form (destructuring-lambda-lists &body BODY).
+ Where BODY may have docstring and declarations.  The type constraints will
+ be extracted from the (declare ... (type ...)) forms.
+ E.g.,
+  (destructuring-case '(1 2 :x 3)
+    ((a b c)
+     (declare (integer a b) (symbol c))
+     :first)
+    ((a &optional (b 0) &key (x 0) (y 0)) 
+     (declare (integer a b x y))
+     :second))
+ ==> :second"
+  (let ((reformed
+	  (loop :for clause :in clauses
+		:collect (destructuring-bind (lambda-list &body body) clause
+			   ;; gather-type-declarations returns a list of the
+			   ;;   form ((var1 typespec1) (var2 typespec2) ...)
+			   ;; need to convert to ((typespec1 var...)
+			   ;;                     (typespec2 var...) ...)
+			   (let ((constraints (mapcar #'reverse (gather-type-declarations body))))
+			     `(,lambda-list ,constraints ,@body))))))
+    `(destructuring-case-alt ,object-form ,@reformed)))
 
 (defun expand-destructuring-methods (object-form clauses call-next-method)
   (declare (type symbol call-next-method))

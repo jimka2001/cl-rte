@@ -21,9 +21,9 @@
 
 (in-package :rte-test)
 
-(define-test test/destructuring-case-1-a
+(define-test test/destructuring-case-alt-1-a
   (assert-true
-   (equal 3 (destructuring-case '(x y z) 
+   (equal 3 (destructuring-case-alt '(x y z) 
 	      ((a) ()
 	       (declare (ignore a))
 	       1)
@@ -34,9 +34,9 @@
 	       (declare (ignore a b c))
 	       3)))))
 
-(define-test test/destructuring-case-1-b
+(define-test test/destructuring-case-alt-1-b
   (assert-true
-   (equal 2 (destructuring-case '(x y)
+   (equal 2 (destructuring-case-alt '(x y)
 	      ((a) ()
 	       (declare (ignore a))
 	       1)
@@ -47,9 +47,9 @@
 	       (declare (ignore a b c))
 	       3))))  )
 
-(define-test test/destructuring-case-1-c
+(define-test test/destructuring-case-alt-1-c
   (assert-true
-   (equal 1 (destructuring-case '(x)
+   (equal 1 (destructuring-case-alt '(x)
 	      ((a) ()
 	       (declare (ignore a))
 	       1)
@@ -60,9 +60,9 @@
 	       (declare (ignore a b c))
 	       3)))))
 
-(define-test test/destructuring-case-2-a
+(define-test test/destructuring-case-alt-2-a
   (assert-true
-   (equal 3 (destructuring-case '((x) y z)
+   (equal 3 (destructuring-case-alt '((x) y z)
 	      ((a) ()
 	       (declare (ignore a))
 	       1)
@@ -73,9 +73,9 @@
 	       (declare (ignore a b c))
 	       3)))))
 
-(define-test test/destructuring-case-2-b  
+(define-test test/destructuring-case-alt-2-b  
   (assert-true
-   (equal 2 (destructuring-case '(x (y))
+   (equal 2 (destructuring-case-alt '(x (y))
 	      ((a) ()
 	       (declare (ignore a))
 	       1)
@@ -87,9 +87,9 @@
 	       3))))  )
 
 
-(define-test test/destructuring-case-2-c
+(define-test test/destructuring-case-alt-2-c
   (assert-true
-   (equal 3 (destructuring-case '((x) y)
+   (equal 3 (destructuring-case-alt '((x) y)
 	      ((a) ()
 	       (declare (ignore a))
 	       1)
@@ -101,12 +101,12 @@
 	       3))))
 )
    
-(define-test test/destructuring-case-3
+(define-test test/destructuring-case-alt-3
   (let ((n 0))
     (dolist (x '((1)
 		 (2 (3))
 		 (1 ((2)) (3 4))))
-      (destructuring-case x
+      (destructuring-case-alt x
 	((a) ()
 	 (incf n)
 	 (assert-true (= a 1)))
@@ -115,6 +115,113 @@
 	 (assert-true (= a 2))
 	 (assert-true (= b 3)))
 	((a ((b)) (c d)) ()
+	 (incf n)
+	 (assert-true (= a 1))
+	 (assert-true (= b 2))
+	 (assert-true (= c 3))
+	 (assert-true (= d 4)))))
+
+    (assert-true (= n 3))))
+
+
+
+;; ==============
+
+
+(define-test test/destructuring-case-1-a
+  (assert-true
+   (equal 3 (destructuring-case '(x y z) 
+	      ((a)
+	       (declare (ignore a))
+	       1)
+	      ((a b)
+	       (declare (ignore a b))
+	       2)
+	      ((a b c)
+	       (declare (ignore a b c))
+	       3)))))
+
+(define-test test/destructuring-case-1-b
+  (assert-true
+   (equal 2 (destructuring-case '(x y)
+	      ((a)
+	       (declare (ignore a))
+	       1)
+	      ((a b)
+	       (declare (ignore a b))
+	       2)
+	      ((a b c)
+	       (declare (ignore a b c))
+	       3))))  )
+
+(define-test test/destructuring-case-1-c
+  (assert-true
+   (equal 1 (destructuring-case '(x)
+	      ((a)
+	       (declare (ignore a))
+	       1)
+	      ((a b)
+	       (declare (ignore a b))
+	       2)
+	      ((a b c)
+	       (declare (ignore a b c))
+	       3)))))
+
+(define-test test/destructuring-case-2-a
+  (assert-true
+   (equal 3 (destructuring-case '((x) y z)
+	      ((a)
+	       (declare (ignore a))
+	       1)
+	      ((a b)
+	       (declare (ignore a b))
+	       2)
+	      (((a) b c)
+	       (declare (ignore a b c))
+	       3)))))
+
+(define-test test/destructuring-case-2-b  
+  (assert-true
+   (equal 2 (destructuring-case '(x (y))
+	      ((a)
+	       (declare (ignore a))
+	       1)
+	      ((a (b))
+	       (declare (ignore a b))
+	       2)
+	      (((a) b)
+	       (declare (ignore a b))
+	       3))))  )
+
+
+(define-test test/destructuring-case-2-c
+  (assert-true
+   (equal 3 (destructuring-case '((x) y)
+	      ((a)
+	       (declare (ignore a))
+	       1)
+	      ((a (b))
+	       (declare (ignore a b))
+	       2)
+	      (((a) b)
+	       (declare (ignore a b))
+	       3))))
+)
+   
+(define-test test/destructuring-case-3
+  (let ((n 0))
+    (dolist (x '((1)
+		 (2 (3))
+		 (1 ((2)) (3 4))))
+      (destructuring-case x
+	((a)
+	 (incf n)
+	 (assert-true (= a 1)))
+	((a (b))
+	 (incf n)
+	 (assert-true (= a 2))
+	 (assert-true (= b 3)))
+	((a ((b)) (c d))
 	 (incf n)
 	 (assert-true (= a 1))
 	 (assert-true (= b 2))

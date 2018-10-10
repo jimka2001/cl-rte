@@ -23,9 +23,11 @@ E.g.,
 
 ````lisp
   (destructuring-case '(1 2 :x 3)
-    ((a b c) ((integer a b) (symbol c))
+    ((a b c) 
+     (declare (type integer a b) (type symbol c))
      :first)
-    ((a &optional (b 0) &key (x 0) (y 0)) ((integer a b x y))
+    ((a &optional (b 0) &key (x 0) (y 0)) 
+     (declare (type integer a b x y))
      :second))
 ==> :second
 ````
@@ -91,12 +93,14 @@ of `string` `number` where the string is optional.  `("hello" 42)` or `(42)`.
 ```lisp
 (defun F4 (obj)
   (destructuring-case obj
-    ((name &key count) ((symbol name)
-                        (integer count))
+    ((name &key count)
+     (declare (type symbol name)
+              (type integer count))
      ...)
-    ((name data &rest strings) ((name symbol)
-                                (data list)
-                                (strings (rte (:* string))))
+    ((name data &rest strings)
+     (declare (type symbol name)
+              (type list data)
+              (type (rte (:* string)) strings))
      ...)))
 ```
 

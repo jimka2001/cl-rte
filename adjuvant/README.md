@@ -116,6 +116,8 @@ PKG> (type-expand '(and-not integer fixnum))
 
 * `process-kill` -- Kill a process started by `run-program` if it was started with `(run-program ... :wait t)`
 
+* `*dot-path*` -- Special variable containing the full path to the UNIX `dot` (graphviz) program.
+
 * `run-program` -- Wrapper around the implementation dependent (sbcl/Allegro) shell command function.
 
 * `getenv` -- Wrapper around the implementation dependent (sbcl/Allegro) UNIX environment variable reader.

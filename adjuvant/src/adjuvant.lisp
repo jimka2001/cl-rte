@@ -25,6 +25,7 @@
   (:use :cl)
   (:export
    "*TMP-DIR-ROOT*"
+   "*DOT-PATH*"
    "BOOLEAN-EXPR-TO-LATEX"
    "CHOOSE-RANDOMLY"
    "COMPARE-OBJECTS"
@@ -53,6 +54,12 @@
 ))
 
 (in-package :adjuvant)
+
+(defvar *dot-path* (if (probe-file "/opt/local/bin/dot")
+		  "/opt/local/bin/dot"
+		  "dot")
+  "Full path to the graphviz dot program")
+
 
 (defun run-program (program args &key (wait t) output error if-output-exists)
   "Wrapper around the implementation dependent (sbcl/Allegro) shell command function"

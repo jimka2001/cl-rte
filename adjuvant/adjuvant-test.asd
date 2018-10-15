@@ -25,6 +25,7 @@
   :author "Jim Newton"
   :description "Test cases for adjuvant package/system"
   :license "MIT"
+  :depends-on (adjuvant scrutiny)
   :components
   ((:module "src"
     :components

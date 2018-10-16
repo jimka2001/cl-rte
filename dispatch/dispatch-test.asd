@@ -21,6 +21,7 @@
 
 (asdf:defsystem :dispatch-test
   :version (:read-file-form "../version.lisp")
+  :description "Test cases for :dispatch"
   :license "MIT"
   :author "Jim Newton"
   :depends-on (:dispatch

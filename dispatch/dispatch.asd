@@ -22,6 +22,7 @@
 (asdf:defsystem :dispatch
   :version (:read-file-form "../version.lisp")
   :author "Jim Newton"
+  :description "Implementation of the function `SPECIALIZER-INTERSECTION`"
   :license "MIT"
   :depends-on (:closer-mop :adjuvant)
   :components

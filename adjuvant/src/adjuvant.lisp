@@ -232,11 +232,16 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
     (t
      initial-value)))
     
-(defvar *tmp-dir-root* (format nil "/tmp/~A/" (or (getenv "USER")
-						  "unknown-user")))
+(defvar *tmp-dir-root* (ensure-directories-exist (format nil "/tmp/~A/~A/~D/"
+                                                         (or (getenv "HOST")
+                                                             "unknown-host")
+                                                         (or (getenv "USER")
+                                                             "unknown-user")
+                                                         (get-universal-time)))
+  "Root directory used by MAKE-TEMP-DIR")
 
 (defun make-temp-dir (suffix)
-  (format nil "~A/~A/" *tmp-dir-root* suffix))
+  (format nil "~A~A/" *tmp-dir-root* suffix))
 
 (defun boolean-expr-to-latex (expr &optional (stream t))
   (etypecase expr
@@ -328,9 +333,9 @@ If N > (length of data) then a permutation of DATA is returned"
   (choose-randomly data (length data)))
 
 
-(defvar *verbose-caching* nil)
-(defvar *caching-thresh* 2048)
-(defvar *secret-default-value* (list nil))
+(defvar *verbose-caching* nil "Verbose mode for CACHING-CALL function")
+(defvar *caching-thresh* 2048 "Threshold used for verbose mode of CACHING-CALL function")
+(defvar *secret-default-value* (list nil) "Default value from hash table used by CACHING-CALL function")
 
 (defun caching-call (thunk key hash fun-name access increment)
   ;; caching-call symbol not exported

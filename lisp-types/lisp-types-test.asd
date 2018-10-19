@@ -23,7 +23,7 @@
 (asdf:defsystem :lisp-types-test
   :version (:read-file-form "../version.lisp")
   :author "Jim Newton"
-  :description ""
+  :description "Test cases for :lisp-types"
   :license "MIT"
   :depends-on (:lisp-types
                :lisp-types-analysis
@@ -31,8 +31,7 @@
                :closer-mop
 	       :adjuvant
 	       :scrutiny
-               ;; :sb-profile
-               (:feature :sbcl :sb-sprof))
+               )
   :components
   ((:module "src"
     :components

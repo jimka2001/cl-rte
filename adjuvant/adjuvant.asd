@@ -25,7 +25,7 @@
   :author "Jim Newton"
   :description "Various utility functions and macros used in several packages."
   :license "MIT"
-  :depends-on ((:feature :sbcl :sb-sprof))
+  :depends-on ((:feature :sbcl :sb-posix))
   :components
   ((:module "src"
     :components

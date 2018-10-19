@@ -54,7 +54,7 @@
 			     :prefix (format nil "mdtd-profile-single-~A-" *decompose*)
 			     :create-png-p t
 			     :multiplier 2.0 ;; 6.0
-			     :destination-dir "/tmp/jimka/."))
+			     :destination-dir (ensure-directories-exist (make-temp-dir "mdtd-report-profile")))
   (format t "finished mdtd-report-profile ~A ~A ~%" *decompose* *bucket*))
 
 (run-program "rm" (list "-r" asdf::*user-cache*))

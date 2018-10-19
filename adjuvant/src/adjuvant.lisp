@@ -37,6 +37,7 @@
    "GETENV"
    "GETTER"
    "GROUP-BY"
+   "GROUP-BY-EQUIVALENCE"
    "LCONC"
    "MAKE-TEMP-DIR"
    "MAP-PAIRS"
@@ -288,6 +289,20 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
 	  (dolist (item (cdr tail))
 	    (funcall binary head item)))
 	data-list))
+
+(defun group-by-equivalence (data-list &key (key #'identity) (test #'eql))
+  (let (groups-alist)
+    (dolist (item data-list)
+      (let ((hit (find-if (lambda (items)
+			    (funcall test
+				     (funcall key (car items))
+				     (funcall key item)))
+			  groups-alist)))
+	(if hit
+	    (push item (cdr hit))
+	    (push (list item) groups-alist))))
+    groups-alist))
+  
 
 (defun rnd-element (data n &aux (r (random n)) (tail (nthcdr r data)))
   "DATA list of objects.

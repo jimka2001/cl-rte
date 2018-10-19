@@ -118,3 +118,24 @@
 	  :do (assert-true (= (reduce #'* nums :initial-value 1)
 			      (tree-reduce #'* nums :initial-value 1)))))
   )
+
+(define-test test/group-by-equivalence
+  (assert-true (equal
+		(sort (group-by-equivalence '(1 4 4 4 2 3 2 3 4 3 4)) #'< :key #'car)
+		'((1) (2 2) (3 3 3) (4 4 4 4 4))))
+  (assert-true (equal
+		(sort (group-by-equivalence '((1 2 3) ; 6
+					      (3 4 -1) ; 6
+					      (6 0) ; 6
+					      (1 -1) ; 0
+					      (2 2 -4) ;0
+					      )
+					    :key (lambda (numbers)
+						   (reduce #'+ numbers :initial-value 0)))
+		      #'< :key #'car)
+		'(((1 -1)
+		   (2 2 -4))
+		  ((1 2 3) 
+		   (6 0) 
+		   (3 4 -1))))))
+		

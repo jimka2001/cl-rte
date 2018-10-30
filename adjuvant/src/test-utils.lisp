@@ -123,19 +123,18 @@
   (assert-true (equal
 		(sort (group-by-equivalence '(1 4 4 4 2 3 2 3 4 3 4)) #'< :key #'car)
 		'((1) (2 2) (3 3 3) (4 4 4 4 4))))
-  (assert-true (equal
-		(sort (group-by-equivalence '((1 2 3) ; 6
+  (let ((grouped (group-by-equivalence '((1 2 3) ; 6
 					      (3 4 -1) ; 6
 					      (6 0) ; 6
 					      (1 -1) ; 0
 					      (2 2 -4) ;0
 					      )
 					    :key (lambda (numbers)
-						   (reduce #'+ numbers :initial-value 0)))
-		      #'< :key #'car)
-		'(((1 -1)
-		   (2 2 -4))
-		  ((1 2 3) 
-		   (6 0) 
-		   (3 4 -1))))))
+						   (reduce #'+ numbers :initial-value 0)))))
+    ;; e.g., (((1 -1) (2 2 -4))
+    ;;        ((1 2 3) (6 0) (3 4 -1)))
+    (dolist (group grouped)
+      (dolist (numbers (cdr group))
+	(assert-true (= (reduce #'+ numbers :initial-value 0)
+			(reduce #'+ (car group) :initial-value 0)))))))
 		

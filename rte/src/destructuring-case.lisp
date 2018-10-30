@@ -147,11 +147,11 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 	       (cadr (assoc var type-specifiers)))
 	     (recursive-pattern-var (var &key (symbol-pattern t))
 	       (typecase var
+		 (null
+		  'null)
 		 (symbol
 		  (or (get-var-type var)
 		      symbol-pattern))
-		 (null
-		  'null)
 		 (list
 		  `(:and list (rte ,(canonicalize-pattern
 				     (destructuring-lambda-list-to-rte var

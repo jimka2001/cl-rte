@@ -333,7 +333,30 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 		 (:cat ,req-pattern
 		       ,tail-pattern))))))
 
+(defmacro rte-typecase (object-form &rest clauses)
+  "OBJECT-FORM is the form to be evaluated,
+CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
+  (let ((object (gensym))
+	previous-anti-patterns)
+    (flet ((transform-clause (clause)
+	     (destructuring-bind (pattern &rest body) clause
+	       (let* ((derived-pattern `(:and ,pattern ,@previous-anti-patterns))
+		      (used-type (if (equivalent-patterns :empty-set
+							  derived-pattern)
+				     `(and nil (rte ,derived-pattern))
+				     `(rte ,pattern))))
+		 (prog1 `(,used-type ,@body)
+		   (push `(:not ,pattern) previous-anti-patterns))))))
+      `(let ((,object ,object-form))
+	 (typecase ,object
+	   ((not list) nil)
+	   ,@(mapcar #'transform-clause clauses))))))
+
 (defun expand-destructuring-case-alt (object-form clauses)
+  "OBJECT-FORM is the form to be evaluated,
+CLAUSES is a list of sublists, each sublist can be destructured as: (LAMBDA-LIST CONSTRAINTS &REST BODY)
+  where CONSTRAINTS is a car/cdr alist mapping each type specifiers to a list of
+  variable names. e.g., ((number a b c) ((or string symbol) x y z))"
   (let ((object (gensym))
 	previous-anti-patterns)
     (flet ((transform-clause (clause)
@@ -346,21 +369,15 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 							   `(declare (type ,@constraint))) constraints))
 		      (pattern (canonicalize-pattern (destructuring-lambda-list-to-rte
 						      lambda-list
-						      :type-specifiers type-specifier-alist)))
-		      (derived-pattern `(:and ,pattern ,@previous-anti-patterns))
-		      (used-type (if (equivalent-patterns :empty-set
-							  derived-pattern)
-				     `(and nil (rte ,derived-pattern))
-				     `(rte ,pattern))))
-		 (prog1 `(,used-type
+						      :type-specifiers type-specifier-alist))))
+		 (prog1 `(,pattern
 			  (destructuring-bind ,lambda-list ,object
 			    ,@additional-declarations
 			    ,@body))
 		   (push `(:not ,pattern) previous-anti-patterns))))))
       `(let ((,object ,object-form))
-	 (typecase ,object
-	   ((not list) nil)
-	   ,@(mapcar #'transform-clause clauses))))))
+	 (rte-typecase ,object-form
+		       ,@(mapcar #'transform-clause clauses))))))
 
 (defmacro destructuring-case-alt (object-form &body clauses)
   "Symantically similar to CASE except that the object is matched against destructuring-lambda-lists and

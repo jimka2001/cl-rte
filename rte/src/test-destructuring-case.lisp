@@ -413,21 +413,6 @@
 			((name &key (count 42)) ((fixnum count))
 			 (list 2 name count))))))
 
-(define-test test/destructuring-case-alt-17
-  (let ((expanded (macroexpand-1 '(destructuring-case-alt x
-				   ((arg1)    ( ( number arg1))
-				    (list arg1))
-				   ((arg1)  ((float arg1))
-				    (list arg1))))))
-    (destructuring-bind (_ignore _ignore ; let arglist
-				 (_ignore _ignore ; typecase var
-					  _ignore ; case1
-					  _ignore ; case2
-				  (type3 &rest _ignore ))) expanded
-      (declare (ignore _ignore))
-      (assert-false (reduce-lisp-type type3)))))
-      
-
 		    
 
 (define-test test/gather-type-declarations
@@ -992,21 +977,5 @@
 			 (declare (type fixnum count))
 			 (list 2 name count))))))
 
-(define-test test/destructuring-case-17
-  (let* ((expanded1 (macroexpand-1 '(destructuring-case x
-				   ((arg1)
-				    (declare (type number arg1))
-				    (list arg1))
-				   ((arg1)
-				    (declare (type float arg1))
-				    (list arg1)))))
-	 (expanded2 (macroexpand-1 expanded1)))
 
-    (destructuring-bind (_ignore _ignore ; let arglist
-				 (_ignore _ignore ; typecase var
-					  _ignore ; case1
-					  _ignore ; case2
-				  (type3 &rest _ignore ))) expanded2
-      (declare (ignore _ignore))
-      (assert-false (reduce-lisp-type type3)))))
       

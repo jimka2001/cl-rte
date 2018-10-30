@@ -949,39 +949,47 @@
        (INCF N) (ASSERT-TRUE (= A 1)) (ASSERT-TRUE (= B 2)) (ASSERT-TRUE (= C 3))))
     
     (assert-true (= 1 n))))
-
+(defrte (:cat float float integer))
 
 (define-test test/destructuring-case-15b
   (let ((n 0))
     (destructuring-case '((1 2) 3)
-      ((a b c) (declare (type float a b) (type integer c))
+      ((a b c)
+       (declare (type float a b) (type integer c))
        (list a b c))
-      ((a b c) (declare (type fixnum a b) (type integer c))
+      ((a b c)
+       (declare (type fixnum a b) (type integer c))
        (list a b c))
-      (((a b) c) (declare (type float a b) (type integer c))
+      (((a b) c)
+       (declare (type float a b) (type integer c))
        (list a b c)))
     (assert-true (= 0 n))))
 
 (define-test test/destructuring-case-16
   (assert-true (equal '(1 x 0)
 		      (destructuring-case '(x)
-			((name &key (count 0)) (declare (type fixnum count))
+			((name &key (count 0))
+			 (declare (type fixnum count))
 			 (list 1 name count))
 			((name &key count)
 			 (list 2 name count)))))
 
   (assert-true (equal '(2 x y)
 		      (destructuring-case '(x :count y)
-			((name &key (count 0)) (declare (type fixnum count))
+			((name &key (count 0))
+			 (declare (type fixnum count))
 			 (list 1 name count))
+			
 			((name &key (count 'z))	 (declare (type symbol count))
 			 (list 2 name count)))))
 
   (assert-true (equal '(1 x 0)
 		      (destructuring-case '(x)
-			((name &key (count 0)) (declare (type fixnum count))
+			((name &key (count 0))
+			 (declare (type fixnum count))
 			 (list 1 name count))
-			((name &key (count 42)) (declare (type fixnum count))
+			((name &key (count 42))
+			 (declare (type fixnum count))
 			 (list 2 name count))))))
 
 (define-test test/destructuring-case-17

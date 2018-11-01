@@ -26,6 +26,15 @@
 
 (in-package :adjuvant-test)
 
+(define-test test/tconc
+  (let ((buf (list nil)))
+    (tconc buf 1)
+    ;; test that we can add to a tconc struct while iterating over it
+    (dolist (item (car buf))
+      (when (= 1 item)
+	(tconc buf 2)))
+    (assert-true (equal (car buf) '(1 2)))))
+
 (define-test test/group-by
   (assert-true (null (group-by nil)))
   (assert-false (set-exclusive-or '((1 (1 1 1)) (2 (2 2 2)) (3 (3 3)) (4 (4)))

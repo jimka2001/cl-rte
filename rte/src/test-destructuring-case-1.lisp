@@ -259,3 +259,21 @@
 			:yes)
 		       ((:cat fixnum number real unsigned-byte number)
 			:no))))))
+
+(define-test ndfa/test-reduce-1
+  (let* ((dfa (make-ndfa '((:label i :initial-p t
+			    :transitions ((:next-label 1 :transition-label fixnum)
+					  (:next-label 2 :transition-label (and number (not fixnum)))))
+			   (:label f :final-p t)
+			   (:label 1
+			    :transitions ((:next-label f :transition-label number)))
+			   (:label 2
+			    :transitions ((:next-label f :transition-label number))))))
+	 (reduced-dfa (reduce-state-machine dfa
+					    :equal-labels (lambda (a b)
+							    (and (subtypep a b)
+								 (subtypep b a)))
+					    :combine (lambda (a b)
+						       (type-to-dnf-bottom-up `(or ,a ,b))))))
+    (assert-true (= 3 (length (states reduced-dfa))))))
+

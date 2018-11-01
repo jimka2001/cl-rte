@@ -21,7 +21,7 @@
 
 (defpackage :rte-test
   (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :scrutiny))
+  (:use :cl :rte :scrutiny :lisp-types))
 
 (do-symbols (name :rte)
   (import name :rte-test))

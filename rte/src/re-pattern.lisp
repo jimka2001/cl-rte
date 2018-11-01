@@ -159,22 +159,22 @@ depend on the choice of F-... function given."
   (declare (type (member :and :or) operator))
   (if (and (eql :and operator)
 	   (exists p1 patterns
-		   (and (valid-type-p p1)
-			(exists p2 (cdr patterns)
-				(and (valid-type-p p2)
-				     ;; (subtype (and T1 T2) nil) means T1 and T2 are mutually exclusive such as string number
-				     (subtypep (list 'and p1 p2) nil))))))
+	     (and (valid-type-p p1)
+		  (exists p2 (cdr patterns)
+		    (and (valid-type-p p2)
+			 ;; (subtype (and T1 T2) nil) means T1 and T2 are mutually exclusive such as string number
+			 (subtypep (list 'and p1 p2) nil))))))
       (list :empty-set)
       (remove-if (lambda (p1)
 		   (and (valid-type-p p1) ;; can only remove redundant types if they are valid lisp types
 			(exists p2 patterns
-				(and (not (equal p1 p2))
-				     (valid-type-p p2)
-				     (case operator
-				       ((:or)
-					(subtypep p1 p2))
-				       (t
-					(subtypep p2 p1)))))))
+			  (and (not (equal p1 p2))
+			       (valid-type-p p2)
+			       (case operator
+				 ((:or)
+				  (subtypep p1 p2))
+				 (t
+				  (subtypep p2 p1)))))))
 		 patterns)))
 
 
@@ -813,6 +813,5 @@ a valid regular type expression.
   (setf *type-functions* (make-hash-table)))
 
 (defun equivalent-patterns (rte1 rte2)
-  
-  (and (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte1 (:not ,rte2))))))
+    (and (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte1 (:not ,rte2))))))
        (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte2 (:not ,rte1))))))))

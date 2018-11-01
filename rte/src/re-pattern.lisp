@@ -356,16 +356,6 @@ a fixed point is found."
 				       (t
 					'(:0-* t))))))))))
 
-(defun fixed-point (function arg &key (test #'equal))
-  "Find the fixed point of a FUNCTION, starting with the given ARG."
-  (declare (type (function (t) t) function))
-  (let ((result (funcall function arg)))
-	
-    (loop :while (not (funcall test result arg))
-	  :do (progn (setf arg result)
-		     (setf result (funcall function arg))))
-    result))
-
 (defun canonicalize-pattern (re)
   "Given a regular-type-expression, return a canonical form."
   (fixed-point #'canonicalize-pattern-once re :test #'equal))

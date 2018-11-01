@@ -141,6 +141,11 @@ PKG> (type-expand '(and-not integer fixnum))
 
 ### Other
 
+* `fixed-point` -- find the fixed point of a function.  I.e. call the given function
+on the given intial value to produce the next value.  Continue producing new values
+in this manner until two successive equal values have been returned according to a :TEST function.
+   
+
 * `boolean-expr-to-latex` -- Generate LaTeX code, and print to `*standard-output*` to post into a tex document to represent a Boolean expression  E.g.,
 ````lisp
 PKG> (boolean-expr-to-latex '(and (or a b (not c)) (not (or c d))))

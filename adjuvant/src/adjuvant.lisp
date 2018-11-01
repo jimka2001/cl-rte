@@ -33,6 +33,7 @@
    "DOLIST-TCONC"
    "ENCODE-TIME"
    "EXISTS"
+   "FIXED-POINT"
    "FORALL"
    "GARBAGE-COLLECT"
    "GETENV"
@@ -509,3 +510,18 @@ If N > (length of data) then a permutation of DATA is returned"
        (t
         (error "cannot compare a ~A with a ~A" (class-of t1) (class-of t2)))))))
 
+
+(defun fixed-point (function arg &key (test #'equal))
+  "Find the fixed point of a FUNCTION, starting with the given ARG."
+  (declare (type (function (t) t) function))
+  (let ((result (funcall function arg)))
+	
+    (loop :while (not (funcall test result arg))
+	  :do (progn (setf arg result)
+		     (setf result (funcall function arg))))
+    ;; return arg rather than result, they are EQUAL, but this is a
+    ;; chance that arg was never changed, thus result may happen to be
+    ;; in short term memory and more easily GCed.
+    (if (eq test #'equal)
+	arg
+	result)))

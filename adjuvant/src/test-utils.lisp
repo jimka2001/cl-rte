@@ -159,3 +159,16 @@
 	(assert-true (= (reduce #'+ numbers :initial-value 0)
 			(reduce #'+ (car group) :initial-value 0)))))))
 		
+
+(define-test type/fixed-point
+  (assert-true (< (fixed-point #'(lambda (obj)
+				   (/ obj 2.0))
+			       10
+			       :test #'(lambda (a b)
+					 (< (abs (- a b)) 0.01)))
+		  0.01))
+  (let ((data (list 1 2 3)))
+    (assert-true (eq data
+		     (fixed-point #'copy-list
+				  data
+				  :test #'equal)))))

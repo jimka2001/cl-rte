@@ -804,4 +804,4 @@ a valid regular type expression.
 
 (defun equivalent-patterns (rte1 rte2)
     (and (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte1 (:not ,rte2))))))
-       (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte2 (:not ,rte1))))))))
+	 (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte2 (:not ,rte1))))))))

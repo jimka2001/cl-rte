@@ -244,3 +244,18 @@
 		       :yes)
 		      ((:cat number number number number number)
 		       :no))))))
+
+(define-test test/rte-typecase-2
+  (let ((data '(1 2 3 4 )))
+    (assert-true (eq :yes
+		     (rte-typecase data
+		       ((:cat fixnum)
+			:no)
+		       ((:cat number number)
+			:no)
+		       ((:cat number number real)
+			:no)
+		       ((:cat number number number unsigned-byte)
+			:yes)
+		       ((:cat fixnum number real unsigned-byte number)
+			:no))))))

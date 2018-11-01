@@ -162,7 +162,7 @@ depend on the choice of F-... function given."
 	     (and (valid-type-p p1)
 		  (exists p2 (cdr patterns)
 		    (and (valid-type-p p2)
-			 ;; (subtype (and T1 T2) nil) means T1 and T2 are mutually exclusive such as string number
+			 ;; (subtype (and T1 T2) nil) means T1 and T2 are mutually disjoint such as string number
 			 (subtypep (list 'and p1 p2) nil))))))
       (list :empty-set)
       (remove-if (lambda (p1)

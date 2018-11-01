@@ -42,6 +42,7 @@
    "GROUP-BY-EQUIVALENCE"
    "LCONC"
    "MAKE-TEMP-DIR"
+   "MAKE-TEMP-FILE-NAME"
    "MAP-PAIRS"
    "PROCESS-KILL"
    "RND-ELEMENT"
@@ -255,8 +256,26 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
                                                          (get-universal-time)))
   "Root directory used by MAKE-TEMP-DIR")
 
+(defvar *tmp-dir-count* 0)
+
 (defun make-temp-dir (suffix)
-  (format nil "~A~A/" *tmp-dir-root* suffix))
+  (format nil "~A~A/~A/" *tmp-dir-root* (incf *tmp-dir-count*) suffix))
+
+(defun make-temp-file-name (base &key (extension nil) (ensure-file-exists nil) (ensure-dir-exists t))
+  (let* ((dir-name (make-temp-dir "tmp-dir"))
+	 (file-name (format nil "~A/~A~A" dir-name base (if extension (concatenate 'string "." extension) ""))))
+    (when ensure-dir-exists
+      (ensure-directories-exist dir-name))
+    (when ensure-file-exists
+      (ensure-directories-exist dir-name)
+      (when (probe-file file-name)
+	(return-from make-temp-file-name
+	  (make-temp-file-name base :extension extension :ensure-file-exists t)))
+      (with-open-file (str file-name
+			   :if-exists :error
+			   :if-does-not-exist :create)
+	())
+      file-name)))
 
 (defun boolean-expr-to-latex (expr &optional (stream t))
   (etypecase expr

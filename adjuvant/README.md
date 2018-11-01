@@ -69,6 +69,21 @@ PKG> (let (pairs)
 ===> ((C D) (B D) (B C) (A D) (A C) (A B))
 ````
 
+* `dolist-tconc` -- like `DOLIST` but used for iterating over a TCONC structure.
+An advantage of useing `DOLIST-TCONC` rather than `DOLIST` is that you can call TCONC
+within the loop an be sure that the new elements are visited before the loop terminates.
+````
+PKG> (defvar *BUF* (list nil))
+PKG> (tconc *BUF* 10)
+PKG> (dolist-tconc (item *BUF*)
+       (when (and (not (member (1- item) (car *BUF*)))
+                  (plusp (1- item)))
+          (tconc *BUF* (1- item))))
+PKG> (car *BUF*)
+==> (10 9 8 7 6 5 4 3 2 1)
+````
+
+
 * `tree-reduce` -- Same semantics as `CL:REDUCE`, but does the evaluation tree-wise rather than left-to-right.
 I.e., it attempts to evaluate as `(+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7)))`, rather than 
 `(+ (+ (+ (+ (+ (+ (+ x0 x1) x2) x3) x4) x5) z6) z7)`.

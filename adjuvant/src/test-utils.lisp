@@ -30,10 +30,22 @@
   (let ((buf (list nil)))
     (tconc buf 1)
     ;; test that we can add to a tconc struct while iterating over it
-    (dolist (item (car buf))
+    (dolist-tconc (item buf)
       (when (= 1 item)
 	(tconc buf 2)))
     (assert-true (equal (car buf) '(1 2)))))
+
+(define-test test/dolist-tconc
+  (let ((buf (list nil)))
+    (tconc buf 10)
+    (dolist-tconc (item buf)
+      (when (and (not (member (1- item) (car buf)))
+		 (plusp (1- item)))
+	(tconc buf (1- item))))
+    (assert-true (equal (car buf)
+			'(10 9 8 7 6 5 4 3 2 1)))))
+
+
 
 (define-test test/group-by
   (assert-true (null (group-by nil)))

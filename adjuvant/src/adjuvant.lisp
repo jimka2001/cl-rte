@@ -30,6 +30,7 @@
    "CHOOSE-RANDOMLY"
    "COMPARE-OBJECTS"
    "DEF-CACHE-FUN"
+   "DOLIST-TCONC"
    "ENCODE-TIME"
    "EXISTS"
    "FORALL"
@@ -166,6 +167,19 @@ than as keywords."
 
 (defun tconc (buf &rest items)
   (lconc buf items))
+
+(defun map-tconc (1-ary tconc-buf)
+  "non-public helper function for dolist-tconc"
+  (let ((buf (car tconc-buf)))
+    (while buf
+      (funcall 1-ary (car buf))
+      (pop buf))))
+
+(defmacro dolist-tconc ((var tconc-buf &optional result-form) &body body)
+  "DOLIST is not a dependable way to iterate over the items in a TCONC structure.
+USE DOLIST-TCONC instead."
+  `(progn (map-tconc (lambda (,var) ,@body) ,tconc-buf)
+	  ,result-form))
 
 (defun type-expand (type)
   "Expand a type, similar to macro-expand, if the given type specifier is not a user defined type, then an EQUAL type is returned."

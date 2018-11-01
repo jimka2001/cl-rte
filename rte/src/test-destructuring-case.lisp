@@ -755,7 +755,7 @@
 		      (type string y)))))))
     (format t "~S~%" pattern)
     (ndfa-to-dot
-     (make-state-machine pattern)
+     (rte-to-dfa pattern)
      #p"/tmp/dfa2.png" :state-legend nil)))
 
 (defun test-graph-3keys ()
@@ -772,7 +772,7 @@
 		      (type fixnum z)))))))
     (format t "~S~%" pattern)
     (ndfa-to-dot 
-     (make-state-machine pattern)
+     (rte-to-dfa pattern)
      #p"/tmp/dfa3.png"
      :transition-abrevs '((t t1)
 			  (list t2)
@@ -814,7 +814,7 @@
 		   (:cat (:* (not (eql :z)) t) (:? (eql :z) fixnum (:* t))))))
     (format t "~S~%" pattern)
     (ndfa-to-dot 
-     (make-state-machine pattern)
+     (rte-to-dfa pattern)
      #p"/tmp/dfa3.png"
      :transition-abrevs '((t t1)
 			  (list t2)
@@ -852,7 +852,7 @@
 			   (:cat (:* (not (eql :z)) t) (:? (eql :z) fixnum (:* t))))))))
     (format t "~S~%" pattern)
     (ndfa::ndfa-to-dot 
-     (make-state-machine pattern)
+     (rte-to-dfa pattern)
      #p"/tmp/dfa4.png"
      :transition-abrevs '((t t1)
 			  (list t2)
@@ -882,8 +882,8 @@
   (format t "~S~%" pattern)
   (ndfa-to-dot 
    (if trim
-       (trim-state-machine (make-state-machine pattern))
-       (make-state-machine pattern))
+       (trim-state-machine (rte-to-dfa pattern))
+       (rte-to-dfa pattern))
    file
    :transition-legend t
    :state-legend t))

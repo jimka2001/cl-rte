@@ -494,7 +494,7 @@ a fixed point is found."
 (defgeneric dump-code (object))
 
 (defmethod dump-code ((pattern list))
-  (dump-code (make-state-machine pattern)))
+  (dump-code (rte-to-dfa pattern)))
 
 (defmethod dump-code ((ndfa rte-state-machine))
   (let* ((states (append (ndfa:get-initial-states ndfa)
@@ -628,7 +628,7 @@ a fixed point is found."
 	   input-sequence)
     current-states))
 
-(defun make-state-machine (pattern)
+(defun rte-to-dfa (pattern)
   "Create and return a finite state machine (ndfa) which can be used to determine if a given list
 consists of values whose types match PATTERN."
 
@@ -728,7 +728,7 @@ consists of values whose types match PATTERN."
 
 (defmethod match-sequence (input-sequence (pattern list))
   (match-sequence input-sequence (or (find-state-machine pattern)
-				     (remember-state-machine (make-state-machine pattern) pattern))))
+				     (remember-state-machine (rte-to-dfa pattern) pattern))))
 
 (defun make-rte-function-name (pattern)
   (when (and (consp pattern)
@@ -745,7 +745,7 @@ consists of values whose types match PATTERN."
 
 (defun define-rte (pattern)
   (setf (gethash pattern *rte-types*)
-	(let ((dfa (make-state-machine pattern))
+	(let ((dfa (rte-to-dfa pattern))
 	      (function-name (make-rte-function-name pattern)))
 	  (register-dependents dfa)
 	  (remember-state-machine dfa pattern)
@@ -783,7 +783,7 @@ a valid regular type expression.
 
 (defmacro defrte (pattern)
   "Declare a given RTE patter so that that it can be used when loaded from fasl."
-  (let* ((dfa (make-state-machine pattern))
+  (let* ((dfa (rte-to-dfa pattern))
 	 (name (make-rte-function-name pattern))
 	 (code (dump-code dfa)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
@@ -813,5 +813,6 @@ a valid regular type expression.
   (setf *type-functions* (make-hash-table)))
 
 (defun equivalent-patterns (rte1 rte2)
-  (and (null (get-final-states (trim-state-machine (make-state-machine `(:and ,rte1 (:not ,rte2))))))
-       (null (get-final-states (trim-state-machine (make-state-machine `(:and ,rte2 (:not ,rte1))))))))
+  
+  (and (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte1 (:not ,rte2))))))
+       (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte2 (:not ,rte1))))))))

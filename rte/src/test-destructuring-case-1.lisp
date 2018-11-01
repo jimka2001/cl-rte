@@ -229,3 +229,18 @@
 	 (assert-true (= d 4)))))
 
     (assert-true (= n 3))))
+
+(define-test test/rte-typecase-1
+  (let ((data '(1 2 3 4 )))
+    (assert-true (eq :yes
+		    (rte-typecase data
+		      ((:cat number)
+		       :no)
+		      ((:cat number number)
+		       :no)
+		      ((:cat number number number)
+		       :no)
+		      ((:cat number number number number)
+		       :yes)
+		      ((:cat number number number number number)
+		       :no))))))

@@ -1,7 +1,7 @@
 
 (in-package :rte)
 
-(let ((sm (make-state-machine '(:0-* (:0-1 (:or string 
+(let ((sm (rte-to-dfa '(:0-* (:0-1 (:or string 
 					     (satisfies oddp)))
 				 (satisfies evenp)))))
   (ndfa:ndfa-to-dot sm #p"/tmp/jnewton/graph11.png"))
@@ -13,7 +13,7 @@
   '(and integer (satisfies evenp)))
 
 
-(let ((sm (make-state-machine '(:0-* (:0-1 (:or string 
+(let ((sm (rte-to-dfa '(:0-* (:0-1 (:or string 
 					     odd))
 				 even))))
   (ndfa:ndfa-to-dot sm #p"/tmp/jnewton/graph12.dot")
@@ -27,7 +27,7 @@
   '(and integer (or (eql 0) (satisfies evenp))))
 
 
-(let ((sm (make-state-machine '(:0-* (:0-1 (:or string 
+(let ((sm (rte-to-dfa '(:0-* (:0-1 (:or string 
 					     odd))
 				 even))))
   (ndfa:ndfa-to-dot sm #p"/tmp/jnewton/graph13.png"))
@@ -38,7 +38,7 @@
 
 (deftype even ()
     '(and integer (not (satisfies oddp)) (or (eql 0) (satisfies evenp))))
-(let ((sm (make-state-machine '(:0-* (:0-1 (:or string 
+(let ((sm (rte-to-dfa '(:0-* (:0-1 (:or string 
 					     odd))
 				 even))))
   (ndfa:ndfa-to-dot sm #p"/tmp/jnewton/graph14.png"))

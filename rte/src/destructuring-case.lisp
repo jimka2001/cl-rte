@@ -333,20 +333,22 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 		 (:cat ,req-pattern
 		       ,tail-pattern))))))
 
-(defmacro rte-typecase (object-form &rest clauses)
+(defmacro rte-typecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
   (let ((object (gensym))
-	previous-anti-patterns)
+	previous-patterns)
     (flet ((transform-clause (clause)
 	     (destructuring-bind (pattern &rest body) clause
-	       (let* ((derived-pattern `(:and ,pattern ,@previous-anti-patterns))
+	       (let* ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns))))
 		      (used-type (if (equivalent-patterns :empty-set
 							  derived-pattern)
 				     `(and nil (rte ,derived-pattern))
 				     `(rte ,pattern))))
+		 (format t "previous: ~A~%" previous-patterns)
+		 (format t "derived: ~A~%" derived-pattern)
 		 (prog1 `(,used-type ,@body)
-		   (push `(:not ,pattern) previous-anti-patterns))))))
+		   (push pattern previous-patterns))))))
       `(let ((,object ,object-form))
 	 (typecase ,object
 	   ((not list) nil)

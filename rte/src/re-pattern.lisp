@@ -626,10 +626,11 @@ a fixed point is found."
 	   input-sequence)
     current-states))
 
-(defun rte-to-dfa (pattern)
+(defun rte-to-dfa (pattern &key trim reduce)
   "Create and return a finite state machine (ndfa) which can be used to determine if a given list
 consists of values whose types match PATTERN."
-
+  ;; cannot reduce without trimming
+  (setf trim (or trim reduce))
   ;; TODO need to sort the transitions of each state such that transitions labeled with an atomic
   ;;   type come before transistions with parameterized types.  I.e., list comes before (rte ...)
   ;;   I.e., we want to avoid testing (rte...) type if the object is not a list, in the case that
@@ -702,6 +703,12 @@ consists of values whose types match PATTERN."
       (create-state pattern :initial-p t)
       (loop :while pending
 	    :do (create-state (pop pending)))
+      (setf sm
+	    (cond (reduce
+		   (reduce-state-machine sm))
+		  (trim
+		   (trim-state-machine sm))
+		  (t sm)))
       (parallel-transitions)
       (sort-transitions)
       (calc-sticky))

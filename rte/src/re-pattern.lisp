@@ -492,7 +492,7 @@ a fixed point is found."
 (defgeneric dump-code (object))
 
 (defmethod dump-code ((pattern list))
-  (dump-code (rte-to-dfa pattern)))
+  (dump-code (rte-to-dfa pattern :reduce t)))
 
 (defmethod dump-code ((ndfa rte-state-machine))
   (let* ((states (append (ndfa:get-initial-states ndfa)

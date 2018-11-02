@@ -344,9 +344,34 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TY
 		      (used-type (if (equivalent-patterns :empty-set
 							  derived-pattern)
 				     `(and nil (rte ,derived-pattern))
-				     `(rte ,pattern))))
-		 (format t "previous: ~A~%" previous-patterns)
-		 (format t "derived: ~A~%" derived-pattern)
+				     `(rte ,derived-pattern))))
+		 ;; (progn
+		 ;;   (format t "-----------~%pattern: ~S~%" pattern)
+		 ;;   (format t "previous: ~S~%" previous-patterns)
+		 ;;   (format t "derived: ~S~%" derived-pattern)
+		 ;;   (let* ((dfa-derived (rte-to-dfa derived-pattern))
+		 ;; 	  (dfa-given (rte-to-dfa pattern))
+		 ;; 	  (dfa-given-trim (trim-state-machine dfa-given))
+		 ;; 	  (dfa-derived-trim (trim-state-machine dfa-derived))
+		 ;; 	  (dfa-given-reduced (progn (format t "reducing dfa of ~S~%" pattern)
+		 ;; 				    (reduce-state-machine dfa-given)))
+		 ;; 	  (dfa-derived-reduced (progn (format t "reducing dfa of ~S~%" derived-pattern)
+		 ;; 				      (reduce-state-machine dfa-derived))))
+		 ;;     (flet ((report-dfa (dfa comment &key view)
+		 ;; 	      (format t "~A   dfa size: ~D~%" comment (length (states dfa)))
+		 ;; 	      (when view
+		 ;; 		(ndfa-to-dot dfa  (make-temp-file-name comment
+		 ;; 						       :extension "png"
+		 ;; 						       :ensure-file-exists t)
+		 ;; 			     :view t :transition-legend t))))
+		 ;;       ;; TODO need to minimize here, not just trim
+		 ;;       (report-dfa dfa-given "given" :view t)
+		 ;;       (report-dfa dfa-derived "derived")
+		 ;;       (report-dfa dfa-given-trim "given-trim")
+		 ;;       (report-dfa dfa-given-reduced "given-reduced")
+		 ;;       (report-dfa dfa-derived-trim "derived-trim")
+		 ;;       (report-dfa dfa-derived-reduced "derived-reduced" :view t))
+		 ;;     ))
 		 (prog1 `(,used-type ,@body)
 		   (push pattern previous-patterns))))))
       `(let ((,object ,object-form))

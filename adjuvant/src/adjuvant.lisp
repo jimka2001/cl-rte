@@ -250,6 +250,7 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
     
 (defvar *tmp-dir-root* (ensure-directories-exist (format nil "/tmp/~A/~A/~D/"
                                                          (or (getenv "HOST")
+							     #+sbcl (machine-instance)
                                                              "unknown-host")
                                                          (or (getenv "USER")
                                                              "unknown-user")

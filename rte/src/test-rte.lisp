@@ -20,8 +20,8 @@
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (defpackage :rte-test
-  (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :scrutiny))
+;;  (:shadowing-import-from :rte "TEST")
+  (:use :cl :rte :scrutiny :lisp-types))
 
 (do-symbols (name :rte)
   (import name :rte-test))

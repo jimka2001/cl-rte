@@ -473,7 +473,15 @@ a fixed point is found."
 
 (defclass rte-state-machine (ndfa:state-machine)
   ((ndfa::test :initform #'typep)
-   (deterministicp :initform t)))
+   (deterministicp :initform t)
+   ;; TODO, perhaps it is better to use bdd versions of these function
+   ;; as they'll do a better job of reduction and detection of equal
+   ;; labels
+   (transition-label-combine :initform (lambda (a b)
+					 (type-to-dnf-bottom-up `(or ,a ,b))))
+   (transition-label-equal :initform (lambda (a b)
+				       (and (subtypep a b)
+					    (subtypep b a))))))
 
 (defmethod print-object ((rte rte-state-machine) stream)
   (print-unreadable-object (rte stream :type t :identity nil)

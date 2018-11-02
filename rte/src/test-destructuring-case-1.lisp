@@ -260,6 +260,51 @@
 		       ((:cat fixnum number real unsigned-byte number)
 			:no))))))
 
+(define-test test/rte-to-dfa
+  (dolist (rte '((:CAT (:* FIXNUM) NUMBER)
+		 (:AND (:CAT (:* FIXNUM) NUMBER) (:NOT (:OR)))
+		 (:CAT (:OR NUMBER SYMBOL) NUMBER)
+		 (:AND (:CAT (:OR NUMBER SYMBOL) NUMBER)
+		  (:NOT (:OR (:CAT (:* FIXNUM) NUMBER))))))
+    (assert-true (rte-to-dfa rte :trim nil :reduce nil))
+    (assert-true (rte-to-dfa rte :trim t :reduce nil))
+    (assert-true (rte-to-dfa rte :reduce t))))
+
+(define-test test/rte-typecase-3
+  (let ((data '(:x 3.4)))
+    (assert-true (eq :yes
+		     (rte-typecase data
+		       ((:cat (:* fixnum) number)
+			:no)
+		       ((:cat (:or number symbol) number)
+			:yes))))))
+
+(define-test ndfa/test-trim-0
+  (let ((dfa (rte-to-dfa '(:AND (:CAT (:OR NUMBER SYMBOL) NUMBER)
+			   (:NOT (:OR (:CAT (:* FIXNUM) NUMBER)))) :trim t :reduce nil)))
+    ;;(ndfa-to-dot dfa t :view nil :transition-legend t :state-legend t)
+    ;;(ndfa-to-dot dfa nil :view t :transition-legend t :state-legend t)
+    ;; assert that all transitions point to a state which is actually
+    ;; in the state list of the dfa
+    (dolist (state (states dfa))
+      (dolist (transition (transitions state))
+	(assert-true (member (next-state transition) (states dfa) :test #'eq)))
+      (assert-false (member nil (transitions state))))))
+
+(define-test ndfa/test-reduce-0
+  (let* ((pattern '(:AND (:CAT (:OR NUMBER SYMBOL) NUMBER)
+		    (:NOT (:OR (:CAT (:* FIXNUM) NUMBER)))))
+	 (dfa (rte-to-dfa pattern :trim nil :reduce nil))
+	 (dfa-trim (rte-to-dfa pattern :trim t :reduce nil))
+	 (dfa-reduce (rte-to-dfa pattern :trim t :reduce t))
+	 )
+    
+    (assert-true (= 7 (length (states dfa))))
+    (assert-true (= 4 (length (states dfa-trim))))
+    (assert-true (= 3 (length (states dfa-reduce))))
+))
+
+
 (define-test ndfa/test-reduce-1
   (let* ((dfa (make-ndfa '((:label i :initial-p t
 			    :transitions ((:next-label 1 :transition-label fixnum)

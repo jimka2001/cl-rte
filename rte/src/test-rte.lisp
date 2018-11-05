@@ -21,7 +21,7 @@
 
 (defpackage :rte-test
 ;;  (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :scrutiny :lisp-types))
+  (:use :cl :rte :scrutiny :lisp-types :ndfa))
 
 (do-symbols (name :rte)
   (import name :rte-test))

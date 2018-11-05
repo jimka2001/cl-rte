@@ -734,3 +734,6 @@
   
   )
 
+(define-test test/synchronized-product
+  (assert-true (synchronized-product (rte-to-dfa :empty-set)
+				     (rte-to-dfa :empty-set))))

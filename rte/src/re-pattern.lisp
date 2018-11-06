@@ -496,7 +496,9 @@ a fixed point is found."
 							    (mdtd-baseline (union labels1 labels2))))
 					    (match-label #'subtypep)
 					    (final-state-callback (lambda (product-state st1 st2)
-								    (when (and (state-exit-form st1)
+								    (when (and st1
+									       st2
+									       (state-exit-form st1)
 									       (state-exit-form st2)
 									       (not (equal (state-exit-form st1)
 											   (state-exit-form st2))))
@@ -504,8 +506,8 @@ a fixed point is found."
 									    (state-exit-form st1)
 									    (state-exit-form st2)))
 								    (setf (state-exit-form product-state)
-									  (or (state-exit-form st1)
-									      (state-exit-form st2))))))
+									  (or (and st1 (state-exit-form st1))
+									      (and st2 (state-exit-form st2)))))))
   (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
 				       :union-labels union-labels
 				       :match-label match-label
@@ -524,12 +526,19 @@ a fixed point is found."
 			(mapcar (lambda (state)
 				  (list state (incf n)))
 				states)))
+	 (exit-form-p (find-if (lambda (state)
+				 ;; something evaluatable?
+				 (typecase (state-exit-form state)
+				   ((member t nil) nil)
+				   (keyword nil)
+				   (cons t)
+				   (symbol t)
+				   (t nil))) (get-final-states ndfa)))
 	 (list-end `(null ,var))
 	 (list-next `(pop ,var))
-	 ;; TODO i/len/check should be gensyms
-	 (i (gensym "I"))
-	 (check (gensym "CHECK"))
-	 (len (gensym "LEN"))
+	 (i (if exit-form-p (gensym "I") 'i))
+	 (check (if exit-form-p (gensym "CHECK") 'check))
+	 (len (if exit-form-p (gensym "LEN") 'len))
 	 (simple-vector-end `(>= ,i ,len))
 	 (simple-vector-next `(prog1 (svref ,var ,i)
 				(incf i)))
@@ -589,7 +598,6 @@ a fixed point is found."
 	 (declare (optimize (speed 3) (debug 0) (safety 0))
 		  ;; (optimize (speed 0) (debug 3) (safety 3))
 		  )
-	 ;; TODO check must be gensym
 	 (block ,check
 	   (typecase ,var
 	     (list

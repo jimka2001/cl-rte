@@ -270,6 +270,13 @@
     (assert-true (rte-to-dfa rte :trim t :reduce nil))
     (assert-true (rte-to-dfa rte :reduce t))))
 
+(define-test test/rte-typecase-4
+  (assert-true (macroexpand-1 '(rte-typecase data
+				((:cat (:* fixnum) number)
+				 :no)
+				((:cat (:or number symbol) number)
+				 :yes)))))
+
 (define-test test/rte-typecase-3
   (let ((data '(:x 3.4)))
     (assert-true (eq :yes

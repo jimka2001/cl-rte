@@ -385,8 +385,10 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TY
 	   ,@(mapcar #'unreachable-clause unreachable-bodys)
 	   (t
 	    (funcall ,(dump-code (tree-reduce #'(lambda (dfa1 dfa2)
-						  (synchronized-product dfa1 dfa2
-									:boolean-function (lambda (a b) (or a b))))
+						  (declare (type rte-state-machine dfa1 dfa2))
+						  (the rte-state-machine
+						       (synchronized-product dfa1 dfa2
+									     :boolean-function (lambda (a b) (or a b)))))
 					      dfas :initial-value (rte-to-dfa :empty-set)) :var object)
 		     ,object)
 	    ))))))

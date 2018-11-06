@@ -361,6 +361,15 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
       (report-dfa dfa-derived-reduced "derived-reduced" :view t))
     ))
 
+(defun rte-synchronized-product (dfas &key (boolean-function (lambda (a b)
+							       (or a b))))
+  (tree-reduce #'(lambda (dfa1 dfa2)
+		   (declare (type rte-state-machine dfa1 dfa2))
+		   (the rte-state-machine
+			(synchronized-product dfa1 dfa2
+					      :boolean-function boolean-function)))
+	       dfas :initial-value (rte-to-dfa :empty-set)))
+
 (defmacro rte-typecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
@@ -378,18 +387,13 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TY
 	     `(nil ,@unreachable-body)))
       (dolist (clause clauses)
 	(transform-clause clause))
-      
+      (ndfa-to-dot (rte-synchronized-product dfas) nil :view t)
       `(let ((,object ,object-form))
 	 (typecase ,object
 	   ((not sequence) nil)
 	   ,@(mapcar #'unreachable-clause unreachable-bodys)
 	   (t
-	    (funcall ,(dump-code (tree-reduce #'(lambda (dfa1 dfa2)
-						  (declare (type rte-state-machine dfa1 dfa2))
-						  (the rte-state-machine
-						       (synchronized-product dfa1 dfa2
-									     :boolean-function (lambda (a b) (or a b)))))
-					      dfas :initial-value (rte-to-dfa :empty-set)) :var object)
+	    (funcall ,(dump-code (rte-synchronized-product dfas) :var object)
 		     ,object)
 	    ))))))
 

@@ -493,7 +493,7 @@ a fixed point is found."
 					  (sm2 rte-state-machine)
 					  &key (boolean-function (lambda (a b) (and a b)))
 					    (union-labels (lambda (labels1 labels2)
-							    (mdtd-baseline (union labels1 labels2))))
+							    (mdtd-baseline (union labels1 labels2 :test #'equal))))
 					    (match-label #'subtypep)
 					    (final-state-callback (lambda (product-state st1 st2)
 								    (when (and st1
@@ -553,11 +553,19 @@ a fixed point is found."
 			   (incf ,i))))
 	 
     (labels ((state-name (state)
-	       (cadr (assoc state state-assoc :test #'eq)))
+	       (declare (type ndfa::state state))
+	       (or (cadr (assoc state state-assoc :test #'eq))
+		   (error "no state name registered for state ~A, available states are ~A" state state-assoc)))
 	     (dump-typecase-transition (transition)
+	       (declare (type ndfa::transition transition))
+	       (assert (typep (ndfa:next-state transition) 'ndfa::state))
+	       (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
 	       `(,(transition-label transition)
 		 (go ,(state-name (ndfa:next-state transition)))))
 	     (dump-case-transition (transition)
+	       (declare (type ndfa::transition transition))
+	       (assert (typep (ndfa:next-state transition) 'ndfa::state))
+	       (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
 	       `(,(cdr (transition-label transition))
 		 (go ,(state-name (ndfa:next-state transition)))))
 	     (dump-end (state end)
@@ -587,9 +595,15 @@ a fixed point is found."
 			    ,(dump-end state end)
 			    ,(dump-case state next))))
 	     (dump-tagbody (end final-next)
-	       `(tagbody 
-		   (go ,(state-name (car (get-initial-states ndfa))))
-		   ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states))))
+	       (cond
+		 ((get-initial-states ndfa)
+		  (assert (= 1 (length (get-initial-states ndfa))))
+		  (assert (typep (car (get-initial-states ndfa)) 'ndfa::state))
+		  `(tagbody 
+		      (go ,(state-name (car (get-initial-states ndfa))))
+		      ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states)))
+		 (t
+		   nil))))
 
       `(lambda (,var)
 	 ;; Don't declare seq a sequence! because if this function gets called with

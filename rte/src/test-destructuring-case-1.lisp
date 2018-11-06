@@ -234,10 +234,6 @@
     (assert-true (= n 3))))
 
 
-(define-test test/synchronized-product
-  (let ((rte-t (rte-to-dfa t)))
-    (assert-true (eq rte-to-dfa
-		     (rte-synchronized-product (list rte-t))))))
 
 
 (define-test ndfa/test-trim-0

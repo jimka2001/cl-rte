@@ -87,3 +87,32 @@
 				((:cat (:or number symbol) number)
 				 :yes)))))
 
+(define-test test/synchronized-product
+  (let ((rte-t (rte-to-dfa t)))
+    (assert-true (eq rte-t
+		     (rte-synchronized-product (list rte-t)))))
+  (let ((rte-number (rte-to-dfa 'number))
+	(rte-string (rte-to-dfa 'string)))
+    (assert-true (= 2 (length (states rte-number))))
+    (assert-true (= 2 (length (states rte-string))))
+    (let ((rte-or (synchronized-product rte-number rte-string :boolean-function (lambda (a b) (or a b)))))
+      (assert-true (= 2 (length (states rte-or))))
+      (dolist (st-i (get-initial-states rte-or))
+	(dolist (trans (transitions st-i))
+	  (assert-true (member (transition-label trans)
+			       '((or string number)
+				 (or number string)) :test #'equal)))))
+		  
+    (assert-true (= 2 (length (states (synchronized-product rte-string rte-number :boolean-function (lambda (a b) (or a b)))))))
+    (assert-true (= 0 (length (states (synchronized-product rte-string rte-number :boolean-function (lambda (a b) (and a b)))))))
+
+    (let ((dfa-or (rte-synchronized-product (list rte-number rte-string))))
+      (assert-true (= 2 (length (states dfa-or))))
+      (dolist (st-i (get-initial-states dfa-or))
+	(dolist (trans (transitions st-i))
+	  (assert-true (member (transition-label trans)
+			       '((or string number)
+				 (or number string)) :test #'equal)))))))
+    
+    
+    

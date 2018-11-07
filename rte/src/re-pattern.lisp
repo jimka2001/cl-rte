@@ -712,7 +712,8 @@ consists of values whose types match PATTERN."
 				      :label re
 				      :initial-p initial-p
 				      :final-p nullable-p
-				      :exit-form final-body
+				      :exit-form (when nullable-p
+						   final-body)
 				      :transitions transitions)))))
 	   (calc-sticky ()
 	     ;; if a state only has transitions which are t (or some supertype of t such as (or number (not number))

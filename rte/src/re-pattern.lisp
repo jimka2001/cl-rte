@@ -522,15 +522,6 @@ a fixed point is found."
   (let* ((states (append (ndfa:get-initial-states ndfa)
 			 (set-difference (ndfa:states ndfa)
 					 (ndfa:get-initial-states ndfa) :test #'eq)))
-	 (state-assoc (let ((n 0))
-			(mapcar (lambda (state)
-				  ;; TODO this should be changed to
-				  ;;   gensym because the state exit
-				  ;;   form might contain a goto to a
-				  ;;   symbol.  we have to avoid name
-				  ;;   conflict of tags
-				  (list state (incf n)))
-				states)))
 	 (exit-form-p (find-if (lambda (state)
 				 ;; something evaluatable?
 				 (typecase (state-exit-form state)
@@ -539,6 +530,12 @@ a fixed point is found."
 				   (cons t)
 				   (symbol t)
 				   (t nil))) (get-final-states ndfa)))
+	 (state-assoc (let ((n 0))
+			(mapcar (lambda (state)
+				  (list state (if exit-form-p
+						  (gensym "L")
+						  (incf n))))
+				states)))
 	 (list-end `(null ,var))
 	 (list-next `(pop ,var))
 	 (i (if exit-form-p (gensym "I") 'i))

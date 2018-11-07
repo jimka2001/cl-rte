@@ -524,6 +524,11 @@ a fixed point is found."
 					 (ndfa:get-initial-states ndfa) :test #'eq)))
 	 (state-assoc (let ((n 0))
 			(mapcar (lambda (state)
+				  ;; TODO this should be changed to
+				  ;;   gensym because the state exit
+				  ;;   form might contain a goto to a
+				  ;;   symbol.  we have to avoid name
+				  ;;   conflict of tags
 				  (list state (incf n)))
 				states)))
 	 (exit-form-p (find-if (lambda (state)

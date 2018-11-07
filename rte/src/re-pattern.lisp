@@ -474,7 +474,7 @@ a fixed point is found."
 (defclass rte-state-machine (ndfa:state-machine)
   ((ndfa::test :initform #'typep)
    (deterministicp :initform t)
-   ;; TODO, perhaps it is better to use bdd versions of these function
+   ;; TODO, perhaps it is better to use bdd versions of these functions
    ;; as they'll do a better job of reduction and detection of equal
    ;; labels
    (transition-label-combine :initform (lambda (a b)
@@ -488,53 +488,100 @@ a fixed point is found."
     (dolist (state (get-initial-states rte))
       (format stream "~A" state))))
 
+(defmethod populate-synchronized-product ((sm-product rte-state-machine)
+					  (sm1 rte-state-machine)
+					  (sm2 rte-state-machine)
+					  &key (boolean-function (lambda (a b) (and a b)))
+					    (union-labels (lambda (labels1 labels2)
+							    (mdtd-baseline (union labels1 labels2 :test #'equal))))
+					    (match-label #'subtypep)
+					    (final-state-callback (lambda (product-state st1 st2)
+								    (when (and st1
+									       st2
+									       (state-exit-form st1)
+									       (state-exit-form st2)
+									       (not (equal (state-exit-form st1)
+											   (state-exit-form st2))))
+								      (warn "unexpected conflicting exit forms: ~A vs ~A"
+									    (state-exit-form st1)
+									    (state-exit-form st2)))
+								    (setf (state-exit-form product-state)
+									  (or (and st1 (state-exit-form st1))
+									      (and st2 (state-exit-form st2)))))))
+  (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
+				       :union-labels union-labels
+				       :match-label match-label
+				       :final-state-callback final-state-callback))
 
-(defgeneric dump-code (object))
+(defgeneric dump-code (object &key var))
 
-(defmethod dump-code ((pattern list))
-  (dump-code (rte-to-dfa pattern :reduce t)))
+(defmethod dump-code ((pattern list) &key (var 'seq))
+  (dump-code (rte-to-dfa pattern :reduce t) :var var))
 
-(defmethod dump-code ((ndfa rte-state-machine))
+(defmethod dump-code ((ndfa rte-state-machine) &key (var 'seq))
   (let* ((states (append (ndfa:get-initial-states ndfa)
 			 (set-difference (ndfa:states ndfa)
 					 (ndfa:get-initial-states ndfa) :test #'eq)))
 	 (state-assoc (let ((n 0))
 			(mapcar (lambda (state)
+				  ;; TODO this should be changed to
+				  ;;   gensym because the state exit
+				  ;;   form might contain a goto to a
+				  ;;   symbol.  we have to avoid name
+				  ;;   conflict of tags
 				  (list state (incf n)))
 				states)))
-	 (list-end `(null seq))
-	 (list-next `(pop seq))
-	 
-	 (simple-vector-end `(>= i len))
-	 (simple-vector-next `(prog1 (svref seq i)
+	 (exit-form-p (find-if (lambda (state)
+				 ;; something evaluatable?
+				 (typecase (state-exit-form state)
+				   ((member t nil) nil)
+				   (keyword nil)
+				   (cons t)
+				   (symbol t)
+				   (t nil))) (get-final-states ndfa)))
+	 (list-end `(null ,var))
+	 (list-next `(pop ,var))
+	 (i (if exit-form-p (gensym "I") 'i))
+	 (check (if exit-form-p (gensym "CHECK") 'check))
+	 (len (if exit-form-p (gensym "LEN") 'len))
+	 (simple-vector-end `(>= ,i ,len))
+	 (simple-vector-next `(prog1 (svref ,var ,i)
 				(incf i)))
 
-	 (vector-end `(>= i len))
-	 (vector-next `(prog1 (aref seq i)
-			 (incf i)))
+	 (vector-end `(>= ,i ,len))
+	 (vector-next `(prog1 (aref ,var ,i)
+			 (incf ,i)))
 
-	 #+sbcl (sequence-end `(or (sequence:emptyp seq)
-			    (>= i len)))
-	 #+sbcl (sequence-next `(prog1 (sequence:elt seq i)
-			   (incf i))))
+	 #+sbcl (sequence-end `(or (sequence:emptyp ,var)
+			    (>= ,i ,len)))
+	 #+sbcl (sequence-next `(prog1 (sequence:elt ,var ,i)
+			   (incf ,i))))
 	 
     (labels ((state-name (state)
-	       (cadr (assoc state state-assoc :test #'eq)))
+	       (declare (type ndfa::state state))
+	       (or (cadr (assoc state state-assoc :test #'eq))
+		   (error "no state name registered for state ~A, available states are ~A" state state-assoc)))
 	     (dump-typecase-transition (transition)
+	       (declare (type ndfa::transition transition))
+	       (assert (typep (ndfa:next-state transition) 'ndfa::state))
+	       (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
 	       `(,(transition-label transition)
 		 (go ,(state-name (ndfa:next-state transition)))))
 	     (dump-case-transition (transition)
+	       (declare (type ndfa::transition transition))
+	       (assert (typep (ndfa:next-state transition) 'ndfa::state))
+	       (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
 	       `(,(cdr (transition-label transition))
 		 (go ,(state-name (ndfa:next-state transition)))))
 	     (dump-end (state end)
 	       (cond ((null (state-final-p state))
 		      `(when ,end
-			 (return-from check nil)))
+			 (return-from ,check nil)))
 		     ((state-sticky-p state)
-		      `(return-from check t))
+		      `(return-from ,check ,(state-exit-form state)))
 		     (t
 		      `(when ,end
-			 (return-from check t)))))
+			 (return-from ,check ,(state-exit-form state))))))
 	     (dump-case (state next)
 	       (cond
 		 ((every #'(lambda (trans)
@@ -543,46 +590,52 @@ a fixed point is found."
 			 (transitions state))
 		  `(case ,next
 		     ,@(mapcar #'dump-case-transition (transitions state))
-		     (t (return-from check nil))))
+		     (t (return-from ,check nil))))
 		 (t
 		  `(typecase ,next
                      ,@(mapcar #'dump-typecase-transition (transitions state))
-                     (t (return-from check nil))))))
+                     (t (return-from ,check nil))))))
 	     (dump-state (state end next)
 	       (copy-list `(,(state-name state)
 			    ,(dump-end state end)
 			    ,(dump-case state next))))
 	     (dump-tagbody (end final-next)
-	       `(tagbody 
-		   (go ,(state-name (car (get-initial-states ndfa))))
-		   ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states))))
+	       (cond
+		 ((get-initial-states ndfa)
+		  (assert (= 1 (length (get-initial-states ndfa))))
+		  (assert (typep (car (get-initial-states ndfa)) 'ndfa::state))
+		  `(tagbody 
+		      (go ,(state-name (car (get-initial-states ndfa))))
+		      ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states)))
+		 (t
+		   nil))))
 
-      `(lambda (seq)
+      `(lambda (,var)
 	 ;; Don't declare seq a sequence! because if this function gets called with
 	 ;; a non-sequence, we want to simply return nil, rather than signaling
 	 ;; an error.
 	 (declare (optimize (speed 3) (debug 0) (safety 0))
 		  ;; (optimize (speed 0) (debug 3) (safety 3))
 		  )
-	 (block check
-	   (typecase seq
+	 (block ,check
+	   (typecase ,var
 	     (list
 	      ,(dump-tagbody list-end list-next))
 	     (simple-vector
-	      (let ((i 0)
-		    (len (length seq)))
-		(declare (type fixnum i len) (ignorable len))
+	      (let ((,i 0)
+		    (,len (length ,var)))
+		(declare (type (and unsigned-byte fixnum) ,i ,len) (ignorable ,len))
 		,(dump-tagbody simple-vector-end simple-vector-next)))
 	     (vector
-	      (let ((i 0)
-		    (len (length seq)))
-		(declare (type fixnum i len) (ignorable len))
+	      (let ((,i 0)
+		    (,len (length ,var)))
+		(declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
 		,(dump-tagbody vector-end vector-next)))
 	     #+sbcl
 	     (sequence		 ; case to handle extensible sequences
-	      (let ((i 0)
-		    (len (sequence:length seq))) ; sequence (such as infinite sequence) might not support length
-		(declare (type fixnum i len) (ignorable len))
+	      (let ((,i 0)
+		    (,len (sequence:length ,var))) ; sequence (such as infinite sequence) might not support length
+		(declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
 		,(dump-tagbody sequence-end sequence-next)))
 	     (t
 	      nil)))))))
@@ -626,7 +679,7 @@ a fixed point is found."
 	   input-sequence)
     current-states))
 
-(defun rte-to-dfa (pattern &key trim reduce)
+(defun rte-to-dfa (pattern &key trim reduce (final-body t))
   "Create and return a finite state machine (ndfa) which can be used to determine if a given list
 consists of values whose types match PATTERN."
   ;; cannot reduce without trimming
@@ -647,7 +700,9 @@ consists of values whose types match PATTERN."
 		    nil)
 		   (t
 		    (push re done)
-		    (let (transitions)
+		    (let (transitions
+			  (nullable-p (nullable re)))
+		      ;; TODO this is still using mdtd-baseline, it should be using a faster version
 		      (dolist (type (mdtd-baseline (uniquify (first-types re))))
 			(let ((deriv (derivative re type)))
 			  (case deriv
@@ -661,7 +716,9 @@ consists of values whose types match PATTERN."
 		      (ndfa:add-state sm
 				      :label re
 				      :initial-p initial-p
-				      :final-p (nullable re)
+				      :final-p nullable-p
+				      :exit-form (when nullable-p
+						   final-body)
 				      :transitions transitions)))))
 	   (calc-sticky ()
 	     ;; if a state only has transitions which are t (or some supertype of t such as (or number (not number))
@@ -818,5 +875,5 @@ a valid regular type expression.
   (setf *type-functions* (make-hash-table)))
 
 (defun equivalent-patterns (rte1 rte2)
-    (and (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte1 (:not ,rte2))))))
-	 (null (get-final-states (trim-state-machine (rte-to-dfa `(:and ,rte2 (:not ,rte1))))))))
+    (and (null (get-final-states (rte-to-dfa `(:and ,rte1 (:not ,rte2)) :reduce t)))
+	 (null (get-final-states (rte-to-dfa `(:and ,rte2 (:not ,rte1)) :reduce t)))))

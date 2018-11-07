@@ -21,13 +21,14 @@
 
 (defpackage :rte-test
 ;;  (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :scrutiny :lisp-types))
+  (:use :cl :rte :scrutiny :lisp-types :ndfa))
 
-(do-symbols (name :rte)
-  (import name :rte-test))
+
 
 (in-package :rte-test)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (shadow-all-symbols :package-from :rte :package-into :rte-test))
 
 (defun test ()
   (run-package-tests :rte-test))

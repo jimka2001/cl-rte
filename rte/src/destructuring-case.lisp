@@ -361,25 +361,41 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
       (report-dfa dfa-derived-reduced "derived-reduced" :view t))
     ))
 
+(defun rte-synchronized-product (dfas &key (boolean-function (lambda (a b)
+							       (or a b))))
+  (tree-reduce #'(lambda (dfa1 dfa2)
+		   (declare (type rte-state-machine dfa1 dfa2))
+		   (the rte-state-machine
+			(synchronized-product dfa1 dfa2
+					      :boolean-function boolean-function)))
+	       dfas :initial-value (rte-to-dfa :empty-set)))
+
 (defmacro rte-typecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
   (let ((object (gensym))
-	previous-patterns)
+	previous-patterns
+	unreachable-bodys
+	dfas)
     (flet ((transform-clause (clause)
 	     (destructuring-bind (pattern &rest body) clause
-	       (let* ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns))))
-		      (used-type (if (equivalent-patterns :empty-set
-							  derived-pattern)
-				     `(and nil (rte ,derived-pattern))
-				     `(rte ,derived-pattern))))
-		 ;; (test-illustrate-dfas pattern previous-patterns derived-pattern)
-		 (prog1 `(,used-type ,@body)
-		   (push pattern previous-patterns))))))
+	       (let ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns)))))
+		 (if (equivalent-patterns :empty-set derived-pattern)
+		     (push body unreachable-bodys)
+		     (push (rte-to-dfa derived-pattern :reduce t :final-body `(progn ,@body))
+			   dfas)))))
+	   (unreachable-clause (unreachable-body)
+	     `(nil ,@unreachable-body)))
+      (dolist (clause clauses)
+	(transform-clause clause))
       `(let ((,object ,object-form))
 	 (typecase ,object
-	   ((not list) nil)
-	   ,@(mapcar #'transform-clause clauses))))))
+	   ((not sequence) nil)
+	   ,@(mapcar #'unreachable-clause unreachable-bodys)
+	   (t
+	    (funcall ,(dump-code (rte-synchronized-product dfas) :var object)
+		     ,object)
+	    ))))))
 
 (defun expand-destructuring-case-alt (object-form clauses)
   "OBJECT-FORM is the form to be evaluated,
@@ -405,7 +421,7 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (LAMBDA-LIST
 			    ,@body))
 		   (push `(:not ,pattern) previous-anti-patterns))))))
       `(let ((,object ,object-form))
-	 (rte-typecase ,object-form
+	 (rte-typecase ,object
 		       ,@(mapcar #'transform-clause clauses))))))
 
 (defmacro destructuring-case-alt (object-form &body clauses)

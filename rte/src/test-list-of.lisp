@@ -23,6 +23,8 @@
 
 (in-package :rte-test)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (shadow-all-symbols :package-from :rte :package-into :rte-test))
 
 (define-test type/list-of
 

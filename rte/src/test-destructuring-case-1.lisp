@@ -21,6 +21,9 @@
 
 (in-package :rte-test)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (shadow-all-symbols :package-from :rte :package-into :rte-test))
+
 (define-test test/destructuring-case-alt-1-a
   (assert-true
    (equal 3 (destructuring-case-alt '(x y z) 
@@ -230,54 +233,8 @@
 
     (assert-true (= n 3))))
 
-(define-test test/rte-typecase-1
-  (let ((data '(1 2 3 4 )))
-    (assert-true (eq :yes
-		    (rte-typecase data
-		      ((:cat number)
-		       :no)
-		      ((:cat number number)
-		       :no)
-		      ((:cat number number number)
-		       :no)
-		      ((:cat number number number number)
-		       :yes)
-		      ((:cat number number number number number)
-		       :no))))))
 
-(define-test test/rte-typecase-2
-  (let ((data '(1 2 3 4 )))
-    (assert-true (eq :yes
-		     (rte-typecase data
-		       ((:cat fixnum)
-			:no)
-		       ((:cat number number)
-			:no)
-		       ((:cat number number real)
-			:no)
-		       ((:cat number number number unsigned-byte)
-			:yes)
-		       ((:cat fixnum number real unsigned-byte number)
-			:no))))))
 
-(define-test test/rte-to-dfa
-  (dolist (rte '((:CAT (:* FIXNUM) NUMBER)
-		 (:AND (:CAT (:* FIXNUM) NUMBER) (:NOT (:OR)))
-		 (:CAT (:OR NUMBER SYMBOL) NUMBER)
-		 (:AND (:CAT (:OR NUMBER SYMBOL) NUMBER)
-		  (:NOT (:OR (:CAT (:* FIXNUM) NUMBER))))))
-    (assert-true (rte-to-dfa rte :trim nil :reduce nil))
-    (assert-true (rte-to-dfa rte :trim t :reduce nil))
-    (assert-true (rte-to-dfa rte :reduce t))))
-
-(define-test test/rte-typecase-3
-  (let ((data '(:x 3.4)))
-    (assert-true (eq :yes
-		     (rte-typecase data
-		       ((:cat (:* fixnum) number)
-			:no)
-		       ((:cat (:or number symbol) number)
-			:yes))))))
 
 (define-test ndfa/test-trim-0
   (let ((dfa (rte-to-dfa '(:AND (:CAT (:OR NUMBER SYMBOL) NUMBER)

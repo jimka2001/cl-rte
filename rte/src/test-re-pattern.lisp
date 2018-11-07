@@ -22,6 +22,8 @@
 
 (in-package :rte-test)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (shadow-all-symbols :package-from :rte :package-into :rte-test))
 
 ;; TODO add some tests with satisfies types. (satisfies oddp) (satisfies evenp) etc.
 
@@ -734,3 +736,6 @@
   
   )
 
+(define-test test/synchronized-product
+  (assert-true (synchronized-product (rte-to-dfa :empty-set)
+				     (rte-to-dfa :empty-set))))

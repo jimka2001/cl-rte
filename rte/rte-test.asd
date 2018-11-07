@@ -42,4 +42,5 @@
      (:file "test-destructuring-case-1")
      (:file "test-destructuring-case-2")
      (:file "test-destructuring-case")
-     (:file "test-ordinary-lambda-list")))))
+     (:file "test-ordinary-lambda-list")
+     (:file "test-rte-typecase")))))

@@ -543,7 +543,7 @@ a fixed point is found."
 	 (len (if exit-form-p (gensym "LEN") 'len))
 	 (simple-vector-end `(>= ,i ,len))
 	 (simple-vector-next `(prog1 (svref ,var ,i)
-				(incf i)))
+				(incf ,i)))
 
 	 (vector-end `(>= ,i ,len))
 	 (vector-next `(prog1 (aref ,var ,i)

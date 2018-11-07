@@ -474,11 +474,8 @@ a fixed point is found."
 (defclass rte-state-machine (ndfa:state-machine)
   ((ndfa::test :initform #'typep)
    (deterministicp :initform t)
-   ;; TODO, perhaps it is better to use bdd versions of these functions
-   ;; as they'll do a better job of reduction and detection of equal
-   ;; labels
    (transition-label-combine :initform (lambda (a b)
-					 (type-to-dnf-bottom-up `(or ,a ,b))))
+					 (bdd-reduce-lisp-type  `(or ,a ,b))))
    (transition-label-equal :initform (lambda (a b)
 				       (and (subtypep a b)
 					    (subtypep b a))))))
@@ -681,11 +678,6 @@ a fixed point is found."
 consists of values whose types match PATTERN."
   ;; cannot reduce without trimming
   (setf trim (or trim reduce))
-  ;; TODO need to sort the transitions of each state such that transitions labeled with an atomic
-  ;;   type come before transistions with parameterized types.  I.e., list comes before (rte ...)
-  ;;   I.e., we want to avoid testing (rte...) type if the object is not a list, in the case that
-  ;;   that is required.
-
   (let ((sm (make-instance 'rte-state-machine))
 	done ; list of patterns for which a state in the state machine has already been created
 	pending ; list of paterns (derivatives) pending to examine, some are in the done list, some not.
@@ -699,8 +691,7 @@ consists of values whose types match PATTERN."
 		    (push re done)
 		    (let (transitions
 			  (nullable-p (nullable re)))
-		      ;; TODO this is still using mdtd-baseline, it should be using a faster version
-		      (dolist (type (mdtd-baseline (uniquify (first-types re))))
+		      (dolist (type (mdtd-bdd (uniquify (first-types re))))
 			(let ((deriv (derivative re type)))
 			  (case deriv
 			    ((:empty-set)

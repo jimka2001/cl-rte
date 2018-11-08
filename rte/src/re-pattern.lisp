@@ -490,7 +490,8 @@ a fixed point is found."
 					  (sm2 rte-state-machine)
 					  &key (boolean-function (lambda (a b) (and a b)))
 					    (union-labels (lambda (labels1 labels2)
-							    (mdtd-baseline (union labels1 labels2 :test #'equal))))
+							    (ltbdd-with-new-hash ()
+							      (mdtd-bdd (union labels1 labels2 :test #'equal)))))
 					    (match-label #'subtypep)
 					    (final-state-callback (lambda (product-state st1 st2)
 								    (when (and st1

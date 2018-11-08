@@ -474,11 +474,8 @@ a fixed point is found."
 (defclass rte-state-machine (ndfa:state-machine)
   ((ndfa::test :initform #'typep)
    (deterministicp :initform t)
-   ;; TODO, perhaps it is better to use bdd versions of these functions
-   ;; as they'll do a better job of reduction and detection of equal
-   ;; labels
    (transition-label-combine :initform (lambda (a b)
-					 (type-to-dnf-bottom-up `(or ,a ,b))))
+					 (bdd-reduce-lisp-type  `(or ,a ,b))))
    (transition-label-equal :initform (lambda (a b)
 				       (and (subtypep a b)
 					    (subtypep b a))))))
@@ -493,7 +490,8 @@ a fixed point is found."
 					  (sm2 rte-state-machine)
 					  &key (boolean-function (lambda (a b) (and a b)))
 					    (union-labels (lambda (labels1 labels2)
-							    (mdtd-baseline (union labels1 labels2 :test #'equal))))
+							    (ltbdd-with-new-hash ()
+							      (mdtd-bdd (union labels1 labels2 :test #'equal)))))
 					    (match-label #'subtypep)
 					    (final-state-callback (lambda (product-state st1 st2)
 								    (when (and st1
@@ -522,15 +520,6 @@ a fixed point is found."
   (let* ((states (append (ndfa:get-initial-states ndfa)
 			 (set-difference (ndfa:states ndfa)
 					 (ndfa:get-initial-states ndfa) :test #'eq)))
-	 (state-assoc (let ((n 0))
-			(mapcar (lambda (state)
-				  ;; TODO this should be changed to
-				  ;;   gensym because the state exit
-				  ;;   form might contain a goto to a
-				  ;;   symbol.  we have to avoid name
-				  ;;   conflict of tags
-				  (list state (incf n)))
-				states)))
 	 (exit-form-p (find-if (lambda (state)
 				 ;; something evaluatable?
 				 (typecase (state-exit-form state)
@@ -539,6 +528,12 @@ a fixed point is found."
 				   (cons t)
 				   (symbol t)
 				   (t nil))) (get-final-states ndfa)))
+	 (state-assoc (let ((n 0))
+			(mapcar (lambda (state)
+				  (list state (if exit-form-p
+						  (gensym "L")
+						  (incf n))))
+				states)))
 	 (list-end `(null ,var))
 	 (list-next `(pop ,var))
 	 (i (if exit-form-p (gensym "I") 'i))
@@ -546,7 +541,7 @@ a fixed point is found."
 	 (len (if exit-form-p (gensym "LEN") 'len))
 	 (simple-vector-end `(>= ,i ,len))
 	 (simple-vector-next `(prog1 (svref ,var ,i)
-				(incf i)))
+				(incf ,i)))
 
 	 (vector-end `(>= ,i ,len))
 	 (vector-next `(prog1 (aref ,var ,i)
@@ -684,11 +679,6 @@ a fixed point is found."
 consists of values whose types match PATTERN."
   ;; cannot reduce without trimming
   (setf trim (or trim reduce))
-  ;; TODO need to sort the transitions of each state such that transitions labeled with an atomic
-  ;;   type come before transistions with parameterized types.  I.e., list comes before (rte ...)
-  ;;   I.e., we want to avoid testing (rte...) type if the object is not a list, in the case that
-  ;;   that is required.
-
   (let ((sm (make-instance 'rte-state-machine))
 	done ; list of patterns for which a state in the state machine has already been created
 	pending ; list of paterns (derivatives) pending to examine, some are in the done list, some not.
@@ -702,8 +692,7 @@ consists of values whose types match PATTERN."
 		    (push re done)
 		    (let (transitions
 			  (nullable-p (nullable re)))
-		      ;; TODO this is still using mdtd-baseline, it should be using a faster version
-		      (dolist (type (mdtd-baseline (uniquify (first-types re))))
+		      (dolist (type (mdtd-bdd (uniquify (first-types re))))
 			(let ((deriv (derivative re type)))
 			  (case deriv
 			    ((:empty-set)

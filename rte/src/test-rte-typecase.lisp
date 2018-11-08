@@ -55,6 +55,22 @@
 		      ((:cat number number number number number)
 		       :no))))))
 
+(define-test test/rte-typecase-5
+  (let ((data '(1)))
+    (assert-true (eql :here
+		      (block block
+			(tagbody
+			   (go 2)
+			 1
+			   (return-from block
+			     :here)
+			 2
+			   (rte-typecase data
+			     ((:cat fixnum)
+			      (go 1))
+			     )
+			 :no-here))))))
+
 (define-test test/rte-typecase-2
   (let ((data '(1 2 3 4 )))
     (assert-true (eq :yes

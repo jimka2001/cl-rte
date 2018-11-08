@@ -112,8 +112,6 @@ of `string` `number` where the string is optional.  `("hello" 42)` or `(42)`.
   ...)
 ```
 
-      
-
 ## License
 
 ```

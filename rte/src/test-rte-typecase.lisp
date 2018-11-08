@@ -24,22 +24,6 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))
 
-(define-test test/rte-typecase-5
-  (assert-true (macroexpand-1 '(rte-typecase data
-				(t 42)))))
-
-(define-test test/rte-typecase-3
-  (let ((data '(:x 3.4)))
-    (assert-true (eq :yes
-		     (rte-typecase data
-		       ((:cat (:* fixnum) number)
-			:no)
-		       ((:cat (:or number symbol) number)
-			:yes))))))
-
-
-
-
 (define-test test/rte-typecase-1
   (let ((data '(1 2 3 4 )))
     (assert-true (eq :yes
@@ -54,22 +38,6 @@
 		       :yes)
 		      ((:cat number number number number number)
 		       :no))))))
-
-(define-test test/rte-typecase-5
-  (let ((data '(1)))
-    (assert-true (eql :here
-		      (block block
-			(tagbody
-			   (go 2)
-			 1
-			   (return-from block
-			     :here)
-			 2
-			   (rte-typecase data
-			     ((:cat fixnum)
-			      (go 1))
-			     )
-			 :no-here))))))
 
 (define-test test/rte-typecase-2
   (let ((data '(1 2 3 4 )))
@@ -86,6 +54,57 @@
 		       ((:cat fixnum number real unsigned-byte number)
 			:no))))))
 
+(define-test test/rte-typecase-3
+  (let ((data '(:x 3.4)))
+    (assert-true (eq :yes
+		     (rte-typecase data
+		       ((:cat (:* fixnum) number)
+			:no)
+		       ((:cat (:or number symbol) number)
+			:yes))))))
+
+(define-test test/rte-typecase-4
+  (assert-true (macroexpand-1 '(rte-typecase data
+				(t 42)))))
+
+(define-test test/rte-typecase-5
+  (assert-true (macroexpand-1 '(rte-typecase data
+				((:cat (:* fixnum) number)
+				 :no)
+				((:cat (:or number symbol) number)
+				 :yes)))))
+
+(define-test test/rte-typecase-6
+  (let ((data '(1)))
+    (assert-true (eql :here
+		      (block block
+			(tagbody
+			   (go 2)
+			 1
+			   (return-from block
+			     :here)
+			 2
+			   (rte-typecase data
+			     ((:cat fixnum)
+			      (go 1))
+			     )
+			 :no-here))))))
+
+(define-test test/rte-typecase-7
+  (let ((data '(1 2 3 )))
+    (assert-true (eql :yes
+		     (rte-typecase data
+		       ((:cat fixnum)
+			:no)
+		       ((:cat number number string)
+			:no)
+		       ((:cat string number number )
+			:no)
+		       ((:cat number number fixnum)
+			:yes)
+		       ((:cat fixnum number real unsigned-byte number)
+			:no))))))
+
 (define-test test/rte-to-dfa
   (dolist (rte '((:CAT (:* FIXNUM) NUMBER)
 		 (:AND (:CAT (:* FIXNUM) NUMBER) (:NOT (:OR)))
@@ -95,13 +114,6 @@
     (assert-true (rte-to-dfa rte :trim nil :reduce nil))
     (assert-true (rte-to-dfa rte :trim t :reduce nil))
     (assert-true (rte-to-dfa rte :reduce t))))
-
-(define-test test/rte-typecase-4
-  (assert-true (macroexpand-1 '(rte-typecase data
-				((:cat (:* fixnum) number)
-				 :no)
-				((:cat (:or number symbol) number)
-				 :yes)))))
 
 (define-test test/synchronized-product
   (let ((rte-t (rte-to-dfa t)))

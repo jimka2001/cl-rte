@@ -751,7 +751,7 @@ consists of values whose types match PATTERN."
 	    :do (create-state (pop pending)))
       (setf sm
 	    (cond (reduce
-		   (reduce-state-machine sm))
+		   (minimize-state-machine sm))
 		  (trim
 		   (trim-state-machine sm))
 		  (t sm)))

@@ -342,9 +342,9 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 	 (dfa-given-trim (trim-state-machine dfa-given))
 	 (dfa-derived-trim (trim-state-machine dfa-derived))
 	 (dfa-given-reduced (progn (format t "reducing dfa of ~S~%" pattern)
-				   (reduce-state-machine dfa-given)))
+				   (minimize-state-machine dfa-given)))
 	 (dfa-derived-reduced (progn (format t "reducing dfa of ~S~%" derived-pattern)
-				     (reduce-state-machine dfa-derived))))
+				     (minimize-state-machine dfa-derived))))
     (flet ((report-dfa (dfa comment &key view)
 	     (format t "~A   dfa size: ~D~%" comment (length (states dfa)))
 	     (when view

@@ -527,6 +527,11 @@ If N > (length of data) then a permutation of DATA is returned"
                '<)
               (t
                '>)))
+       (character
+	(cond ((char< t1 t2)
+	       '<)
+	      (t
+	       '>)))
        (t
         (error "cannot compare a ~A with a ~A" (class-of t1) (class-of t2)))))))
 

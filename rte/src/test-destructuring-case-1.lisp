@@ -211,6 +211,8 @@
 	       3))))
 )
    
+(defrte (:AND LIST (RTE T)))
+
 (define-test test/destructuring-case-3
   (let ((n 0))
     (dolist (x '((1)

@@ -167,6 +167,8 @@
 (define-test type/declaration2b
   (assert-true (type/declaration2)))
 
+(defrte (:1-* (RTE (:CAT NUMBER NUMBER))))
+
 (define-test type/declaration
   (assert-true (equal '(1 2 3)
 		      (funcall (lambda (x)

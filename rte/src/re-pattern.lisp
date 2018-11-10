@@ -494,18 +494,22 @@ a fixed point is found."
 							      (mdtd-bdd (union labels1 labels2 :test #'equal)))))
 					    (match-label #'subtypep)
 					    (final-state-callback (lambda (product-state st1 st2)
-								    (when (and st1
-									       st2
-									       (state-exit-form st1)
-									       (state-exit-form st2)
-									       (not (equal (state-exit-form st1)
-											   (state-exit-form st2))))
-								      (warn "unexpected conflicting exit forms: ~A vs ~A"
-									    (state-exit-form st1)
-									    (state-exit-form st2)))
 								    (setf (state-exit-form product-state)
-									  (or (and st1 (state-exit-form st1))
-									      (and st2 (state-exit-form st2)))))))
+									  (cond
+									    ((and st1
+										  st2
+										  (state-exit-form st1)
+										  (state-exit-form st2)
+										  (not (equal (state-exit-form st1)
+											      (state-exit-form st2))))
+									     (cerror "Generate code with explicit conflict."
+										     "unexpected conflicting exit forms: ~A vs ~A"
+										     (state-exit-form st1)
+										     (state-exit-form st2))
+									     (gensym "conflict"))
+									    (t
+									     (or (and st1 (state-exit-form st1))
+										 (and st2 (state-exit-form st2)))))))))
   (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
 				       :union-labels union-labels
 				       :match-label match-label
@@ -751,7 +755,7 @@ consists of values whose types match PATTERN."
 	    :do (create-state (pop pending)))
       (setf sm
 	    (cond (reduce
-		   (reduce-state-machine sm))
+		   (minimize-state-machine sm))
 		  (trim
 		   (trim-state-machine sm))
 		  (t sm)))

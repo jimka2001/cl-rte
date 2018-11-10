@@ -342,9 +342,9 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 	 (dfa-given-trim (trim-state-machine dfa-given))
 	 (dfa-derived-trim (trim-state-machine dfa-derived))
 	 (dfa-given-reduced (progn (format t "reducing dfa of ~S~%" pattern)
-				   (reduce-state-machine dfa-given)))
+				   (minimize-state-machine dfa-given)))
 	 (dfa-derived-reduced (progn (format t "reducing dfa of ~S~%" derived-pattern)
-				     (reduce-state-machine dfa-derived))))
+				     (minimize-state-machine dfa-derived))))
     (flet ((report-dfa (dfa comment &key view)
 	     (format t "~A   dfa size: ~D~%" comment (length (states dfa)))
 	     (when view
@@ -360,42 +360,6 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
       (report-dfa dfa-derived-trim "derived-trim")
       (report-dfa dfa-derived-reduced "derived-reduced" :view t))
     ))
-
-(defun rte-synchronized-product (dfas &key (boolean-function (lambda (a b)
-							       (or a b))))
-  (tree-reduce #'(lambda (dfa1 dfa2)
-		   (declare (type rte-state-machine dfa1 dfa2))
-		   (the rte-state-machine
-			(synchronized-product dfa1 dfa2
-					      :boolean-function boolean-function)))
-	       dfas :initial-value (rte-to-dfa :empty-set)))
-
-(defmacro rte-typecase (object-form &body clauses)
-  "OBJECT-FORM is the form to be evaluated,
-CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (let ((object (gensym))
-	previous-patterns
-	unreachable-bodys
-	dfas)
-    (flet ((transform-clause (clause)
-	     (destructuring-bind (pattern &rest body) clause
-	       (let ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns)))))
-		 (if (equivalent-patterns :empty-set derived-pattern)
-		     (push body unreachable-bodys)
-		     (push (rte-to-dfa derived-pattern :reduce t :final-body `(progn ,@body))
-			   dfas)))))
-	   (unreachable-clause (unreachable-body)
-	     `(nil ,@unreachable-body)))
-      (dolist (clause clauses)
-	(transform-clause clause))
-      `(let ((,object ,object-form))
-	 (typecase ,object
-	   ((not sequence) nil)
-	   ,@(mapcar #'unreachable-clause unreachable-bodys)
-	   (t
-	    (funcall ,(dump-code (rte-synchronized-product dfas) :var object)
-		     ,object)
-	    ))))))
 
 (defun expand-destructuring-case-alt (object-form clauses)
   "OBJECT-FORM is the form to be evaluated,

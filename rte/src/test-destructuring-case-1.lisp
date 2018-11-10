@@ -271,11 +271,11 @@
 			    :transitions ((:next-label f :transition-label number)))
 			   (:label 2
 			    :transitions ((:next-label f :transition-label number))))))
-	 (reduced-dfa (reduce-state-machine dfa
-					    :equal-labels (lambda (a b)
-							    (and (subtypep a b)
-								 (subtypep b a)))
-					    :combine (lambda (a b)
-						       (type-to-dnf-bottom-up `(or ,a ,b))))))
+	 (reduced-dfa (minimize-state-machine dfa
+					      :equal-labels (lambda (a b)
+							      (and (subtypep a b)
+								   (subtypep b a)))
+					      :combine (lambda (a b)
+							 (type-to-dnf-bottom-up `(or ,a ,b))))))
     (assert-true (= 3 (length (states reduced-dfa))))))
 

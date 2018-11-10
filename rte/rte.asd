@@ -32,11 +32,12 @@
   ((:module "src"
     :components
     ((:file "rte")
-     (:file "asdf")
-     (:file "expand-typedef")
-     (:file "list-of" :depends-on ("expand-typedef"))
-     (:file "dependents")
-     (:file "re-pattern" :depends-on ("expand-typedef" "dependents"))
+     (:file "asdf" :depends-on ("rte"))
+     (:file "expand-typedef"  :depends-on ("rte"))
+     (:file "list-of" :depends-on ("rte" "expand-typedef"))
+     (:file "dependents" :depends-on ("rte"))
+     (:file "re-pattern" :depends-on ("rte" "expand-typedef" "dependents"))
+     (:file "rte-typecase" :depends-on ("rte"))
      (:file "destructuring-case" :depends-on ("re-pattern"))
-     (:file "prolog")
+     (:file "prolog" :depends-on ("rte"))
      ))))

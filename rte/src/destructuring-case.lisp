@@ -279,9 +279,13 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
 				  t)))
 
 	  (setf key-pattern
-		(let ((patt-1 (if allow-other-keys
-				  '(:* keyword t)
-				  `(:* (member ,@used-keywords) t)))
+		(let ((patt-1 (cond
+				(allow-other-keys
+				 '(:* keyword t))
+				(used-keywords
+				 `(:* (member ,@used-keywords) t))
+				(t ; used-keywords = (), this means &key was used with no &allow-other-keys and also with no acutal keys
+				 :empty-word )))
 		      (patt-per-key (loop :for key-format :in key-formats
 					  :collect
 					  (destructuring-bind (key type) key-format

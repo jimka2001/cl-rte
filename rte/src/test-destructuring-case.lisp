@@ -615,6 +615,10 @@
   (assert-true (equivalent-patterns (destructuring-lambda-list-to-rte '(&optional a)
 								      :type-specifiers '((a integer)))
 				    '(:? integer)))
+  (assert-false (equivalent-patterns (destructuring-lambda-list-to-rte '(&optional a b)
+								       :type-specifiers '((a integer) (b string)))
+				     '(:or integer
+				       (:cat integer string))))
   (assert-true (equivalent-patterns (destructuring-lambda-list-to-rte '(&optional a b)
 								      :type-specifiers '((a integer) (b string)))
 				    '(:? integer (:? string))))

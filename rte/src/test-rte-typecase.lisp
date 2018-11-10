@@ -144,3 +144,98 @@
     
     
     
+(define-test test/rte-typecase-dfas-1
+  (let ((expansion-1
+	  (macroexpand-1
+	   '(destructuring-case '(1 2 :x 3 :y 4)
+	     ((a b &key x)
+	      (declare (type string a b))
+	      (f1))
+	     ((a b &key x y)
+	      (declare (type string a b))
+	      (f2))
+	     ((a b c d &optional z1 z2)
+	      (declare (type fixnum a b d)
+	       (type keyword c z1)
+	       (type string z2))
+	      (f3))
+	     ((a b &key x y  &allow-other-keys)
+	      (declare (type fixnum a b x y))
+	      (f4))
+	     ((a b &key x y)
+	      (declare (type fixnum a b x y))
+	      (f5))
+	     ((a b c &key y x &allow-other-keys)
+	      (declare (type float a b c))
+	      (f6))))))
+    
+    (assert-true (typep expansion-1
+			'(rte (:cat (eql destructuring-case-alt) (:* cons)))))
+    (let ((expansion-2 (macroexpand-1 expansion-1)))
+      (assert-true (typep expansion-2
+			  '(rte (:cat (eql LET)
+				 cons
+				 (cons (eql rte-typecase))))))
+      (destructuring-bind (_ _ (_ obj &rest clauses) &rest _) expansion-2
+	(declare (ignore _))
+	(format t "obj=~A~%" obj)
+	(format t "clauses=~A~%" clauses)
+	(rte-typecase-helper obj clauses)))))
+
+(define-test test/rte-typecase-dfas-3
+  (flet ((f1 () :x)
+	 (f2 () :y))
+    (destructuring-case '("1" "2")
+      ((&key x)
+       (f1))
+      ((&key x y)
+       (f2)))))
+
+(define-test test/rte-typecase-dfas-4
+  (flet ((f1 () :x)
+	 (f2 () :y))
+    (DESTRUCTURING-CASE-ALT '("1" "2")
+      ((&KEY X) NIL (F1))
+      ((&KEY X Y) NIL (F2)))))
+
+(define-test test/rte-typecase-dfas-5
+  (flet ((f1 () :x)
+	 (f2 () :y))
+    (let ((g670 '("1" "2")))
+      (rte-typecase g670
+	 ((:and (:not (:and (:* (member :x) t)
+		      (:cat (:* (not (eql :x)) t)
+			    (:or :empty-word (:cat (eql :x) t (:* t))))))
+		(:and (:* (member :x :y) t)
+		      (:cat (:* (not (eql :x)) t)
+			    (:or :empty-word (:cat (eql :x) t (:* t))))
+		      (:cat (:* (not (eql :y)) t)
+			    (:or :empty-word (:cat (eql :y) t (:* t))))))	
+	  (destructuring-bind (&key x) g670
+	    (f1) (f2)))
+	))))
+
+(define-test test/rte-typecase-dfas-2
+  (let ((expansion-1
+	  (macroexpand-1
+	   '(destructuring-case '(1 2 :x 3 :y 4)
+	     ((a b &key x)
+	      (declare (type string a b))
+	      (f1))
+	     ((a b &key x y)
+	      (declare (type string a b))
+	      (f2))))))
+    
+    (assert-true (typep expansion-1
+			'(rte (:cat (eql destructuring-case-alt) (:* cons)))))
+    (let ((expansion-2 (macroexpand-1 expansion-1)))
+      (assert-true (typep expansion-2
+			  '(rte (:cat (eql LET)
+				 cons
+				 (cons (eql rte-typecase))))))
+      (destructuring-bind (_ _ (_ obj &rest clauses) &rest _) expansion-2
+	(declare (ignore _))
+	(format t "obj=~A~%" obj)
+	(format t "clauses=~A~%" clauses)
+	(rte-typecase-helper obj clauses)))))
+    

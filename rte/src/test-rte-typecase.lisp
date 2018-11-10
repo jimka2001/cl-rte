@@ -150,24 +150,24 @@
 	   '(destructuring-case '(1 2 :x 3 :y 4)
 	     ((a b &key x)
 	      (declare (type string a b))
-	      (f1))
+	      (list a b x))
 	     ((a b &key x y)
 	      (declare (type string a b))
-	      (f2))
+	      (list a b x y))
 	     ((a b c d &optional z1 z2)
 	      (declare (type fixnum a b d)
 	       (type keyword c z1)
 	       (type string z2))
-	      (f3))
+	      (list a b c d z1 z2))
 	     ((a b &key x y  &allow-other-keys)
 	      (declare (type fixnum a b x y))
-	      (f4))
+	      (list a b x y))
 	     ((a b &key x y)
 	      (declare (type fixnum a b x y))
-	      (f5))
+	      (list a b x y))
 	     ((a b c &key y x &allow-other-keys)
 	      (declare (type float a b c))
-	      (f6))))))
+	      (list a b c x y))))))
     
     (assert-true (typep expansion-1
 			'(rte (:cat (eql destructuring-case-alt) (:* cons)))))
@@ -176,11 +176,9 @@
 			  '(rte (:cat (eql LET)
 				 cons
 				 (cons (eql rte-typecase))))))
-      (destructuring-bind (_ _ (_ obj &rest clauses) &rest _) expansion-2
-	(declare (ignore _))
-	(format t "obj=~A~%" obj)
-	(format t "clauses=~A~%" clauses)
-	(rte-typecase-helper obj clauses)))))
+      (destructuring-bind (_1 _2 (_3 obj &rest clauses) &rest _4) expansion-2
+	(declare (ignore _1 _2 _3 _4 obj))
+	(rte-typecase-helper clauses)))))
 
 (define-test test/rte-typecase-dfas-3
   (flet ((f1 () :x)

@@ -235,5 +235,5 @@
 	(declare (ignore _))
 	(format t "obj=~A~%" obj)
 	(format t "clauses=~A~%" clauses)
-	(rte-typecase-helper obj clauses)))))
+	(rte-typecase-helper clauses)))))
     

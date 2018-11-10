@@ -42,8 +42,8 @@
 		 (if (equivalent-patterns :empty-set derived-pattern)
 		     (push body unreachable-bodys)
 		     (let ((dfa (rte-to-dfa derived-pattern :reduce t :final-body `(progn ,@body))))
-		       (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
-					    :title (format nil "~s" derived-pattern))		       
+		       ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
+		       ;; 			    :title (format nil "~s" derived-pattern))
 		       (push dfa dfas)))))))
       (dolist (clause clauses)
 	(transform-clause clause))
@@ -54,7 +54,7 @@
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
   (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-helper clauses)
     (declare (ignore _))
-    (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "sync-product" :title "syncronized product")
+    ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "sync-product" :title "syncronized product")
     (flet ((unreachable-clause (unreachable-body)
 	     `(nil ,@unreachable-body)))
       (let ((object (gensym)))

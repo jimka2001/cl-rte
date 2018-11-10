@@ -30,7 +30,7 @@
 					      :boolean-function boolean-function)))
 	       dfas :initial-value (rte-to-dfa :empty-set)))
 
-(defun rte-typecase-helper (object-form clauses)
+(defun rte-typecase-helper (clauses)
   "Helper function for rte-typecase."
   (let (previous-patterns
 	unreachable-bodys
@@ -38,10 +38,13 @@
     (flet ((transform-clause (clause)
 	     (destructuring-bind (pattern &rest body) clause
 	       (let ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns)))))
+		 (push pattern previous-patterns)
 		 (if (equivalent-patterns :empty-set derived-pattern)
 		     (push body unreachable-bodys)
-		     (push (rte-to-dfa derived-pattern :reduce t :final-body `(progn ,@body))
-			   dfas))))))
+		     (let ((dfa (rte-to-dfa derived-pattern :reduce t :final-body `(progn ,@body))))
+		       (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
+					    :title (format nil "~s" derived-pattern))		       
+		       (push dfa dfas)))))))
       (dolist (clause clauses)
 	(transform-clause clause))
       (list unreachable-bodys dfas (rte-synchronized-product dfas)))))
@@ -49,8 +52,9 @@
 (defmacro rte-typecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-helper object-form clauses)
+  (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-helper clauses)
     (declare (ignore _))
+    (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "sync-product" :title "syncronized product")
     (flet ((unreachable-clause (unreachable-body)
 	     `(nil ,@unreachable-body)))
       (let ((object (gensym)))

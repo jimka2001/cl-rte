@@ -311,57 +311,6 @@
 			((:* t)
 			 :c)))))
 
-;; (define-test test/parse-defmethod-2a
-;;   (flet ((parse (form)
-;; 	   (let ((g687 form))
-;; 	     (funcall
-;; 	      (lambda (g687)
-;; 		(declare (optimize (speed 3) (debug 0) (safety 0)))
-;; 		(block check696
-;; 		  (typecase g687
-;; 		    (list
-;; 		     (tagbody
-;; 			(go l688)
-;; 		      l688 (format t "@ ~A~%" 'l688)
-;; 			(when (null g687) (return-from check696 (progn 5)))
-;; 			(case (pop g687)
-;; 			  ((defmethod) (go l693))
-;; 			  (t (return-from check696 nil)))
-;; 		      l689 (format t "@ ~A~%" 'l689)
-;; 			(when (null g687) (return-from check696 (progn 5)))
-;; 			(typecase (pop g687)
-;; 			  (string (go l694))
-;; 			  ((cons (eql declare)) (go l689))
-;; 			  (t (return-from check696 nil)))
-;; 		      l690 (format t "@ ~A~%" 'l690)
-;; 			(when (null g687) (return-from check696 (progn 5)))
-;; 			(typecase (pop g687)
-;; 			  ((cons (eql declare)) (go l689))
-;; 			  (t (return-from check696 nil)))
-;; 		      l691 (format t "@ ~A~%" 'l691)
-;; 			(when (null g687) (return-from check696 (progn 5)))
-;; 			(typecase (pop g687)
-;; 			  (keyword (go l691))
-;; 			  (list (go l690))
-;; 			  (t (return-from check696 nil)))
-;; 		      l692 (format t "@ ~A~%" 'l692)
-;; 			(when (null g687) (return-from check696 (progn 5)))
-;; 			(typecase (pop g687)
-;; 			  (keyword (go l691))
-;; 			  (t (return-from check696 nil)))
-;; 		      l693 (format t "@ ~A~%" 'l693)
-;; 			(when (null g687) (return-from check696 (progn 5)))
-;; 			(typecase (pop g687)
-;; 			  (symbol (go l692))
-;; 			  (t (return-from check696 nil)))
-;; 		      l694 (format t "@ ~A~%" 'l694)
-;; 			(when (null g687) (return-from check696 (progn 1)))
-;; 			(typecase (pop g687) (t (go l694)))))
-;; 		    (t  (format t "@ ~A~%" 't) nil))))
-;; 	      g687))))
-    
-;;     (assert-true (eql 5
-;; 		      (parse '(defmethod (setf binder) () ()))))))
 
 (define-test test/parse-defmethod-2b
   (flet ((parse (form)
@@ -423,5 +372,73 @@
   
   (assert-false (typep '(1 2 3)
 		       '(rte (:cat string (:* t))))))
+
+
+(define-test test/parse-defmethod-4
+  (flet ((parse (form)
+	   (rte-typecase form
+	     ((:not (:cat (eql defmethod)
+			  (:and (:not keyword)
+				(:not (eql t))
+				(:not null)
+				(:or symbol (cons (eql setf) (cons symbol null)))) ;;  name or (setf name)
+			  (:* keyword) ;; optional qualifiers
+			  list ;; specialized lambda list
+			  (:permute (:* (cons (eql declare))) ;; declarations 
+				    (:? string)) ;; + doc string
+			  (:* t)))
+	      ;; if not a valid defmethod form
+	      0)
+	     
+	     ;; (defmethod  name qualifiers   lambda-list declarations             documentation  ...body...)
+	     ((:cat t       t    (:+ keyword) list        (:+ (cons (eql declare))) string     (:* t))
+	      1)
+
+	     ;; (defmethod  name lambda-list documentation declarations            ...body...)
+	     ((:cat t       t    list        string        (:+ (cons (eql declare)))  (:* t))
+	      2)
+
+	     ;; (defmethod  name   qualifiers   lambda-list documentation declarations               ...body...)
+	     ((:cat t       t      (:+ keyword) list        string        (:+ (cons (eql declare)))  (:* t))
+	      3)
+
+	     ;; (defmethod name   lambda-list declarations             documentation  ...body...)
+	     ((:cat t       t     list        (:+ (cons (eql declare))) string       (:* t))
+	      4)
+
+	     ;; (defmethod name lambda-list ...body...)
+	     ((:cat t t list (:* t))
+	      5)
+	     
+	     ;; other
+	     ((:* t)
+	      6))))
+
+    (assert-true (eql 0
+		      (parse '(list 1 2 3))))
+    (assert-true (eql 1
+		      (parse '(defmethod name :before :after (a b) (declare (optimize (safety 3)))  "a docstring" (list a b)))))
+
+    (assert-true (eql 1
+		      (parse '(defmethod (setf name) :before :after (a b) (declare (optimize (safety 3)))  "a docstring" (list a b)))))
+
+    (assert-true (eql 2
+		      (parse '(defmethod name (a b) "a docstring"  (declare (optimize (safety 3))) (list a b)))))
+
+    (assert-true (eql 3
+		      (parse '(defmethod name :before :after (a b) "a docstring" (declare (optimize (safety 3))) (list a b)))))
+
+    (assert-true (eql 4
+		      (parse '(defmethod name (a b) (declare (optimize (safety 3)))  "a docstring" (list a b)))))
+
+    (assert-true (eql 5
+		      (parse '(defmethod (setf binder) () ()))))
+
+    (assert-true (eql 0
+		      (parse '(defmethod nil () ()))))
+    (assert-true (eql 0
+		      (parse '(defmethod t () ()))))
+    (assert-true (eql 0
+		      (parse '(defmethod :keyword () ()))))))
 
 

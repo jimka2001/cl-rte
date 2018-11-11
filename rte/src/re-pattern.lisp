@@ -520,6 +520,8 @@ a fixed point is found."
 (defmethod dump-code ((pattern list) &key (var 'seq))
   (dump-code (rte-to-dfa pattern :reduce t) :var var))
 
+
+
 (defmethod dump-code ((ndfa rte-state-machine) &key (var 'seq))
   (let* ((states (append (ndfa:get-initial-states ndfa)
 			 (set-difference (ndfa:states ndfa)
@@ -809,6 +811,12 @@ consists of values whose types match PATTERN."
 	  (symbol-package 'rte)))
 
 (defun define-rte (pattern)
+  ;; TODO
+  ;; optimization, a top-level (:cat ...) which contains only
+  ;; lisp type specifiers, can be expanded directly into (or (cons ...) (and (not cons) sequence (satisfies ...)))
+  ;; This expansion should give the compiler more information about the
+  ;; object
+
   (setf (gethash pattern *rte-types*)
 	(let ((dfa (rte-to-dfa pattern))
 	      (function-name (make-rte-function-name pattern)))

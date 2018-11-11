@@ -233,8 +233,8 @@
 				 (cons (eql rte-typecase))))))
       (destructuring-bind (_ _ (_ obj &rest clauses) &rest _) expansion-2
 	(declare (ignore _))
-	(format t "obj=~A~%" obj)
-	(format t "clauses=~A~%" clauses)
+	;;(format t "obj=~A~%" obj)
+	;;(format t "clauses=~A~%" clauses)
 	(rte-typecase-helper clauses)))))
     
 

@@ -88,7 +88,6 @@ with the given KEYVAR form"
   (let (var-declarations)
     ;; allow one but only one optional "docstring"
     (when (stringp (car body))
-      (format t "skipping docstring ~S~%" (car body))
       (pop body))
     (loop :while (typep body '(cons (cons (eql declare))))
 	  :do (dolist (decl (cdr (car body)))

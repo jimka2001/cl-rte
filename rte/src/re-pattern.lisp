@@ -708,7 +708,12 @@ consists of values whose types match PATTERN."
 		    (push re done)
 		    (let (transitions
 			  (nullable-p (nullable re)))
-		      (dolist (type (mdtd-bdd (uniquify (first-types re))))
+		      ;; we must partition the universe by finding the
+		      ;; maximal disjoint type decomposition of all the first types
+		      ;; plus t.  For example, if the only first type is STRING,
+		      ;; then we need (STRING (NOT STRING)), otherwise
+		      ;; (:not ...) won't work properly
+		      (dolist (type (mdtd-bdd (uniquify (cons t (first-types re)))))
 			(let ((deriv (derivative re type)))
 			  (case deriv
 			    ((:empty-set)

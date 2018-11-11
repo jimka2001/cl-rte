@@ -39,16 +39,23 @@
   (let (previous-patterns
 	unreachable-bodys
 	dfas)
-    (flet ((transform-clause (clause)
-	     (destructuring-bind (pattern &rest body) clause
-	       (let ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns)))))
-		 (push pattern previous-patterns)
-		 (if (equivalent-patterns :empty-set derived-pattern)
-		     (push body unreachable-bodys)
-		     (let ((dfa (rte-to-dfa derived-pattern :reduce t :final-body `(progn ,@body))))
-		       ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
-		       ;; 			    :title (format nil "~s" derived-pattern))
-		       (push dfa dfas)))))))
+    (labels ((exit-form (body)
+	       ;; smart body encapsulation, only wrap in progn if necessary
+	       (typecase body
+		 ((cons t null)
+		  (car body))
+		 (t
+		  `(progn ,@body))))
+	     (transform-clause (clause)
+	       (destructuring-bind (pattern &rest body) clause
+		 (let ((derived-pattern `(:and ,pattern (:not (:or ,@previous-patterns)))))
+		   (push pattern previous-patterns)
+		   (if (equivalent-patterns :empty-set derived-pattern)
+		       (push body unreachable-bodys)
+		       (let ((dfa (rte-to-dfa derived-pattern :reduce t :final-body (exit-form body))))
+			 ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
+			 ;; 			    :title (format nil "~s" derived-pattern))
+			 (push dfa dfas)))))))
       (dolist (clause clauses)
 	(transform-clause clause))
       (list unreachable-bodys dfas (rte-synchronized-product dfas)))))

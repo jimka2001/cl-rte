@@ -506,7 +506,7 @@ a fixed point is found."
 										     "unexpected conflicting exit forms: ~A vs ~A"
 										     (state-exit-form st1)
 										     (state-exit-form st2))
-									     (gensym "conflict"))
+									     (gensym "CONFLICT"))
 									    (t
 									     (or (and st1 (state-exit-form st1))
 										 (and st2 (state-exit-form st2)))))))))

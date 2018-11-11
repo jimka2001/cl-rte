@@ -106,7 +106,7 @@
   "Tests whether there exists an element which satisfies an expression.  E.g., (exists x '(1 2 3) (evenp x))"
   (typecase obj
     (list
-     (let ((var (gensym "exists")))
+     (let ((var (gensym "EXISTS")))
        `(member-if (lambda (,var)
                      (destructuring-bind ,obj ,var
                        ,@body)) ,data)))
@@ -117,7 +117,7 @@
   "Tests whether all the elements in a given list satisfies an expression.  E.g., (forall x '(2 4 6 8 10) (evenp x))"
   (typecase var
     (list
-     (let ((v (gensym "forall")))
+     (let ((v (gensym "FORALL")))
        `(every #'(lambda (,v)
 		   (destructuring-bind ,var ,v
 		     ,@body)) ,data)))
@@ -129,7 +129,7 @@
   "Construct a new list of all the elements which satisfy an expression.  E.g., (setof x '(2 3 5 6 7) (evenp x))"
   (typecase var
     (list
-     (let ((v (gensym "setof")))
+     (let ((v (gensym "SETOF")))
        `(remove-if-not (lambda (,v)
 			 (destructuring-bind ,var ,v
 			   ,@body)) ,data)))
@@ -404,8 +404,8 @@ If N > (length of data) then a permutation of DATA is returned"
             ))))
 
 (defmacro def-cache-fun ((fun-name with-name
-                          &key (hash (gensym "hash"))
-                            (access-count (gensym "count"))
+                          &key (hash (gensym "HASH"))
+                            (access-count (gensym "COUNT"))
                             (caching-call (intern (concatenate 'string (symbol-name fun-name) "-CACHING-CALL")
                                                   (symbol-package fun-name))))
                          lam-list doc-string  &body body)

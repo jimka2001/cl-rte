@@ -594,6 +594,9 @@ a fixed point is found."
 		     (t (return-from ,check nil))))
 		 (t
 		  (let* ((leading-clauses (mapcar #'dump-typecase-transition (transitions state)))
+			 ;; We use subtypep here to remove the final T clause
+			 ;; cases like (string...) ((not string) ...)  or
+			 ;; if a (T ...) clause already exists.
 			 (exhaustive? (subtypep t (cons 'or (mapcar #'car leading-clauses))))
 			 (final-clause-option (if exhaustive?
 						  nil
@@ -603,7 +606,7 @@ a fixed point is found."
 		    ;; exhaustive.  This is because we
 		    ;; want to eliminate a final T clause in the clause the leading 
 		    ;; clauses are exhaustive.
-		    `(bdd-typecase ,next
+		    `(typecase ,next ;; TODO -- change to bdd-typecase, but this makes startup VERY slow
 				   ,@leading-clauses
 				   ,@final-clause-option)))))
 	     (dump-state (state end next)

@@ -976,10 +976,11 @@
 			((name &key (count 'z))	 (declare (type symbol count))
 			 (list 2 name count)))))
 
-  (assert-true (equal '(1 x 0)
+  (assert-true (equal '(2 x 42)
 		      (destructuring-case '(x)
 			((name &key (count 0))
-			 (declare (type fixnum count))
+			 (declare (type string name)
+				  (type fixnum count))
 			 (list 1 name count))
 			((name &key (count 42))
 			 (declare (type fixnum count))

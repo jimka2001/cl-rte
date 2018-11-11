@@ -591,9 +591,19 @@ a fixed point is found."
 		     ,@(mapcar #'dump-case-transition (transitions state))
 		     (t (return-from ,check nil))))
 		 (t
-		  `(typecase ,next
-                     ,@(mapcar #'dump-typecase-transition (transitions state))
-                     (t (return-from ,check nil))))))
+		  (let* ((leading-clauses (mapcar #'dump-typecase-transition (transitions state)))
+			 (exhaustive? (subtypep t (cons 'or (mapcar #'car leading-clauses))))
+			 (final-clause-option (if exhaustive?
+						  nil
+						  `((t (return-from ,check nil))))))
+		    ;; final-clause-option is a ,@-comaptible list of the final
+		    ;; clause or NIL in the situation that the leading clauses are
+		    ;; exhaustive.  This is because we
+		    ;; want to eliminate a final T clause in the clause the leading 
+		    ;; clauses are exhaustive.
+		    `(bdd-typecase ,next
+				   ,@leading-clauses
+				   ,@final-clause-option)))))
 	     (dump-state (state end next)
 	       (copy-list `(,(state-name state)
 			    ,(dump-end state end)

@@ -410,3 +410,18 @@
     
     (assert-true (eql 5
 		      (match '(1 2 3))))))
+
+(define-test test/rte-match
+  (assert-true (typep '(1 2 3)
+		      '(rte (:* t))))
+  
+  (assert-true (typep '(1 2 3)
+		      '(rte (:not (:cat string (:* t))))))
+  
+  (assert-true (typep '(1 2 3)
+		      '(rte (:and (:* t) (:not (:cat string (:* t)))))))
+  
+  (assert-false (typep '(1 2 3)
+		       '(rte (:cat string (:* t))))))
+
+

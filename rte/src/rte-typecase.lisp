@@ -28,9 +28,8 @@
 	   (optimize (speed 3) (debug 0) (compilation-speed 0)))	   
   (tree-reduce #'(lambda (dfa1 dfa2)
 		   (declare (type rte-state-machine dfa1 dfa2))
-		   (the rte-state-machine
-			(synchronized-product dfa1 dfa2
-					      :boolean-function boolean-function)))
+		   (synchronized-product dfa1 dfa2
+					      :boolean-function boolean-function))
 	       dfas :initial-value (rte-to-dfa :empty-set)))
 
 (defun rte-typecase-helper (clauses)

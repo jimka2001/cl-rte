@@ -23,6 +23,9 @@
 
 (defun rte-synchronized-product (dfas &key (boolean-function (lambda (a b)
 							       (or a b))))
+  (declare (type (function (t t) t) boolean-function)
+	   (type list dfas)
+	   (optimize (speed 3) (debug 0) (compilation-speed 0)))	   
   (tree-reduce #'(lambda (dfa1 dfa2)
 		   (declare (type rte-state-machine dfa1 dfa2))
 		   (the rte-state-machine
@@ -32,6 +35,8 @@
 
 (defun rte-typecase-helper (clauses)
   "Helper function for rte-typecase."
+  (declare (type list clauses)
+	   (optimize (speed 3) (debug 0) (compilation-speed 0)))
   (let (previous-patterns
 	unreachable-bodys
 	dfas)

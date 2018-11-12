@@ -381,10 +381,52 @@
   (assert-false (typep '(1 2 3)
 		       '(rte (:cat string (:* t))))))
 
+(define-test test/rte-etypecase
+  (assert-error 'warning
+		(macroexpand-1
+		 '(rte-etypecase form
+		   ((:not (:cat (eql defmethod)
+				(:and (:not keyword)
+				      (:not (eql t))
+				      (:not null)
+				      (:or symbol (cons (eql setf) (cons symbol null)))) ;;  name or (setf name)
+				(:* keyword) ;; optional qualifiers
+				list ;; specialized lambda list
+				(:permute (:* (cons (eql declare))) ;; declarations 
+					  (:? string)) ;; + doc string
+				(:* t)))
+		    ;; if not a valid defmethod form
+		    0)
+	     
+		   ;; (defmethod  name qualifiers   lambda-list declarations             documentation  ...body...)
+		   ((:cat t       t    (:+ keyword) list        (:+ (cons (eql declare))) string     (:* t))
+		    1)
+
+		   ;; (defmethod  name lambda-list documentation declarations            ...body...)
+		   ((:cat t       t    list        string        (:+ (cons (eql declare)))  (:* t))
+		    2)
+
+		   ;; (defmethod  name   qualifiers   lambda-list documentation declarations               ...body...)
+		   ((:cat t       t      (:+ keyword) list        string        (:+ (cons (eql declare)))  (:* t))
+		    3)
+
+		   ;; (defmethod name   lambda-list declarations             documentation  ...body...)
+		   ((:cat t       t     list        (:+ (cons (eql declare))) string       (:* t))
+		    4)
+
+		   ;;(defmethod name lambda-list ...body...)
+		   ((:cat t t list (:* t))
+		    5)
+	     
+		   ;; other
+		   ;;((:* t)
+		   ;;6)
+		   )	 )))
+
 
 (define-test test/parse-defmethod-4
   (flet ((parse (form)
-	   (rte-typecase form
+	   (rte-etypecase form
 	     ((:not (:cat (eql defmethod)
 			  (:and (:not keyword)
 				(:not (eql t))

@@ -58,22 +58,44 @@
 			 (push dfa dfas)))))))
       (dolist (clause clauses)
 	(transform-clause clause))
-      (list unreachable-bodys dfas (rte-synchronized-product dfas)))))
+      (let* ((dfa-remainder (rte-to-dfa `(:and (:* t) (:not (:or ,@previous-patterns))) :reduce t))
+	     (transit (cond
+			((null (get-final-states dfa-remainder))
+			 nil)
+			(t
+			 (find-transit dfa-remainder)))))
+	(list unreachable-bodys dfas (rte-synchronized-product dfas) transit)))))
+
+
+(defmacro rte-etypecase (object-form &body clauses)
+  "OBJECT-FORM is the form to be evaluated,
+CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
+  (destructuring-bind (unreachable-bodys _ dfa remainder) (rte-typecase-helper clauses)
+    (declare (ignore _))
+    (let ((object (gensym "RTE")))
+      (cond
+	(remainder
+	 ;; TODO -- we don't really want to issue this warning for rte-etypecase, it is not clear
+	 ;;  when it should be issued, perhaps we need 
+       
+	 ;; if there is a sequence not covered by this typecase, issue a discriptive warning message
+	 (warn "rte-etypecase not exaustive: for example ~A" remainder)
+	 `(let ((,object ,object-form))
+	    (rte-etypecase ,object ,@clauses ((:* t) (error "The sequence ~A fell through the RTE-ETYPECASE" ,object)))))
+	(t
+	 ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "sync-product" :title "syncronized product")
+	 (flet ((unreachable-clause (unreachable-body)
+		  `(nil ,@unreachable-body)))
+	   `(let ((,object ,object-form))
+	      (typecase ,object
+		((not sequence) nil)
+		,@(mapcar #'unreachable-clause unreachable-bodys)
+		(t
+		 (funcall ,(dump-code dfa :var object)
+			  ,object))))))))))
 
 (defmacro rte-typecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-helper clauses)
-    (declare (ignore _))
-    ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "sync-product" :title "syncronized product")
-    (flet ((unreachable-clause (unreachable-body)
-	     `(nil ,@unreachable-body)))
-      (let ((object (gensym)))
-	`(let ((,object ,object-form))
-	   (typecase ,object
-	     ((not sequence) nil)
-	     ,@(mapcar #'unreachable-clause unreachable-bodys)
-	     (t
-	      (funcall ,(dump-code dfa :var object)
-		       ,object))))))))
+  `(rte-etypecase ,object-form ,@clauses ((:* t) nil)))
 

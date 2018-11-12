@@ -238,6 +238,14 @@
 	(rte-typecase-helper clauses)))))
     
 
+(define-test test/find-transit
+  (assert-true (find-transit (rte-to-dfa '(:AND (:* T) (:NOT (:OR (:CAT FIXNUM FIXNUM))))
+					 :reduce t)))
+  (assert-true (find-transit (rte-to-dfa '(:and (:cat number number number)
+					        (:not (:cat number fixnum fixnum))
+					        (:not (:cat number fixnum (:and (:not fixnum) number))))
+					 :reduce t))))
+
 (define-test test/parse-defmethod
   (flet ((parse (form)
 	   (rte-typecase form

@@ -21,11 +21,13 @@
 
 (defpackage :rte-test
 ;;  (:shadowing-import-from :rte "TEST")
-  (:use :cl :rte :scrutiny :lisp-types :ndfa))
+  (:use :cl :rte :scrutiny :lisp-types :ndfa :adjuvant))
 
 
 
 (in-package :rte-test)
+
+(garbage-collect)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))

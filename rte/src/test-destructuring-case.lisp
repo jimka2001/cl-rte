@@ -21,6 +21,7 @@
 
 (in-package :rte-test)
 
+(garbage-collect)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))
@@ -317,6 +318,8 @@
     
     (assert-true (equal n 1))))
 
+(garbage-collect)
+
 (define-test test/destructuring-case-alt-14
   (let ((n 0))
     (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100)
@@ -342,8 +345,11 @@
     
     (assert-true (equal n 1))))
 
+(garbage-collect)
+
 (define-test test/destructuring-case-alt-14b
   (let ((n 0))
+    (declare (type (unsigned-byte 32) n))
     (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100 :a 12)
       ((&key ((:x (a b c)) '(nil nil nil))
 	     ((:y (d)) '(nil))
@@ -367,6 +373,7 @@
     
     (assert-true (equal n 1))))
 
+(garbage-collect)
 
 (define-test test/destructuring-case-alt-15
   (let ((n 0))
@@ -383,6 +390,8 @@
        (assert-true (= b 2))
        (assert-true (= c 3))))
     (assert-true (= 1 n))))
+
+(garbage-collect)
 
 (define-test test/destructuring-case-alt-15b
   (let ((n 0))

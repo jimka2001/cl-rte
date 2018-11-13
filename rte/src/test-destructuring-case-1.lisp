@@ -21,6 +21,8 @@
 
 (in-package :rte-test)
 
+(garbage-collect)
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))
 

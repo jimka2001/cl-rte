@@ -116,7 +116,7 @@
     (assert-true (rte-to-dfa rte :trim t :reduce nil))
     (assert-true (rte-to-dfa rte :reduce t))))
 
-(define-test test/synchronized-product
+(define-test test/synchronized-product-2
   (let ((rte-t (rte-to-dfa t)))
     (assert-true (eq rte-t
 		     (rte-synchronized-product (list rte-t)))))

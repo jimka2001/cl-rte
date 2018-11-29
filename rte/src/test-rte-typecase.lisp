@@ -240,12 +240,16 @@
     
 
 (define-test test/find-transit
-  (assert-true (find-transit (rte-to-dfa '(:AND (:* T) (:NOT (:OR (:CAT FIXNUM FIXNUM))))
-					 :reduce t)))
-  (assert-true (find-transit (rte-to-dfa '(:and (:cat number number number)
-					        (:not (:cat number fixnum fixnum))
-					        (:not (:cat number fixnum (:and (:not fixnum) number))))
-					 :reduce t))))
+  (assert-true (equal '(nil t)
+                      (multiple-value-list
+                       (find-transit (rte-to-dfa '(:AND (:* T) (:NOT (:OR (:CAT FIXNUM FIXNUM))))
+                                                 :reduce t)))))
+  (assert-false (equal '(nil nil)
+                       (multiple-value-list
+                        (find-transit (rte-to-dfa '(:and (:cat number number number)
+                                                    (:not (:cat number fixnum fixnum))
+                                                    (:not (:cat number fixnum (:and (:not fixnum) number))))
+                                                  :reduce t))))))
 
 (define-test test/parse-defmethod
   (flet ((parse (form)
@@ -383,7 +387,7 @@
 		       '(rte (:cat string (:* t))))))
 
 (define-test test/rte-etypecase
-  (assert-error 'warning
+  (assert-error warning
 		(macroexpand-1
 		 '(rte-etypecase form
 		   ((:not (:cat (eql defmethod)

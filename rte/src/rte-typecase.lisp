@@ -61,25 +61,28 @@
       (let* ((dfa-remainder (rte-to-dfa `(:and (:* t) (:not (:or ,@previous-patterns))) :reduce t))
 	     (transit (cond
 			((null (get-final-states dfa-remainder))
-			 nil)
+			 '(nil nil))
 			(t
-			 (find-transit dfa-remainder)))))
+			 (multiple-value-list
+                          (find-transit dfa-remainder))))))
 	(list unreachable-bodys dfas (rte-synchronized-product dfas) transit)))))
 
 
 (defmacro rte-etypecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (destructuring-bind (unreachable-bodys _ dfa remainder) (rte-typecase-helper clauses)
+  (destructuring-bind (unreachable-bodys _ dfa (remainder remainderp)) (rte-typecase-helper clauses)
     (declare (ignore _))
     (let ((object (gensym "RTE")))
       (cond
-	(remainder
+	(remainderp
 	 ;; TODO -- we don't really want to issue this warning for rte-etypecase, it is not clear
-	 ;;  when it should be issued, perhaps we need 
+	 ;;  when it should be issued
        
 	 ;; if there is a sequence not covered by this typecase, issue a discriptive warning message
-	 (warn "rte-etypecase not exaustive: for example ~A" remainder)
+         (if remainder
+             (warn "rte-etypecase not exaustive: for example, ~A" remainder)
+             (warn "rte-etypecase not exaustive: for example, the empty list"))
 	 `(let ((,object ,object-form))
 	    (rte-etypecase ,object ,@clauses ((:* t) (error "The sequence ~A fell through the RTE-ETYPECASE" ,object)))))
 	(t

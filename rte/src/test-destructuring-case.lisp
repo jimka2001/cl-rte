@@ -349,31 +349,34 @@
 
 (garbage-collect)
 
-(define-test test/destructuring-case-alt-14b
-  (let ((n 0))
-    (declare (type (unsigned-byte 32) n))
-    (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100 :a 12)
-      ((&key ((:x (a b c)) '(nil nil nil))
-	     ((:y (d)) '(nil))
-	     &allow-other-keys) ()
-       (declare (ignore a b c d))
-       nil)
-      ((&key ((:y (u v w)) '(nil nil nil))
-	     ((:x (a b)) '(nil nil))
-	     &allow-other-keys) ()
-       (assert-true (equal a 1))
-       (assert-true (equal b 2))
-       (assert-true (equal u 10))
-       (assert-true (equal v 20))
-       (assert-true (equal w 30))
-       (incf n))
-      ((&key ((:y (u v w)) '(nil nil nil))
-	     ((:x (a b)) '(nil nil))
-	     z) ()
-       (declare (ignore u v w a b z))
-       nil))
+;; commenting out this test because it is toooo sloooow
+;;
+;; (define-test test/destructuring-case-alt-14b
+;;   (let ((n :no-case))
+;;     (declare (type keyword n))
+;;     (destructuring-case-alt '(:x (1 2) :y (10 20 30) :z 100 :a 12)
+;;       ((&key ((:x (a b c)) '(nil nil nil))
+;; 	     ((:y (d)) '(nil))
+;; 	     &allow-other-keys) ()
+;;        (declare (ignore a b c d))
+;;        (setf n :first-case))
+;;       ((&key ((:y (u v w)) '(nil nil nil))
+;; 	     ((:x (a b)) '(nil nil))
+;; 	     &allow-other-keys) ()
+;;        (assert-true (equal a 1))
+;;        (assert-true (equal b 2))
+;;        (assert-true (equal u 10))
+;;        (assert-true (equal v 20))
+;;        (assert-true (equal w 30))
+;;        (setf n :second-case))
+;;       ((&key ((:y (u v w)) '(nil nil nil))
+;; 	     ((:x (a b)) '(nil nil))
+;; 	     z
+;;              &allow-other-keys) ()
+;;        (declare (ignore u v w a b z))
+;;        (setf n :third-case)))
     
-    (assert-true (equal n 1))))
+;;     (assert-true (eql n :second-case))))
 
 (garbage-collect)
 

@@ -155,7 +155,7 @@ depend on the choice of F-... function given."
   (sort (copy-list patterns) #'cmp-objects))
 
 (defun remove-redundant-types (patterns operator)
-  "Given the operand list of either :or or :and, return a new operand list understand some basic logical reductions."
+  "Given the operand list of either :or or :and, return a new operand list understand some basic logical reductions based on super-typeness."
   (declare (type (member :and :or) operator))
   (if (and (eql :and operator)
 	   (exists p1 patterns

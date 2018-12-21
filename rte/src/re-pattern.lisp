@@ -726,10 +726,14 @@ consists of values whose types match PATTERN."
 			     (push (list :next-label deriv
 					 :transition-label type)
 				   transitions)))))
+                      ;; TODO, can't this be made to create an instance of an
+                      ;;   rte-specific subclass of state.   add-rte-state?
+                      ;;   thus removing exit-form from ndfa:state
 		      (ndfa:add-state sm
 				      :label re
 				      :initial-p initial-p
 				      :final-p nullable-p
+                                      ;; TODO need to add :priority to arbitrate between colliding exit conditions
 				      :exit-form (when nullable-p
 						   final-body)
 				      :transitions transitions)))))

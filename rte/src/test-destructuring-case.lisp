@@ -21,13 +21,11 @@
 
 (in-package :rte-test)
 
-(garbage-collect)
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))
 
 
-
+(garbage-collect)
 
 (define-test test/destructuring-lambda-list-to-rte-2
   (equivalent-patterns 
@@ -211,6 +209,8 @@
 					     :here)))))
 		    '(:w :x :y :z)))
 
+(garbage-collect)
+
 (define-test test/destructuring-case-alt-9
   (let ((n 0))
     (destructuring-case-alt '(:x (1 2))
@@ -219,6 +219,8 @@
        (assert-true (equal b 2))
        (incf n)))
     (assert-true (equal n 1))))
+
+(garbage-collect)
 
 (define-test test/destructuring-case-alt-10
   (let ((n 0))
@@ -232,6 +234,8 @@
        (incf n)))
     (assert-true (equal n 1))))
 
+
+(garbage-collect)
 
 (define-test test/destructuring-case-alt-11
   (let ((n 0))
@@ -252,6 +256,8 @@
        (incf n)))
     (assert-true (equal n 1))))
 
+(garbage-collect)
+
 (define-test test/destructuring-case-alt-12
   (let ((n 0))
     (destructuring-case-alt '(:x (1 2) :y (10 20 30))
@@ -269,6 +275,7 @@
        (incf n)))
     (assert-true (equal n 1))))
 
+(garbage-collect)
 
 (define-test test/destructuring-case-alt-13
   (let ((n 0))

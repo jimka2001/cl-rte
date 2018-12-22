@@ -499,14 +499,13 @@ a fixed point is found."
 									    ((and st1
 										  st2
 										  (state-exit-form st1)
-										  (state-exit-form st2)
-										  (not (equal (state-exit-form st1)
-											      (state-exit-form st2))))
-									     (cerror "Generate code with explicit conflict."
-										     "unexpected conflicting exit forms: ~A vs ~A"
-										     (state-exit-form st1)
-										     (state-exit-form st2))
-									     (gensym "CONFLICT"))
+										  (state-exit-form st2))
+									     ;; if the two states both have an exit form, take the one with
+									     ;; lowest clause-index (highest priority), this is the one which appears
+									     ;; first in the unexpanded typecase.
+									     (if (< (clause-index st1) (clause-index st2))
+										 (state-exit-form st1)
+										 (state-exit-form st2)))
 									    (t
 									     (or (and st1 (state-exit-form st1))
 										 (and st2 (state-exit-form st2)))))))))
@@ -519,8 +518,6 @@ a fixed point is found."
 
 (defmethod dump-code ((pattern list) &key (var 'seq))
   (dump-code (rte-to-dfa pattern :reduce t) :var var))
-
-
 
 (defmethod dump-code ((ndfa rte-state-machine) &key (var 'seq))
   (let* ((states (append (ndfa:get-initial-states ndfa)
@@ -736,7 +733,9 @@ consists of values whose types match PATTERN."
                                       ;; TODO need to add :priority to arbitrate between colliding exit conditions
 				      :exit-form (when nullable-p
 						   final-body)
-				      :clause-index clause-index
+				      :clause-index (if nullable-p
+							clause-index
+							nil)
 				      :transitions transitions)))))
 	   (calc-sticky ()
 	     ;; if a state only has transitions which are t (or some supertype of t such as (or number (not number))

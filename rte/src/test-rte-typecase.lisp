@@ -178,7 +178,7 @@
 				 cons
 				 (cons (eql rte-typecase))))))
       (destructuring-bind (_1 _2 (_3 obj &rest clauses) &rest _4) expansion-2
-	(declare (ignore _1 _2 _3 _4 obj))
+	(declare (ignore _1 _2 _3 obj))
 	(rte-typecase-helper clauses)))))
 
 (define-test test/rte-typecase-dfas-3
@@ -232,7 +232,7 @@
 			  '(rte (:cat (eql LET)
 				 cons
 				 (cons (eql rte-typecase))))))
-      (destructuring-bind (_ _ (_ obj &rest clauses) &rest _) expansion-2
+      (destructuring-bind (_ (_ obj &rest clauses) &rest _) expansion-2
 	(declare (ignore _))
 	;;(format t "obj=~A~%" obj)
 	;;(format t "clauses=~A~%" clauses)

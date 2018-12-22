@@ -66,14 +66,12 @@
 			(t
 			 (multiple-value-list
                           (find-transit dfa-remainder))))))
-	(list unreachable-bodys dfas (rte-synchronized-product dfas) transit)))))
-
+	(list unreachable-bodys (rte-synchronized-product dfas) transit)))))
 
 (defmacro rte-etypecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (destructuring-bind (unreachable-bodys _ dfa (remainder remainderp)) (rte-typecase-helper clauses)
-    (declare (ignore _))
+  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-typecase-helper clauses)
     (let ((object (gensym "RTE")))
       (cond
 	(remainderp

@@ -38,6 +38,7 @@
 	   (optimize (speed 3) (debug 0) (compilation-speed 0)))
   (let (previous-patterns
 	unreachable-bodys
+	(clause-index 0)
 	dfas)
     (labels ((exit-form (body)
 	       ;; smart body encapsulation, only wrap in progn if necessary
@@ -52,7 +53,7 @@
 		   (push pattern previous-patterns)
 		   (if (equivalent-patterns :empty-set derived-pattern)
 		       (push body unreachable-bodys)
-		       (let ((dfa (rte-to-dfa derived-pattern :reduce t :final-body (exit-form body))))
+		       (let ((dfa (rte-to-dfa pattern :reduce nil :final-body (exit-form body) :clause-index (incf clause-index))))
 			 ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
 			 ;; 			    :title (format nil "~s" derived-pattern))
 			 (push dfa dfas)))))))

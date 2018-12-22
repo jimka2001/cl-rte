@@ -693,7 +693,7 @@ a fixed point is found."
 	   input-sequence)
     current-states))
 
-(defun rte-to-dfa (pattern &key trim reduce (final-body t))
+(defun rte-to-dfa (pattern &key trim reduce (final-body t) (clause-index 0))
   "Create and return a finite state machine (ndfa) which can be used to determine if a given list
 consists of values whose types match PATTERN."
   ;; cannot reduce without trimming
@@ -736,6 +736,7 @@ consists of values whose types match PATTERN."
                                       ;; TODO need to add :priority to arbitrate between colliding exit conditions
 				      :exit-form (when nullable-p
 						   final-body)
+				      :clause-index clause-index
 				      :transitions transitions)))))
 	   (calc-sticky ()
 	     ;; if a state only has transitions which are t (or some supertype of t such as (or number (not number))

@@ -30,10 +30,23 @@
   (let ((a '(1 2 :x 3 :y 4))
 	(n 0))
     (destructuring-case a
-      ((u v &key x y) ()
+      ((u v &key x y)
        (incf n)
        (assert-true (= u 1))
        (assert-true (= v 2))
        (assert-true (= x 3))
        (assert-true (= y 4))))
     (assert-true (= n 1))))
+
+(define-test test/destructuring-case-5
+  (let ((a '(1)))
+    (assert-true (equal 1
+			(destructuring-case a
+			  ((u &key x)
+			   (declare (ignore others))
+			   u)
+			  ((u &key x y)
+			   (+ 1 u))
+			  ((u &key x y z)
+			   (declare (ignore others))
+			   (+ 2 u)))))))

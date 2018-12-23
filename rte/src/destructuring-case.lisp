@@ -61,14 +61,14 @@ with the given KEYVAR form"
   (let (type-spec-alist)
     (dolist (constraint constraint-alist)
       (destructuring-bind (type-specifier &rest variable-names) constraint
-	(dolist (name variable-names)
-	  (let* ((hit (assoc name type-spec-alist))
-		 (type-spec (cadr hit)))
-	  (cond
-	    (hit
-	     (setf (cadr hit) `(and ,type-specifier ,type-spec)))
-	    (t
-	     (push (list name type-specifier) type-spec-alist)))))))
+        (dolist (name variable-names)
+          (let* ((hit (assoc name type-spec-alist))
+                 (type-spec (cadr hit)))
+          (cond
+            (hit
+             (setf (cadr hit) `(and ,type-specifier ,type-spec)))
+            (t
+             (push (list name type-specifier) type-spec-alist)))))))
     type-spec-alist))
 
 
@@ -90,23 +90,23 @@ with the given KEYVAR form"
     (when (stringp (car body))
       (pop body))
     (loop :while (typep body '(cons (cons (eql declare))))
-	  :do (dolist (decl (cdr (car body)))
-		(unless (member (car decl) '(dynamic-extent ignore optimize ftype inline special ignorable notinline type)
-				:test #'eq)
-		  (push 'type decl))
+          :do (dolist (decl (cdr (car body)))
+                (unless (member (car decl) '(dynamic-extent ignore optimize ftype inline special ignorable notinline type)
+                                :test #'eq)
+                  (push 'type decl))
                 (when (typep decl '(cons (eql type)))
-		  (destructuring-bind (_ typespec &rest vars) decl
-		    (declare (ignore _))
+                  (destructuring-bind (_ typespec &rest vars) decl
+                    (declare (ignore _))
                        ;; need to handle the case that the same
                        ;; variable appears twice with two different
                        ;; declarations.  Need to check with the spec
                        ;; to see what the defined semantics are.
-		    (dolist (var vars)
-		      (if (assoc var var-declarations)
-			  (setf (cadr (assoc var var-declarations))
-				(list 'and typespec (cadr (assoc var var-declarations))))
-			  (push (list var typespec) var-declarations)))))
-		(pop body)))
+                    (dolist (var vars)
+                      (if (assoc var var-declarations)
+                          (setf (cadr (assoc var var-declarations))
+                                (list 'and typespec (cadr (assoc var var-declarations))))
+                          (push (list var typespec) var-declarations)))))
+                (pop body)))
     var-declarations))
 
 (defun destructuring-lambda-list-to-rte (lambda-list &key type-specifiers)
@@ -130,88 +130,88 @@ lambda-list::= (wholevar reqvars optvars restvar keyvars auxvars)
 Not supporting this syntax -> (wholevar reqvars optvars . var) "
   (declare (type list lambda-list type-specifiers))
   (let ((copy-lambda-list lambda-list)
-	(ll-keywords '(&whole &optional &rest &body &key &allow-other-keys &aux))
-	(whole-pattern '(:* t))
-	req-pattern
-	rest-pattern
-	key-pattern
-	optional-types
-	tail-pattern)
+        (ll-keywords '(&whole &optional &rest &body &key &allow-other-keys &aux))
+        (whole-pattern '(:* t))
+        req-pattern
+        rest-pattern
+        key-pattern
+        optional-types
+        tail-pattern)
 
     (labels ((stack-optional (types base)
-	       (if (null types)
-		   base
-		   (list :? (car types) (stack-optional (cdr types) base))))
-	     (get-var-type (var)
-	       (cadr (assoc var type-specifiers)))
-	     (recursive-pattern-var (var &key (symbol-pattern t))
-	       (typecase var
-		 (null
-		  'null)
-		 (symbol
-		  (or (get-var-type var)
-		      symbol-pattern))
-		 (list
-		  `(:and list (rte ,(canonicalize-pattern
-				     (destructuring-lambda-list-to-rte var
-								       :type-specifiers type-specifiers)))))
-		 (t
-		  (error "invalid object ~A in var position in lambda list ~A" var copy-lambda-list))))
-	     (recursive-pattern-var-val (var-val)
-	       (typecase var-val
-		 (null
-		  'null)
-		 (list
-		  (recursive-pattern-var (car var-val)))
-		 (symbol
-		  (recursive-pattern-var var-val))
-		 (t
-		  (error "invalid object ~A in var position of lambea list ~A" var-val copy-lambda-list)))))
+               (if (null types)
+                   base
+                   (list :? (car types) (stack-optional (cdr types) base))))
+             (get-var-type (var)
+               (cadr (assoc var type-specifiers)))
+             (recursive-pattern-var (var &key (symbol-pattern t))
+               (typecase var
+                 (null
+                  'null)
+                 (symbol
+                  (or (get-var-type var)
+                      symbol-pattern))
+                 (list
+                  `(:and list (rte ,(canonicalize-pattern
+                                     (destructuring-lambda-list-to-rte var
+                                                                       :type-specifiers type-specifiers)))))
+                 (t
+                  (error "invalid object ~A in var position in lambda list ~A" var copy-lambda-list))))
+             (recursive-pattern-var-val (var-val)
+               (typecase var-val
+                 (null
+                  'null)
+                 (list
+                  (recursive-pattern-var (car var-val)))
+                 (symbol
+                  (recursive-pattern-var var-val))
+                 (t
+                  (error "invalid object ~A in var position of lambea list ~A" var-val copy-lambda-list)))))
       ;; wholevar
       ;; wholevar::= [&whole var]
       (pop ll-keywords) ;; pop &whole off ll-keywords
       (when (eq '&whole (car lambda-list))
-	(pop lambda-list)		; pop off &whole
-	(setf whole-pattern (recursive-pattern-var (car lambda-list)
-						   :symbol-pattern '(:* t)))
-	(pop lambda-list)		; pop off the variable
-	)
+        (pop lambda-list)               ; pop off &whole
+        (setf whole-pattern (recursive-pattern-var (car lambda-list)
+                                                   :symbol-pattern '(:* t)))
+        (pop lambda-list)               ; pop off the variable
+        )
     
       ;; reqvars
       (setf req-pattern (cons :cat
-			      (loop :while (and lambda-list
-						(not (member (car lambda-list) ll-keywords)))
-				    :collect (prog1 (recursive-pattern-var (car lambda-list))
-					       (pop lambda-list)))))
+                              (loop :while (and lambda-list
+                                                (not (member (car lambda-list) ll-keywords)))
+                                    :collect (prog1 (recursive-pattern-var (car lambda-list))
+                                               (pop lambda-list)))))
     
       ;; optvars
       ;; optvars::= [&optional {var | (var [init-form [supplied-p-parameter]])}*] 
       (when (eql '&optional (car lambda-list))
-	(pop ll-keywords)	    ; pop &optional off of ll-keywords
-	(pop lambda-list)           ; pop &optional off the lambda-list
-	(setf optional-types (loop :while (and lambda-list
-					       (not (member (car lambda-list) ll-keywords)))
-				   :collect (prog1 (recursive-pattern-var-val (car lambda-list))
-					      (pop lambda-list)))))
+        (pop ll-keywords)           ; pop &optional off of ll-keywords
+        (pop lambda-list)           ; pop &optional off the lambda-list
+        (setf optional-types (loop :while (and lambda-list
+                                               (not (member (car lambda-list) ll-keywords)))
+                                   :collect (prog1 (recursive-pattern-var-val (car lambda-list))
+                                              (pop lambda-list)))))
 
       ;; restvar
       ;; restvar::= [{&rest | &body} var] 
       (when (member (car lambda-list) '(&rest &body))
-	(pop lambda-list)		; pop off the &rest | &body
-	(setf rest-pattern (cond
-			     ((listp (car lambda-list))
-			      (recursive-pattern-var (car lambda-list) :symbol-pattern '(:* t)))
-			     ((member (recursive-pattern-var-val (car lambda-list)) '(list t))
-			      '(:* t))
-			     ((eq 'cons (recursive-pattern-var-val (car lambda-list)))
-			      '(:+ t))
-			     (t
-			      (error "unable to convert &rest ~A with declared type ~A to RTE"
-				     (car lambda-list) (recursive-pattern-var-val (car lambda-list))))))
-	(pop lambda-list)		; pop off the var,
-	(pop ll-keywords)		; pop &rest
-	(pop ll-keywords)		; pop &body
-	)
+        (pop lambda-list)               ; pop off the &rest | &body
+        (setf rest-pattern (cond
+                             ((listp (car lambda-list))
+                              (recursive-pattern-var (car lambda-list) :symbol-pattern '(:* t)))
+                             ((member (recursive-pattern-var-val (car lambda-list)) '(list t))
+                              '(:* t))
+                             ((eq 'cons (recursive-pattern-var-val (car lambda-list)))
+                              '(:+ t))
+                             (t
+                              (error "unable to convert &rest ~A with declared type ~A to RTE"
+                                     (car lambda-list) (recursive-pattern-var-val (car lambda-list))))))
+        (pop lambda-list)               ; pop off the var,
+        (pop ll-keywords)               ; pop &rest
+        (pop ll-keywords)               ; pop &body
+        )
 
       ;; keyvars
       ;; keyvars::= [&key {var | ({var | (keyword-name var)} [init-form [supplied-p-parameter]])}* 
@@ -261,100 +261,100 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
       |#
       
       (when (eql '&key (car lambda-list))
-	(pop lambda-list)		; pop off &key
-	(let* (key-vars
-	       used-keywords
-	       (key-formats (loop :while (and lambda-list
-					      (not (member (car lambda-list) ll-keywords)))
-				  :for ll-var = (pop lambda-list)
-				  :for keyword = (find-keyword ll-var copy-lambda-list)
-				  :for key-var = (find-key-variable ll-var copy-lambda-list)
-				  :for pattern = (recursive-pattern-var key-var)
-				  :collect (list keyword pattern)
-				  :do (push keyword used-keywords)
-				  :do (push key-var key-vars)))
-	      (allow-other-keys (when (eql '&allow-other-keys (car lambda-list))
-				  (pop lambda-list)
-				  t)))
+        (pop lambda-list)               ; pop off &key
+        (let* (key-vars
+               used-keywords
+               (key-formats (loop :while (and lambda-list
+                                              (not (member (car lambda-list) ll-keywords)))
+                                  :for ll-var = (pop lambda-list)
+                                  :for keyword = (find-keyword ll-var copy-lambda-list)
+                                  :for key-var = (find-key-variable ll-var copy-lambda-list)
+                                  :for pattern = (recursive-pattern-var key-var)
+                                  :collect (list keyword pattern)
+                                  :do (push keyword used-keywords)
+                                  :do (push key-var key-vars)))
+              (allow-other-keys (when (eql '&allow-other-keys (car lambda-list))
+                                  (pop lambda-list)
+                                  t)))
 
-	  (setf key-pattern
-		(let ((patt-1 (cond
-				(allow-other-keys
-				 '(:* keyword t))
-				(used-keywords
-				 `(:* (member ,@used-keywords) t))
-				(t ; used-keywords = (), this means &key was used with no &allow-other-keys and also with no acutal keys
-				 :empty-word )))
-		      (patt-per-key (loop :for key-format :in key-formats
-					  :collect
-					  (destructuring-bind (key type) key-format
-					    `(:cat (:* (not (eql ,key)) t) (:? (eql ,key) ,type (:* t)))))))
-					  
-		  `(:and ,patt-1
-			 ,@patt-per-key)))))
+          (setf key-pattern
+                (let ((patt-1 (cond
+                                (allow-other-keys
+                                 '(:* keyword t))
+                                (used-keywords
+                                 `(:* (member ,@used-keywords) t))
+                                (t ; used-keywords = (), this means &key was used with no &allow-other-keys and also with no acutal keys
+                                 :empty-word )))
+                      (patt-per-key (loop :for key-format :in key-formats
+                                          :collect
+                                          (destructuring-bind (key type) key-format
+                                            `(:cat (:* (not (eql ,key)) t) (:? (eql ,key) ,type (:* t)))))))
+                                          
+                  `(:and ,patt-1
+                         ,@patt-per-key)))))
 
       (let ((rest-key-pattern (cond
-				((and rest-pattern key-pattern)
-				 ;; &rest &key
-				 `(:and ,rest-pattern ,key-pattern))
-				((and rest-pattern (not key-pattern))
-				 ;; &rest
-				 rest-pattern)
-				((and (not rest-pattern) key-pattern)
-				 ;; &key
-				 key-pattern)
-				((and (not rest-pattern) (not key-pattern))
-				 ':empty-word))))
-	(setf tail-pattern (stack-optional optional-types rest-key-pattern)))
+                                ((and rest-pattern key-pattern)
+                                 ;; &rest &key
+                                 `(:and ,rest-pattern ,key-pattern))
+                                ((and rest-pattern (not key-pattern))
+                                 ;; &rest
+                                 rest-pattern)
+                                ((and (not rest-pattern) key-pattern)
+                                 ;; &key
+                                 key-pattern)
+                                ((and (not rest-pattern) (not key-pattern))
+                                 ':empty-word))))
+        (setf tail-pattern (stack-optional optional-types rest-key-pattern)))
 
-      (pop ll-keywords)			; pop off &key
-      (pop ll-keywords)			; pop off &allow-other-keys
+      (pop ll-keywords)                 ; pop off &key
+      (pop ll-keywords)                 ; pop off &allow-other-keys
 
       ;; auxvars
       ;; auxvars::= [&aux {var | (var [init-form])}*]     
       (when (eql '&aux (car lambda-list))
-	;; We only parse the &aux section so that we can check for errors.  If there's something
-	;; trailing the &aux section, we trigger an error below.
-	(pop lambda-list)	   ; pop off the &aux from lambda-list
-	(loop :while lambda-list
-	      :for var = (pop lambda-list) ;; update every time through the loop
-	      :do (typecase var
-		    (null
-		     (error "destructuring not supported in &aux variable ~A of lambda-list ~A" var copy-lambda-list))
-		    (symbol
-		     t)
-		    ((cons symbol t)
-		     t)
-		    (t
-		     (error "destructuring not supported in &aux variable ~A of lambda-list ~A" var copy-lambda-list)))))
+        ;; We only parse the &aux section so that we can check for errors.  If there's something
+        ;; trailing the &aux section, we trigger an error below.
+        (pop lambda-list)          ; pop off the &aux from lambda-list
+        (loop :while lambda-list
+              :for var = (pop lambda-list) ;; update every time through the loop
+              :do (typecase var
+                    (null
+                     (error "destructuring not supported in &aux variable ~A of lambda-list ~A" var copy-lambda-list))
+                    (symbol
+                     t)
+                    ((cons symbol t)
+                     t)
+                    (t
+                     (error "destructuring not supported in &aux variable ~A of lambda-list ~A" var copy-lambda-list)))))
       
       (pop ll-keywords)
 
       (if lambda-list
-	  (error "lambda list ~A not parsed correctly: suspicious tail is ~A" copy-lambda-list lambda-list)
-	  `(:and ,whole-pattern
-		 (:cat ,req-pattern
-		       ,tail-pattern))))))
+          (error "lambda list ~A not parsed correctly: suspicious tail is ~A" copy-lambda-list lambda-list)
+          `(:and ,whole-pattern
+                 (:cat ,req-pattern
+                       ,tail-pattern))))))
 
 (defun test-illustrate-dfas (pattern previous-patterns derived-pattern)
   (format t "-----------~%pattern: ~S~%" pattern)
   (format t "previous: ~S~%" previous-patterns)
   (format t "derived: ~S~%" derived-pattern)
   (let* ((dfa-derived (rte-to-dfa derived-pattern))
-	 (dfa-given (rte-to-dfa pattern))
-	 (dfa-given-trim (trim-state-machine dfa-given))
-	 (dfa-derived-trim (trim-state-machine dfa-derived))
-	 (dfa-given-reduced (progn (format t "reducing dfa of ~S~%" pattern)
-				   (minimize-state-machine dfa-given)))
-	 (dfa-derived-reduced (progn (format t "reducing dfa of ~S~%" derived-pattern)
-				     (minimize-state-machine dfa-derived))))
+         (dfa-given (rte-to-dfa pattern))
+         (dfa-given-trim (trim-state-machine dfa-given))
+         (dfa-derived-trim (trim-state-machine dfa-derived))
+         (dfa-given-reduced (progn (format t "reducing dfa of ~S~%" pattern)
+                                   (minimize-state-machine dfa-given)))
+         (dfa-derived-reduced (progn (format t "reducing dfa of ~S~%" derived-pattern)
+                                     (minimize-state-machine dfa-derived))))
     (flet ((report-dfa (dfa comment &key view)
-	     (format t "~A   dfa size: ~D~%" comment (length (states dfa)))
-	     (when view
-	       (ndfa-to-dot dfa  (make-temp-file-name comment
-						      :extension "png"
-						      :ensure-file-exists t)
-			    :view t :transition-legend t))))
+             (format t "~A   dfa size: ~D~%" comment (length (states dfa)))
+             (when view
+               (ndfa-to-dot dfa  (make-temp-file-name comment
+                                                      :extension "png"
+                                                      :ensure-file-exists t)
+                            :view t :transition-legend t))))
       ;; TODO need to minimize here, not just trim
       (report-dfa dfa-given "given" :view t)
       (report-dfa dfa-derived "derived")
@@ -370,26 +370,26 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (LAMBDA-LIST
   where CONSTRAINTS is a car/cdr alist mapping each type specifiers to a list of
   variable names. e.g., ((number a b c) ((or string symbol) x y z))"
   (let ((object (gensym))
-	previous-anti-patterns)
+        previous-anti-patterns)
     (flet ((transform-clause (clause)
-	     (destructuring-bind (lambda-list constraints &rest body) clause
-	       (declare (type list constraints))
-	       ;; constraints is an car/cdr alist mapping each type specifiers to a list of
-	       ;;  variable names. e.g., ((number a b c) ((or string symbol) x y z))
-	       (let* ((type-specifier-alist (swap-type-specifier-alist constraints))
-		      (additional-declarations (mapcar #'(lambda (constraint)
-							   `(declare (type ,@constraint))) constraints))
-		      (pattern (canonicalize-pattern (destructuring-lambda-list-to-rte
-						      lambda-list
-						      :type-specifiers type-specifier-alist))))
-		 (prog1 `(,pattern
-			  (destructuring-bind ,lambda-list ,object
-			    ,@additional-declarations
-			    ,@body))
-		   (push `(:not ,pattern) previous-anti-patterns))))))
+             (destructuring-bind (lambda-list constraints &rest body) clause
+               (declare (type list constraints))
+               ;; constraints is an car/cdr alist mapping each type specifiers to a list of
+               ;;  variable names. e.g., ((number a b c) ((or string symbol) x y z))
+               (let* ((type-specifier-alist (swap-type-specifier-alist constraints))
+                      (additional-declarations (mapcar #'(lambda (constraint)
+                                                           `(declare (type ,@constraint))) constraints))
+                      (pattern (canonicalize-pattern (destructuring-lambda-list-to-rte
+                                                      lambda-list
+                                                      :type-specifiers type-specifier-alist))))
+                 (prog1 `(,pattern
+                          (destructuring-bind ,lambda-list ,object
+                            ,@additional-declarations
+                            ,@body))
+                   (push `(:not ,pattern) previous-anti-patterns))))))
       `(let ((,object ,object-form))
-	 (rte-typecase ,object
-		       ,@(mapcar #'transform-clause clauses))))))
+         (rte-typecase ,object
+                       ,@(mapcar #'transform-clause clauses))))))
 
 (defmacro destructuring-case-alt (object-form &body clauses)
   "Symantically similar to CASE except that the object is matched against destructuring-lambda-lists and
@@ -422,47 +422,47 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (LAMBDA-LIST
      :second))
  ==> :second"
   (let ((reformed
-	  (loop :for clause :in clauses
-		:collect (destructuring-bind (lambda-list &body body) clause
-			   ;; gather-type-declarations returns a list of the
-			   ;;   form ((var1 typespec1) (var2 typespec2) ...)
-			   ;; need to convert to ((typespec1 var...)
-			   ;;                     (typespec2 var...) ...)
-			   (let ((constraints (mapcar #'reverse (gather-type-declarations body))))
-			     `(,lambda-list ,constraints ,@body))))))
+          (loop :for clause :in clauses
+                :collect (destructuring-bind (lambda-list &body body) clause
+                           ;; gather-type-declarations returns a list of the
+                           ;;   form ((var1 typespec1) (var2 typespec2) ...)
+                           ;; need to convert to ((typespec1 var...)
+                           ;;                     (typespec2 var...) ...)
+                           (let ((constraints (mapcar #'reverse (gather-type-declarations body))))
+                             `(,lambda-list ,constraints ,@body))))))
     `(destructuring-case-alt ,object-form ,@reformed)))
 
 (defun expand-destructuring-methods (object-form clauses call-next-method)
   (declare (type symbol call-next-method))
   (let ((object (gensym))
-	(objects (gensym)))
+        (objects (gensym)))
     (flet ((transform-clause (clauses)
-	     (destructuring-bind (lambda-list &rest body) (car clauses)
-	       (let ((pattern (destructuring-lambda-list-to-rte lambda-list
-								:type-specifiers (gather-type-declarations body))))
+             (destructuring-bind (lambda-list &rest body) (car clauses)
+               (let ((pattern (destructuring-lambda-list-to-rte lambda-list
+                                                                :type-specifiers (gather-type-declarations body))))
 
-		 (if (cdr clauses)
-		     `((rte ,(canonicalize-pattern pattern))
-		       (flet ((,call-next-method (&rest ,objects)
-				(destructuring-methods (if ,objects
-							   (car ,objects)
-							   ,object)
-				    (:call-next-method ,call-next-method)
-				  ,@(cdr clauses))))
-			 (declare (ignorable (function ,call-next-method)))
-			 (destructuring-bind ,lambda-list ,object
-			   ,@body)))
-		     `((rte ,(canonicalize-pattern pattern))
-		       (flet ((,call-next-method (&rest ,objects)
-				(declare (ignore ,objects))
-				(error "cannot call ~A from final clause" ',call-next-method)))
-			 (declare (ignorable (function ,call-next-method)))
-			 (destructuring-bind ,lambda-list ,object
-			   ,@body))))))))
-	   `(let ((,object ,object-form))
-	      (typecase ,object
-		((not list) nil)
-		,@(maplist #'transform-clause clauses))))))
+                 (if (cdr clauses)
+                     `((rte ,(canonicalize-pattern pattern))
+                       (flet ((,call-next-method (&rest ,objects)
+                                (destructuring-methods (if ,objects
+                                                           (car ,objects)
+                                                           ,object)
+                                    (:call-next-method ,call-next-method)
+                                  ,@(cdr clauses))))
+                         (declare (ignorable (function ,call-next-method)))
+                         (destructuring-bind ,lambda-list ,object
+                           ,@body)))
+                     `((rte ,(canonicalize-pattern pattern))
+                       (flet ((,call-next-method (&rest ,objects)
+                                (declare (ignore ,objects))
+                                (error "cannot call ~A from final clause" ',call-next-method)))
+                         (declare (ignorable (function ,call-next-method)))
+                         (destructuring-bind ,lambda-list ,object
+                           ,@body))))))))
+           `(let ((,object ,object-form))
+              (typecase ,object
+                ((not list) nil)
+                ,@(maplist #'transform-clause clauses))))))
 
 (defmacro destructuring-methods (object-form (&key (call-next-method 'call-next-method)) &body clauses)
   "A variant of DESTRUCTURING-CASE, but allows a call-next-method feature.

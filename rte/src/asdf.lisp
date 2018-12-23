@@ -41,21 +41,21 @@ of the ASDF:DEFSYSTEM."))
   (let ((fasl (first (asdf/action::input-files operation file))))
     (when fasl
       (let ((registry (merge-pathnames (make-pathname :type "rte") fasl)))
-	(when (probe-file registry)
-	  ;; (format t "reading patterns from file ~A" registry)
-	  (load registry))))))
+        (when (probe-file registry)
+          ;; (format t "reading patterns from file ~A" registry)
+          (load registry))))))
 
 (defmethod asdf:perform :around ((operation asdf:compile-op) (file asdf-user::rte-cl-source-file))
   "Create a file in the fasl directory whose lisp text defines the matching functions for the
 rte patterns which come into existing while compiling FILE."
   (let ((old-patterns (copy-list (get-patterns)))
-	;; (lisp (first (asdf/action::input-files operation file)))
-	(fasl (first (asdf/action::output-files operation file))))
+        ;; (lisp (first (asdf/action::input-files operation file)))
+        (fasl (first (asdf/action::output-files operation file))))
     (prog1 (call-next-method)
       (when fasl
-	(let ((patterns (set-difference (get-patterns) old-patterns :test #'equal))
-	      (registry (merge-pathnames (make-pathname :type "rte") fasl)))
-	  ;; (format t "creating ~d patterns in file ~A" (length patterns) registry)
-	  (with-open-file (stream registry :direction :output :if-exists :supersede)
-	    (serialize-functions stream patterns)))))))
+        (let ((patterns (set-difference (get-patterns) old-patterns :test #'equal))
+              (registry (merge-pathnames (make-pathname :type "rte") fasl)))
+          ;; (format t "creating ~d patterns in file ~A" (length patterns) registry)
+          (with-open-file (stream registry :direction :output :if-exists :supersede)
+            (serialize-functions stream patterns)))))))
 

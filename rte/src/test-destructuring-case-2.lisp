@@ -25,10 +25,10 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))
    
-	  
+          
 (define-test test/destructuring-case-4
   (let ((a '(1 2 :x 3 :y 4))
-	(n 0))
+        (n 0))
     (destructuring-case a
       ((u v &key x y)
        (incf n)
@@ -41,12 +41,12 @@
 (define-test test/destructuring-case-5
   (let ((a '(1)))
     (assert-true (equal 1
-			(destructuring-case a
-			  ((u &key x)
-			   (declare (ignore others))
-			   u)
-			  ((u &key x y)
-			   (+ 1 u))
-			  ((u &key x y z)
-			   (declare (ignore others))
-			   (+ 2 u)))))))
+                        (destructuring-case a
+                          ((u &key x)
+                           (declare (ignore others))
+                           u)
+                          ((u &key x y)
+                           (+ 1 u))
+                          ((u &key x y z)
+                           (declare (ignore others))
+                           (+ 2 u)))))))

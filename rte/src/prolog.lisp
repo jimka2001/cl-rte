@@ -25,17 +25,17 @@
 (defun complexity (object)
   "Returns the number of cons cells in the given hierarchical list"
   (cond ((atom object)
-	 0)
-	(t
-	 (+ (length object)
-	    (reduce #'+ (mapcar #'complexity object) :initial-value 0)))))
+         0)
+        (t
+         (+ (length object)
+            (reduce #'+ (mapcar #'complexity object) :initial-value 0)))))
 
 (defun get-patterns ()
   (let (patterns)
     (maphash (lambda (pattern dfa)
-	       (declare (ignore dfa))
-	       (push pattern patterns))
-	     *state-machines*)
+               (declare (ignore dfa))
+               (push pattern patterns))
+             *state-machines*)
     (sort-patterns patterns)))
 
 (defun sort-patterns (patterns)
@@ -45,26 +45,26 @@ pattern-B.  This sorting is done naively: If pattern-B references pattern-A, the
 the total number of cons cells of pattern-B must be larger than that of pattern-A, thus
 the list is sorted by complexity, otherwise the sort order is non-deterministic."
   (declare (type list patterns)
-	   (notinline <))
+           (notinline <))
   (sort patterns #'< :key #'complexity))
 
 (defun serialize-functions (stream &optional (patterns (get-patterns)))
   (dolist (pattern patterns)
     (let* ((dfa (gethash pattern *state-machines*))
-	   (name (make-rte-function-name pattern))
-	   (code (dump-code dfa)))
+           (name (make-rte-function-name pattern))
+           (code (dump-code dfa)))
       (format stream ";; ")
       (write pattern
-	     :stream stream
-	     :escape t
-	     :pretty nil)
+             :stream stream
+             :escape t
+             :pretty nil)
       (terpri stream)
       (format stream ";; complexity = ~D~%" (complexity pattern))
       (write `(unless (fboundp ',name) (defun ,name ,@(cdr code))) ; cdr discards lambda
-	     :stream stream
-	     :escape t
-	     :case :downcase
-	     :pretty t)
+             :stream stream
+             :escape t
+             :case :downcase
+             :pretty t)
       (terpri stream)
       (terpri stream))))
 
@@ -72,4 +72,4 @@ the list is sorted by complexity, otherwise the sort order is non-deterministic.
   (with-open-file (stream pathname :direction :output :if-exists :supersede)
     (let ((patterns (get-patterns)))
       (prog1 (funcall compile)
-	(serialize-functions stream (remove-if-not (get-patterns) patterns))))))
+        (serialize-functions stream (remove-if-not (get-patterns) patterns))))))

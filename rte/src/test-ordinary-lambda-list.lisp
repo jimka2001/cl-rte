@@ -31,40 +31,40 @@
   (deftype var-designator ()
     '(and symbol
       (not (or keyword
-	    (member t nil)
-	    (member &optional &key &rest &whole &allow-other-keys &aux)))))
+            (member t nil)
+            (member &optional &key &rest &whole &allow-other-keys &aux)))))
 
   (deftype dwim-ordinary-lambda-list ()
     (let* ((var 'var-designator)
-	   (optional-var `(:or ,var (:and list (rte (:1 ,var
-							(:0-1 t
-							      (:0-1 ,var)))))))
-	   ;; [&optional {var | (var [init-form [supplied-p-parameter]])}*]
-	   (optional `(:cat (eql &optional) (:0-* ,optional-var)))
-	 
-	   ;; [&rest var]
-	   (rest `(:cat (eql &rest) ,var))
+           (optional-var `(:or ,var (:and list (rte (:1 ,var
+                                                        (:0-1 t
+                                                              (:0-1 ,var)))))))
+           ;; [&optional {var | (var [init-form [supplied-p-parameter]])}*]
+           (optional `(:cat (eql &optional) (:0-* ,optional-var)))
+         
+           ;; [&rest var]
+           (rest `(:cat (eql &rest) ,var))
 
-	   ;; var | ({var | (keyword-name var)} [init-form [supplied-p-parameter]])
-	   (key-var `(:or ,var
-			  (:and list
-				(rte (:1 (:or ,var (cons keyword (cons ,var null)))
-					 (:0-1 t
-					       (:0-1 ,var)))))))
-	   ;; [&key {var | ({var | (keyword-name var)} [init-form [supplied-p-parameter]])}* [&allow-other-keys]]
-	   (key `(:cat (eql &key) (:0-* ,key-var) (:0-1 (eql &allow-other-keys))))
-	   ;; var | (var [init-form])
-	   (aux-var `(:or ,var (:and list (rte (:1 ,var (:0-1 t))))))
-	   ;; [&aux {var | (var [init-form])}*]
-	   (aux `(:cat (eql &aux) (:0-* ,aux-var))))
+           ;; var | ({var | (keyword-name var)} [init-form [supplied-p-parameter]])
+           (key-var `(:or ,var
+                          (:and list
+                                (rte (:1 (:or ,var (cons keyword (cons ,var null)))
+                                         (:0-1 t
+                                               (:0-1 ,var)))))))
+           ;; [&key {var | ({var | (keyword-name var)} [init-form [supplied-p-parameter]])}* [&allow-other-keys]]
+           (key `(:cat (eql &key) (:0-* ,key-var) (:0-1 (eql &allow-other-keys))))
+           ;; var | (var [init-form])
+           (aux-var `(:or ,var (:and list (rte (:1 ,var (:0-1 t))))))
+           ;; [&aux {var | (var [init-form])}*]
+           (aux `(:cat (eql &aux) (:0-* ,aux-var))))
 
       `(rte
-	(:1
-	 (:0-* ,var)
-	 (:0-1 ,optional)
-	 (:0-1 ,rest)
-	 (:0-1 ,key)
-	 (:0-1 ,aux)))))
+        (:1
+         (:0-* ,var)
+         (:0-1 ,optional)
+         (:0-1 ,rest)
+         (:0-1 ,key)
+         (:0-1 ,aux)))))
 
   ;; required
   (assert-true (typep '() 'dwim-ordinary-lambda-list))

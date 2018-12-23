@@ -26,10 +26,10 @@
 (defun expand-my-typedef (type args unary-function &key (function-name (gensym (format nil "~A" type))))
   (declare (type symbol function-name))
   (let* ((type (cons type args))
-	 (sat  (or (gethash type *type-functions*)
-		   (setf (gethash type *type-functions*)
-			 (progn
-			   (setf (symbol-function function-name) unary-function)
-			   function-name)))))
+         (sat  (or (gethash type *type-functions*)
+                   (setf (gethash type *type-functions*)
+                         (progn
+                           (setf (symbol-function function-name) unary-function)
+                           function-name)))))
     `(and sequence
-	  (satisfies ,sat))))
+          (satisfies ,sat))))

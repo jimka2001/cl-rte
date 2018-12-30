@@ -49,6 +49,7 @@ the list is sorted by complexity, otherwise the sort order is non-deterministic.
   (sort patterns #'< :key #'complexity))
 
 (defun serialize-functions (stream &optional (patterns (get-patterns)))
+  (format stream "(in-package :rte)~%")
   (dolist (pattern patterns)
     (let* ((dfa (gethash pattern *state-machines*))
            (name (make-rte-function-name pattern))
@@ -60,7 +61,9 @@ the list is sorted by complexity, otherwise the sort order is non-deterministic.
              :pretty nil)
       (terpri stream)
       (format stream ";; complexity = ~D~%" (complexity pattern))
-      (write `(unless (fboundp ',name) (defun ,name ,@(cdr code))) ; cdr discards lambda
+      (write `(progn
+                (pushnew ',name *rte-pattern-functions*)
+                (unless (fboundp ',name) (defun ,name ,@(cdr code)))) ; cdr discards lambda
              :stream stream
              :escape t
              :case :downcase

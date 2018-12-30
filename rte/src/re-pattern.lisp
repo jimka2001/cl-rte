@@ -809,18 +809,24 @@ consists of values whose types match PATTERN."
   (match-sequence input-sequence (or (find-state-machine pattern)
                                      (remember-state-machine (rte-to-dfa pattern) pattern))))
 
+(defvar *rte-pattern-functions* nil "List of function names created by MAKE-RTE-FUNCTION-NAME")
+
 (defun make-rte-function-name (pattern)
   (when (and (consp pattern)
              (symbolp (car pattern))
              (eql 'rte (car pattern))) 
     (error "cannot make pattern function of pattern string with ~S: ~S" (car pattern) pattern))
-  (intern (with-output-to-string (str)
-            (write " " :stream str)
-            (write pattern
-                   :stream str
-                   :pretty nil
-                   :escape t))
-          (symbol-package 'rte)))
+  (let* ((name-str (with-output-to-string (str)
+                     (format str "-")
+                     (let ((*package* (find-package :rte)))
+                       (write pattern
+                              :stream str
+                              :pretty nil
+                              :escape t))))
+         (name-sym (intern name-str (symbol-package 'rte))))
+    (pushnew name-sym *rte-pattern-functions*)
+    ;; (format t "~%rte pattern: ~A~%" name-sym) ; debug
+    name-sym))
 
 (defun define-rte (pattern)
   ;; TODO

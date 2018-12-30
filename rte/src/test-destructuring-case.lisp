@@ -1013,4 +1013,27 @@
                          (list 2 name count))))))
 
 
+(define-test test/destructuring-case-17
+  (assert-true (equal 1
+                      (destructuring-case '(:x 1)
+                        ((&key x)
+                         x))))
+  (assert-true (equal 1
+                      (destructuring-case '(:x 1 :x 2)
+                        ((&key x)
+                         x))))
+  (assert-true (equal nil
+                      (destructuring-case '(:x 1 :x 2 :y 3)
+                        ((&key x)
+                         x))))
+  (assert-true (equal 3
+                      (destructuring-case '(:x 1 :x 2 :y 3)
+                        ((&key y &allow-other-keys)
+                         y))))
+  )
+  
+  
+  
+               
+               
       

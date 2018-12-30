@@ -132,7 +132,6 @@
       ((NOT LIST) NIL)
       ((RTE
         (:CAT 
-              
          (:OR
           (:CAT (:OR (:CAT (EQL :X) T)
                  :EMPTY-WORD)

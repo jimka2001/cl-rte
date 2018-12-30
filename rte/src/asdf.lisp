@@ -33,7 +33,7 @@ each rte pattern newly encountered while compiling the file.
 
 To instruct ASDF to instantiate ASDF::RTE-CL-SOURCE-FILE rather than
 the normal ASDF::CL-SOURCE-FILE, substitute the keyword
-:RTE-CL-SOURCE-FILE in place of :LOAD in the :COMPONENTS section
+:RTE-CL-SOURCE-FILE in place of :FILE in the :COMPONENTS section
 of the ASDF:DEFSYSTEM."))
 
 (defmethod asdf:perform :before ((operation asdf:load-op) (file asdf-user::rte-cl-source-file))

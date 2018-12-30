@@ -112,6 +112,31 @@ of `string` `number` where the string is optional.  `("hello" 42)` or `(42)`.
   ...)
 ```
 
+## ASDF
+
+The ASDF :file designator is not sufficient for loading a lisp file
+which contains rte type specifiers.  You must use :rte-file instead,
+and include `:defsystem-depends-on (:rte)`
+Here is an example.
+
+```
+(asdf:defsystem :rte-test
+  ...
+  :defsystem-depends-on (:rte)
+  :components
+  ((:module "src"
+    :components
+    ((:file "test-rte")
+     (:file "test-list-of")
+     (:rte-file "test-re-pattern")
+     (:rte-file "test-destructuring-case-1")
+     (:rte-file "test-destructuring-case-2")
+     (:rte-file "test-destructuring-case")
+     (:rte-file "test-ordinary-lambda-list")
+     (:rte-file "test-rte-typecase")))))
+```
+
+
 ## License
 
 ```

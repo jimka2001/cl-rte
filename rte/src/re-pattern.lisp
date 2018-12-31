@@ -56,9 +56,9 @@
                            (client #'(lambda (pattern)
                                        (apply #'traverse-pattern pattern functions)))
                            (f-0-* #'(lambda (patterns)
-                                      (cons :0-* (mapcar client patterns))))
+                                      (cons :* (mapcar client patterns))))
                            (f-1-* #'(lambda (patterns)
-                                      (apply #'traverse-pattern `(:cat ,@patterns (:0-* ,@patterns)) functions)))
+                                      (apply #'traverse-pattern `(:cat ,@patterns (:* ,@patterns)) functions)))
                            (f-0-1 #'(lambda (patterns)
                                       (apply #'traverse-pattern `(:or :empty-word (:cat ,@patterns)) functions)))
                            (f-and #'(lambda (patterns)
@@ -217,8 +217,8 @@ a fixed point is found."
                                        pattern)))
                :f-empty-set #'identity
                :f-empty-word #'identity
-                    :f-0-* #'(lambda (patterns)
-                               (like-multipy :0-* patterns :idempotent nil))
+               :f-0-* #'(lambda (patterns)
+                          (like-multipy :* patterns :idempotent nil))
                :f-cat #'(lambda (patterns)
                           ;; (:cat A B (:cat C D) E F) --> (:cat A B C D E F)
                           (setf patterns
@@ -305,7 +305,10 @@ a fixed point is found."
                                 
                                 ;; (:and A B (:0-* t))
                                 ;;  --> (:and A B)
-                                (setf patterns (remove '(:0-* t) patterns :test #'equal))
+                                (dolist (p '((:0-* t)
+                                             (:0-or-more t)
+                                             (:* t)))
+                                  (setf patterns (remove p patterns :test #'equal)))
                                 
                                 ;; (:and (member 1 2 3) (member 2 3 4) ...)
                                 ;;  --> (:and (member 2 3) ...)   ;; in some order, unspecified
@@ -447,7 +450,7 @@ a fixed point is found."
                                   (term1)))))
                   :f-0-* #'(lambda (patterns)
                              (let ((deriv (derivative `(:cat ,@patterns) wrt-type)))
-                               `(:cat ,deriv (:0-* ,@patterns))))))))
+                               `(:cat ,deriv (:* ,@patterns))))))))
 
 (defun first-types (pattern)
   (traverse-pattern pattern

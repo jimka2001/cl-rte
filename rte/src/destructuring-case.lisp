@@ -237,8 +237,8 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
       ;;  The value associated with the first :y in the given argument list must match the
       ;;  destructuring element (y0 y1 y2), i.e., Fy=(:and list (rte (:cat t t t)))
       ;;  Thus each element of the (:cat ...) is of the form
-      ;;  (:0-1 (eql :y) Fy                      ...)
-      ;;  (:0-1 (eql :y) (:and list (rte t t t)) ...)
+      ;;  (:? (eql :y) Fy                      ...)
+      ;;  (:? (eql :y) (:and list (rte t t t)) ...)
       ;; Here are two examples:
       ;;  the values of Fx, Fy, and Fz depend on the structuring elements of
       ;;    :x :y and :z respectively.
@@ -246,15 +246,15 @@ Not supporting this syntax -> (wholevar reqvars optvars . var) "
       #|
       (&key x y z) ; without &allow-other-keys
        ==>
-          (:and (:0-* keyword t)
-                (:0-* (not (member :x :y :z)) t)
+          (:and (:* keyword t)
+                (:* (not (member :x :y :z)) t)
                 (:cat (:* (not :x) t) (:? (eql :x) Fx (:* t)))
                 (:cat (:* (not :y) t) (:? (eql :y) Fy (:* t)))
                 (:cat (:* (not :z) t) (:? (eql :z) Fz (:* t))))
 
       (&key x y z &allow-other-keys)
        ==>
-          (:and (:0-* keyword t)
+          (:and (:* keyword t)
                 (:cat (:* (not :x) t) (:? (eql :x) Fx (:* t)))
                 (:cat (:* (not :y) t) (:? (eql :y) Fy (:* t)))
                 (:cat (:* (not :z) t) (:? (eql :z) Fz (:* t))))

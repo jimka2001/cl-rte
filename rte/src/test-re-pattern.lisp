@@ -247,8 +247,8 @@
     (assert-true (equal :empty-set  (canonicalize-pattern '(:and :empty-word :empty-set))))
     (assert-true (equal :empty-set  (canonicalize-pattern '(:and :empty-set :empty-word))))
     (assert-true (equal :empty-set  (canonicalize-pattern '(:and :empty-set float))))
-    (assert-true (equal '(:0-* t)   (canonicalize-pattern '(:and))))
-    (assert-true (equal 'float  (canonicalize-pattern '(:and (:0-* t) float))))
+    (assert-true (equal '(:* t)   (canonicalize-pattern '(:and))))
+    (assert-true (equal 'float  (canonicalize-pattern '(:and (:* t) float))))
     ;; (assert-true (equal :empty-set  (canonicalize-pattern '(:and :empty-word float))))
     (assert-true (equal 'float      (canonicalize-pattern '(:and float float))))
 
@@ -262,7 +262,7 @@
     (assert-true (equal '(:or float string)
                         (canonicalize-pattern '(:or string float))))
     
-    (assert-true (equal '(:cat (:0-* float) (:or float string))
+    (assert-true (equal '(:cat (:* float) (:or float string))
                         (canonicalize-pattern '(:cat (:0-* float) (:or string float)))))
 
     (assert-true (equal '(:OR (:AND A D E F)
@@ -296,9 +296,9 @@
   (assert-true (equal '(:and float number) (traverse-pattern '(:and float number) :client #'identity)))
   (assert-true (equal '(:cat float number) (traverse-pattern '(:cat float number) :client #'identity)))
 
-  (assert-true (equal '(:0-* float number) (traverse-pattern '(:0-* float number) :client #'identity)))
+  (assert-true (equal '(:* float number) (traverse-pattern '(:* float number) :client #'identity)))
 
-  (assert-true (equal '(:0-* float number) (traverse-pattern '(:0-* float number) :f-type #'identity))))
+  (assert-true (equal '(:* float number) (traverse-pattern '(:* float number) :f-type #'identity))))
 
 (define-test type/first-types
   (assert-false (set-exclusive-or '(float)
@@ -359,22 +359,22 @@
                       (derivative '(:cat float) 'float)))
   (assert-true (equal 'string
                       (derivative '(:cat float string) 'float)))
-  (assert-true (equal '(:0-* string)
-                      (derivative '(:cat float (:0-* string)) 'float)))
-  (assert-true (equivalent-patterns '(:0-* (:or float string))
-                                         (derivative '(:cat float (:0-* (:or string float))) 'float)))
+  (assert-true (equal '(:* string)
+                      (derivative '(:cat float (:* string)) 'float)))
+  (assert-true (equivalent-patterns '(:* (:or float string))
+                                         (derivative '(:cat float (:* (:or string float))) 'float)))
     
-  (assert-true (equivalent-patterns '(:0-* float)
-                                         (derivative '(:0-* float) 'float)))
+  (assert-true (equivalent-patterns '(:* float)
+                                         (derivative '(:* float) 'float)))
 
-  (assert-true (equivalent-patterns '(:0-* float)
-                                         (derivative '(:1-* float) 'float)))
+  (assert-true (equivalent-patterns '(:* float)
+                                         (derivative '(:+ float) 'float)))
 
-  (assert-true (equivalent-patterns '(:or (:cat (:0-* float) (:or float string))  :empty-word)
-                                         (derivative '(:cat (:0-* float) (:or string float)) 'float)))
-  (assert-true (equivalent-patterns '(:or (:cat (:0-* float) (:0-* (:or float string)))
-                                           (:0-* (:or float string)))
-                                         (derivative '(:cat (:0-* float) (:0-* (:or string float))) 'float)))
+  (assert-true (equivalent-patterns '(:or (:cat (:* float) (:or float string))  :empty-word)
+                                         (derivative '(:cat (:* float) (:or string float)) 'float)))
+  (assert-true (equivalent-patterns '(:or (:cat (:* float) (:* (:or float string)))
+                                           (:* (:or float string)))
+                                         (derivative '(:cat (:* float) (:* (:or string float))) 'float)))
   )
 
 (define-test type/derivative-2

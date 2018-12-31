@@ -179,10 +179,10 @@
 
   (assert-equal (canonicalize-pattern (destructuring-lambda-list-to-rte '(&key x y z)))
                 (canonicalize-pattern
-                 '(:and (:0-* (member :x :y :z) t)
-                   (:cat (:0-* (not (eql :x)) t) (:or :empty-word (:cat (eql :x) t (:0-* t))))
-                   (:cat (:0-* (not (eql :y)) t) (:or :empty-word (:cat (eql :y) t (:0-* t))))
-                   (:cat (:0-* (not (eql :z)) t) (:or :empty-word (:cat (eql :z) t (:0-* t)))))))
+                 '(:and (:* (member :x :y :z) t)
+                   (:cat (:* (not (eql :x)) t) (:or :empty-word (:cat (eql :x) t (:* t))))
+                   (:cat (:* (not (eql :y)) t) (:or :empty-word (:cat (eql :y) t (:* t))))
+                   (:cat (:* (not (eql :z)) t) (:or :empty-word (:cat (eql :z) t (:* t)))))))
 
     (map-permutations (lambda (perm)
                         (assert-true (equal :here
@@ -1032,7 +1032,46 @@
   )
   
   
-  
-               
+(define-test test/destructuring-case-18
+  (flet ((test-match (&rest arg-list)
+           (destructuring-case arg-list
+             ((a b c)
+              (declare (type fixnum a b c) (ignore a b c))
+              :clause-1)
+             ((a b &optional (c 0))
+              (declare (type fixnum a b)
+                       (type number c)
+                       (ignore a b c))
+              :clause-2)
+             ((a b c)
+              (declare (type fixnum a)
+                       (type number b c)
+                       (ignore a b c))
+              :clause-3)
+             ((a b &key (c 0))
+              (declare (type fixnum a b)
+                       (type number c)
+                       (ignore a b c))
+              :clause-4)
+             ((&rest args)
+              (declare (ignore args))
+              :clause-final))))
+    (assert-true (equal (test-match 1 2 3)
+                        :clause-1))
+    (assert-true (equal (test-match 1 2 3.3)
+                        :clause-2))
+    (assert-true (equal (test-match 1 2)
+                        :clause-2))
+    (assert-true (equal (test-match 1 2.2)
+                        :clause-final))
+    (assert-true (equal (test-match 1 2.2 3)
+                        :clause-3))
+    (assert-true (equal (test-match 1 2.2 3.3)
+                        :clause-3))
+    (assert-true (equal (test-match 1 2 :c 3)
+                        :clause-4))))
+
+         
+
                
       

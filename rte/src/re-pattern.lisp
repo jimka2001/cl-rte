@@ -281,6 +281,14 @@ a fixed point is found."
                                patterns (remove :empty-set patterns)
                                patterns (uniquify patterns)
                                patterns (remove-redundant-types patterns :or))
+                         ;; (:or A B (:0-* t))
+                         ;;  --> (:or (:0-* t))
+                         (when (intersection patterns
+                                             '((:0-* t)
+                                               (:0-or-more t)
+                                               (:* t))
+                                             :test #'equal)
+                           (setf patterns (list '(:* t))))
                          (cond
                            ((cdr patterns)
                             ;; TODO, should not alphabetize patterns because it will not work in the case

@@ -31,7 +31,7 @@
                dfas :initial-value (rte-to-dfa :empty-set)))
 
 
-(defun _rte-typecase-helper (object-form clauses)
+(defun _rte-typecase-clauses-to-dfa (object-form clauses)
   (let ((object (gensym))
         previous-patterns
         unreachable-bodys
@@ -50,7 +50,7 @@
       (list unreachable-bodys dfas (rte-synchronized-product dfas)))))
 
 (defmacro _rte-typecase (object-form &body clauses)
-  (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-helper object-form clauses)
+  (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-clauses-to-dfa object-form clauses)
     (declare (ignore _))
     `(let ((,object ,object-form))
        (typecase ,object

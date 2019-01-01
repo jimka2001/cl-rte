@@ -1032,13 +1032,14 @@
   )
   
   
+(defvar *glob-var*)
 (define-test test/destructuring-case-18
-  (flet ((test-match (&rest arg-list)
-           (destructuring-case arg-list
+  (flet ((test-match (&rest candidate-expression)
+           (destructuring-case candidate-expression
              ((a b c)
               (declare (type fixnum a b c) (ignore a b c))
               :clause-1)
-             ((a b &optional (c 0))
+             ((a b &optional (c (incf *glob-var*)))
               (declare (type fixnum a b)
                        (type number c)
                        (ignore a b c))
@@ -1048,7 +1049,7 @@
                        (type number b c)
                        (ignore a b c))
               :clause-3)
-             ((a b &key (c 0))
+             ((a b &key (c (incf *glob-var*)))
               (declare (type fixnum a b)
                        (type number c)
                        (ignore a b c))
@@ -1056,6 +1057,7 @@
              ((&rest args)
               (declare (ignore args))
               :clause-final))))
+    (setf *glob-var* 0)
     (assert-true (equal (test-match 1 2 3)
                         :clause-1))
     (assert-true (equal (test-match 1 2 3.3)
@@ -1071,7 +1073,40 @@
     (assert-true (equal (test-match 1 2 :c 3)
                         :clause-4))))
 
-         
 
-               
-      
+(define-test test/destructuring-case-19
+  (flet ((test-match (&rest candidate-expression)
+           (destructuring-case candidate-expression
+             ((a b c)
+              (declare (type fixnum a b c) (ignore a b c))
+              :clause-1)
+             ((a b &optional (c 0))
+              (declare (type fixnum a b)
+                       (type integer c)
+                       (ignore a b c))
+              :clause-2)
+             ((a b &optional (c 0.0))
+              (declare (type fixnum a b)
+                       (type number c)
+                       (ignore a b c))
+              :clause-3))))))
+
+
+(define-test test/destructuring-case-19
+  (flet ((test-match (&rest candidate-expression)
+           (destructuring-case candidate-expression
+             ((b c)
+              (declare (type fixnum b c) (ignore b c))
+              :clause-1)
+             ((b &optional (c 0))
+              (declare (type fixnum b)
+                       (type integer c)
+                       (ignore b c))
+              :clause-2)
+             ((b &optional (c 0.0))
+              (declare (type fixnum b)
+                       (type number c)
+                       (ignore b c))
+              :clause-3))))))
+
+   

@@ -32,13 +32,19 @@
                                               :boolean-function boolean-function))
                dfas :initial-value (rte-to-dfa :empty-set)))
 
-(defun rte-typecase-helper (clauses)
-  "Helper function for rte-typecase."
+(defun rte-typecase-clauses-to-dfa (clauses &key (disjoint-clauses t) (view t))
+  "Helper function for rte-typecase. Parses the clauses to compute three objects:
+1) the list of unreachable-bodys
+2) the dfa
+3) a pair (transit boolean), the boolean indicates whether there is a transit through the
+     dfa which does correspond to one of the given clauses.  If the boolean is TRUE
+     then the transit indicates a list of type specifiers of such an object."
   (declare (type list clauses)
            (optimize (speed 3) (debug 0) (compilation-speed 0)))
   (let (previous-patterns
         unreachable-bodys
         (clause-index 0)
+        (transition-abrevs (list '(t "T0")))
         dfas)
     (labels ((exit-form (body)
                ;; smart body encapsulation, only wrap in progn if necessary
@@ -53,9 +59,19 @@
                    (push pattern previous-patterns)
                    (if (equivalent-patterns :empty-set derived-pattern)
                        (push body unreachable-bodys)
-                       (let ((dfa (rte-to-dfa pattern :reduce nil :final-body (exit-form body) :clause-index (incf clause-index))))
-                         ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "derived-clause"
-                         ;;                         :title (format nil "~s" derived-pattern))
+                       (let ((dfa (rte-to-dfa (if disjoint-clauses
+                                                  derived-pattern
+                                                  pattern) :reduce nil :final-body (exit-form body) :clause-index (incf clause-index))))
+                         (when view
+                           (ndfa-to-dot dfa nil :view t :transition-legend t :state-legend t :prefix (format nil "clause-~D" clause-index)
+                                                :transition-abrevs transition-abrevs
+                                                :transition-label-cb (lambda (label name)
+                                                                       (pushnew (list label name)
+                                                                                transition-abrevs))
+                                                :title (let ((*print-case* :downcase))
+                                                         (if disjoint-clauses
+                                                             (format nil "disjoint-pattern = ~s" derived-pattern)
+                                                             (format nil "pattern = ~s" pattern)))))
                          (push dfa dfas)))))))
       (dolist (clause clauses)
         (transform-clause clause))
@@ -65,13 +81,18 @@
                          '(nil nil))
                         (t
                          (multiple-value-list
-                          (find-transit dfa-remainder))))))
-        (list unreachable-bodys (rte-synchronized-product dfas) transit)))))
+                          (find-transit dfa-remainder)))))
+             (product (rte-synchronized-product dfas)))
+        (when view
+          (ndfa-to-dot product nil :view t :transition-legend t :state-legend t :prefix "product"
+                                   :transition-abrevs transition-abrevs
+                                   :title "syncronized product"))
+        (list unreachable-bodys product transit)))))
 
 (defmacro rte-etypecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-typecase-helper clauses)
+  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-typecase-clauses-to-dfa clauses)
     (let ((object (gensym "RTE")))
       (cond
         (remainderp

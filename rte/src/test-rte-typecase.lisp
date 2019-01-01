@@ -179,7 +179,7 @@
                                  (cons (eql rte-typecase))))))
       (destructuring-bind (_1 _2 (_3 obj &rest clauses) &rest _4) expansion-2
         (declare (ignore _1 _2 _3 obj))
-        (rte-typecase-helper clauses)))))
+        (rte-typecase-clauses-to-dfa clauses)))))
 
 (define-test test/rte-typecase-dfas-3
   (flet ((f1 () :x)
@@ -236,7 +236,7 @@
         (declare (ignore _))
         ;;(format t "obj=~A~%" obj)
         ;;(format t "clauses=~A~%" clauses)
-        (rte-typecase-helper clauses)))))
+        (rte-typecase-clauses-to-dfa clauses)))))
     
 
 (define-test test/find-transit

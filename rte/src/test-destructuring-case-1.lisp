@@ -91,6 +91,21 @@
                (declare (ignore a b))
                3))))  )
 
+(define-test test-destructuring-lambda-list-to-rte
+  (assert-true (equivalent-patterns '(:cat t t)
+                                    (destructuring-lambda-list-to-rte '(a b))))
+  (assert-true (equivalent-patterns '(:cat t t)
+                                    (canonicalize-pattern (destructuring-lambda-list-to-rte '(a b)))))
+  (assert-true (equivalent-patterns '(:cat t)
+                                    (destructuring-lambda-list-to-rte '(a))))
+  (assert-true (equivalent-patterns '(:cat t)
+                                    (canonicalize-pattern (destructuring-lambda-list-to-rte '(a)))))
+  (assert-true (equivalent-patterns '(:cat)
+                                    (destructuring-lambda-list-to-rte '())))
+  (assert-true (equivalent-patterns '(:cat)
+                                    (canonicalize-pattern (destructuring-lambda-list-to-rte '())))))
+  
+
 
 (define-test test/destructuring-case-alt-2-c
   (assert-true
@@ -212,7 +227,18 @@
                (declare (ignore a b))
                3))))
 )
-   
+
+(define-test test-231
+  (assert (equal 3 (RTE-CASE '((X) Y)
+                     ((:CAT (:AND LIST (RTE T)) T)
+                      3))))
+  (assert (equal 3 (RTE-CASE '((X) Y)
+                     (T 1)
+                     ((:CAT T (:AND LIST (RTE T)))
+                      2)
+                     ((:CAT (:AND LIST (RTE T)) T)
+                      3)))))
+
 (defrte (:AND LIST (RTE T)))
 
 (define-test test/destructuring-case-3

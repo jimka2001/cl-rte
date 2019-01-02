@@ -1092,7 +1092,7 @@
               :clause-3))))))
 
 
-(define-test test/destructuring-case-19
+(define-test test/destructuring-case-20
   (flet ((test-match (&rest candidate-expression)
            (destructuring-case candidate-expression
              ((b c)
@@ -1107,6 +1107,26 @@
               (declare (type fixnum b)
                        (type number c)
                        (ignore b c))
+              :clause-3))))))
+
+
+
+
+(define-test test/destructuring-case-21
+  (flet ((test-match (&rest candidate-expression)
+           (destructuring-case candidate-expression
+             ((X Y)
+              (declare (type fixnum X Y) (ignore X Y))
+              :clause-1)
+             ((X Y)
+              (declare (type fixnum X)
+                       (type integer Y)
+                       (ignore X Y))
+              :clause-2)
+             ((X Y)
+              (declare (type (or string fixnum) X)
+                       (type number Y)
+                       (ignore X Y))
               :clause-3))))))
 
    

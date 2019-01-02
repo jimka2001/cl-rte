@@ -567,5 +567,3 @@ is replaced with replacement."
           when pos do (write-string replacement out)
             while pos)))
 
-
-  

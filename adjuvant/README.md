@@ -141,6 +141,12 @@ PKG> (type-expand '(and-not integer fixnum))
 
 ### Other
 
+* `replace-all` -- find an replace all occurances of once string in another.
+````lisp
+(replace-all "abc++def++ghi++" "++" "---")
+==> "abc---def---ghi---"
+````
+
 * `fixed-point` -- find the fixed point of a function.  I.e. call the given function
 on the given intial value to produce the next value.  Continue producing new values
 in this manner until two successive equal values have been returned according to a :TEST function.

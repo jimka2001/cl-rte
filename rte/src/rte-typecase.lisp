@@ -21,18 +21,19 @@
 
 (in-package :rte)
 
-(defun rte-synchronized-product (dfas &key (boolean-function (lambda (a b)
-                                                               (or a b))))
+(defun rte-synchronized-product (dfas &key (minimize t) (boolean-function (lambda (a b)
+                                                                            (or a b))))
   (declare (type (function (t t) t) boolean-function)
            (type list dfas)
            (optimize (speed 3) (debug 0) (compilation-speed 0)))           
   (tree-reduce #'(lambda (dfa1 dfa2)
                    (declare (type rte-state-machine dfa1 dfa2))
                    (synchronized-product dfa1 dfa2
-                                              :boolean-function boolean-function))
+                                         :minimize minimize
+                                         :boolean-function boolean-function))
                dfas :initial-value (rte-to-dfa :empty-set)))
 
-(defun rte-typecase-clauses-to-dfa (clauses &key (disjoint-clauses t) (view t))
+(defun rte-typecase-clauses-to-dfa (clauses &key (reduce nil) (disjoint-clauses t) (view nil))
   "Helper function for rte-typecase. Parses the clauses to compute three objects:
 1) the list of unreachable-bodys
 2) the dfa
@@ -61,9 +62,14 @@
                        (push body unreachable-bodys)
                        (let ((dfa (rte-to-dfa (if disjoint-clauses
                                                   derived-pattern
-                                                  pattern) :reduce nil :final-body (exit-form body) :clause-index (incf clause-index))))
+                                                  pattern)
+                                              :reduce reduce
+                                              :final-body (exit-form body)
+                                              :clause-index (incf clause-index))))
                          (when view
-                           (ndfa-to-dot dfa nil :view t :transition-legend t :state-legend t :prefix (format nil "clause-~D" clause-index)
+                           (ndfa-to-dot dfa nil :view t :transition-legend t
+                                                :state-legend t
+                                                :prefix (format nil "clause-~D" clause-index)
                                                 :transition-abrevs transition-abrevs
                                                 :transition-label-cb (lambda (label name)
                                                                        (pushnew (list label name)
@@ -82,7 +88,7 @@
                         (t
                          (multiple-value-list
                           (find-transit dfa-remainder)))))
-             (product (rte-synchronized-product dfas)))
+             (product (rte-synchronized-product dfas :minimize reduce)))
         (when view
           (ndfa-to-dot product nil :view t :transition-legend t :state-legend t :prefix "product"
                                    :transition-abrevs transition-abrevs

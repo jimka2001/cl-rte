@@ -503,6 +503,7 @@ a fixed point is found."
                                             (union-labels (lambda (labels1 labels2)
                                                             (ltbdd-with-new-hash ()
                                                               (mdtd-bdd (union labels1 labels2 :test #'equal)))))
+                                            (minimize t)
                                             (match-label #'subtypep)
                                             (final-state-callback (lambda (product-state st1 st2)
                                                                     (setf (state-exit-form product-state)
@@ -523,6 +524,7 @@ a fixed point is found."
   (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
                                        :union-labels union-labels
                                        :match-label match-label
+                                       :minimize minimize
                                        :final-state-callback final-state-callback))
 
 (defgeneric dump-code (object &key var))

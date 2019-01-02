@@ -95,24 +95,22 @@
                                    :title "syncronized product"))
         (list unreachable-bodys product transit)))))
 
-(defmacro rte-etypecase (object-form &body clauses)
-  "OBJECT-FORM is the form to be evaluated,
-CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
+(defun rte-typecase-expander (object-form clauses &key (complain-remainder nil))
   (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-typecase-clauses-to-dfa clauses)
     (let ((object (gensym "RTE")))
       (cond
-        (remainderp
-         ;; TODO -- we don't really want to issue this warning for rte-etypecase, it is not clear
-         ;;  when it should be issued
-       
-         ;; if there is a sequence not covered by this typecase, issue a discriptive warning message
+        ((and remainderp
+              complain-remainder)
+         ;; if there is a sequence not covered by this rte-etypecase,
+         ;; issue a discriptive warning message and recursively expand
+         ;; to rte-etypecase with a (:* t) clause to force a runtime
+         ;; error if called with an otherwise non-matching form.
          (if remainder
              (warn "rte-etypecase not exaustive: for example, ~A" remainder)
              (warn "rte-etypecase not exaustive: for example, the empty list"))
          `(let ((,object ,object-form))
             (rte-etypecase ,object ,@clauses ((:* t) (error "The sequence ~A fell through the RTE-ETYPECASE" ,object)))))
         (t
-         ;; (ndfa-to-dot dfa nil :view t :transition-legend nil :state-legend t :prefix "sync-product" :title "syncronized product")
          (flet ((unreachable-clause (unreachable-body)
                   `(nil ,@unreachable-body)))
            `(let ((,object ,object-form))
@@ -123,8 +121,13 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TY
                  (funcall ,(dump-code dfa :var object)
                           ,object))))))))))
 
+(defmacro rte-etypecase (object-form &body clauses)
+  "OBJECT-FORM is the form to be evaluated,
+CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
+  (rte-typecase-expander object-form clauses :complain-remainder t))
+
 (defmacro rte-typecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  `(rte-etypecase ,object-form ,@clauses ((:* t) nil)))
+  (rte-typecase-expander object-form clauses :complain-remainder nil))
 

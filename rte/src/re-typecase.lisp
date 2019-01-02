@@ -31,7 +31,7 @@
                dfas :initial-value (rte-to-dfa :empty-set)))
 
 
-(defun _rte-typecase-clauses-to-dfa (object-form clauses)
+(defun _rte-case-clauses-to-dfa (object-form clauses)
   (let ((object (gensym))
         previous-patterns
         unreachable-bodys
@@ -49,8 +49,8 @@
         (transform-clause clause))
       (list unreachable-bodys dfas (rte-synchronized-product dfas)))))
 
-(defmacro _rte-typecase (object-form &body clauses)
-  (destructuring-bind (unreachable-bodys _ dfa) (rte-typecase-clauses-to-dfa object-form clauses)
+(defmacro _rte-case (object-form &body clauses)
+  (destructuring-bind (unreachable-bodys _ dfa) (rte-case-clauses-to-dfa object-form clauses)
     (declare (ignore _))
     `(let ((,object ,object-form))
        (typecase ,object
@@ -61,7 +61,7 @@
                      ,object)
             )))))
 
-(defmacro rte-typecase (object-form &body clauses)
+(defmacro rte-case (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
   (let ((object (gensym))

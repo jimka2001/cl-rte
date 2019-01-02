@@ -387,7 +387,7 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (LAMBDA-LIST
                      ,@additional-declarations
                      ,@body))))))
       `(let ((,object ,object-form))
-         (rte-typecase ,object
+         (rte-case ,object
            ,@(mapcar #'transform-clause clauses))))))
 
 (defmacro destructuring-case-alt (object-form &body clauses)

@@ -37,7 +37,7 @@
      (:file "list-of" :depends-on ("rte" "expand-typedef"))
      (:file "dependents" :depends-on ("rte"))
      (:file "re-pattern" :depends-on ("rte" "expand-typedef" "dependents"))
-     (:file "rte-typecase" :depends-on ("rte"))
+     (:file "rte-case" :depends-on ("rte"))
      (:file "destructuring-case" :depends-on ("re-pattern"))
      (:file "prolog" :depends-on ("rte"))
      ))))

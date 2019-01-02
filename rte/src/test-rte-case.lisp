@@ -25,10 +25,10 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (shadow-all-symbols :package-from :rte :package-into :rte-test))
 
-(define-test test/rte-typecase-1
+(define-test test/rte-case-1
   (let ((data '(1 2 3 4 )))
     (assert-true (eq :yes
-                    (rte-typecase data
+                    (rte-case data
                       ((:cat number)
                        :no)
                       ((:cat number number)
@@ -40,10 +40,10 @@
                       ((:cat number number number number number)
                        :no))))))
 
-(define-test test/rte-typecase-2
+(define-test test/rte-case-2
   (let ((data '(1 2 3 4 )))
     (assert-true (eq :yes
-                     (rte-typecase data
+                     (rte-case data
                        ((:cat fixnum)
                         :no)
                        ((:cat number number)
@@ -55,27 +55,27 @@
                        ((:cat fixnum number real unsigned-byte number)
                         :no))))))
 
-(define-test test/rte-typecase-3
+(define-test test/rte-case-3
   (let ((data '(:x 3.4)))
     (assert-true (eq :yes
-                     (rte-typecase data
+                     (rte-case data
                        ((:cat (:* fixnum) number)
                         :no)
                        ((:cat (:or number symbol) number)
                         :yes))))))
 
-(define-test test/rte-typecase-4
-  (assert-true (macroexpand-1 '(rte-typecase data
+(define-test test/rte-case-4
+  (assert-true (macroexpand-1 '(rte-case data
                                 (t 42)))))
 
-(define-test test/rte-typecase-5
-  (assert-true (macroexpand-1 '(rte-typecase data
+(define-test test/rte-case-5
+  (assert-true (macroexpand-1 '(rte-case data
                                 ((:cat (:* fixnum) number)
                                  :no)
                                 ((:cat (:or number symbol) number)
                                  :yes)))))
 
-(define-test test/rte-typecase-6
+(define-test test/rte-case-6
   (let ((data '(1)))
     (assert-true (eql :here
                       (block block
@@ -85,16 +85,16 @@
                            (return-from block
                              :here)
                          2
-                           (rte-typecase data
+                           (rte-case data
                              ((:cat fixnum)
                               (go 1))
                              )
                          :no-here))))))
 
-(define-test test/rte-typecase-7
+(define-test test/rte-case-7
   (let ((data '(1 2 3 )))
     (assert-true (eql :yes
-                     (rte-typecase data
+                     (rte-case data
                        ((:cat fixnum)
                         :no)
                        ((:cat number number string)
@@ -145,7 +145,7 @@
     
     
     
-(define-test test/rte-typecase-dfas-1
+(define-test test/rte-case-dfas-1
   (let ((expansion-1
           (macroexpand-1
            '(destructuring-case '(1 2 :x 3 :y 4)
@@ -176,12 +176,12 @@
       (assert-true (typep expansion-2
                           '(rte (:cat (eql LET)
                                  cons
-                                 (cons (eql rte-typecase))))))
+                                 (cons (eql rte-case))))))
       (destructuring-bind (_1 _2 (_3 obj &rest clauses) &rest _4) expansion-2
         (declare (ignore _1 _2 _3 obj))
-        (rte-typecase-clauses-to-dfa clauses)))))
+        (rte-case-clauses-to-dfa clauses)))))
 
-(define-test test/rte-typecase-dfas-3
+(define-test test/rte-case-dfas-3
   (flet ((f1 () :x)
          (f2 () :y))
     (destructuring-case '("1" "2")
@@ -190,18 +190,18 @@
       ((&key x y)
        (f2)))))
 
-(define-test test/rte-typecase-dfas-4
+(define-test test/rte-case-dfas-4
   (flet ((f1 () :x)
          (f2 () :y))
     (DESTRUCTURING-CASE-ALT '("1" "2")
       ((&KEY X) NIL (F1))
       ((&KEY X Y) NIL (F2)))))
 
-(define-test test/rte-typecase-dfas-5
+(define-test test/rte-case-dfas-5
   (flet ((f1 () :x)
          (f2 () :y))
     (let ((g670 '("1" "2")))
-      (rte-typecase g670
+      (rte-case g670
          ((:and (:not (:and (:* (member :x) t)
                       (:cat (:* (not (eql :x)) t)
                             (:or :empty-word (:cat (eql :x) t (:* t))))))
@@ -214,7 +214,7 @@
             (f1) (f2)))
         ))))
 
-(define-test test/rte-typecase-dfas-2
+(define-test test/rte-case-dfas-2
   (let ((expansion-1
           (macroexpand-1
            '(destructuring-case '(1 2 :x 3 :y 4)
@@ -231,12 +231,12 @@
       (assert-true (typep expansion-2
                           '(rte (:cat (eql LET)
                                  cons
-                                 (cons (eql rte-typecase))))))
+                                 (cons (eql rte-case))))))
       (destructuring-bind (_ _ (_ obj &rest clauses) &rest _) expansion-2
         (declare (ignore _))
         ;;(format t "obj=~A~%" obj)
         ;;(format t "clauses=~A~%" clauses)
-        (rte-typecase-clauses-to-dfa clauses)))))
+        (rte-case-clauses-to-dfa clauses)))))
     
 
 (define-test test/find-transit
@@ -253,7 +253,7 @@
 
 (define-test test/parse-defmethod
   (flet ((parse (form)
-           (rte-typecase form
+           (rte-case form
              ;; (defmethod          name qualifiers  lambda-list declarations        documentation  ...body...)
              ((:cat (eql defmethod) symbol  (:+ keyword) list  (:+ (cons (eql declare))) string     (:* t))
               1)
@@ -292,7 +292,7 @@
 
 (define-test test/parse-defmethod-2
   (flet ((parse (form)
-           (rte-typecase form
+           (rte-case form
              ;; (defmethod          name qualifiers  lambda-list declarations        documentation  ...body...)
              ((:cat (eql defmethod) symbol  (:+ keyword) list  (:+ (cons (eql declare))) string     (:* t))
               1)
@@ -305,7 +305,7 @@
 
 (define-test test/parse-defmethod-3
   (flet ((parse (form)
-           (rte-typecase form
+           (rte-case form
              ;; default
              ((:* t)
               5))))
@@ -314,9 +314,9 @@
                       (parse '(defmethod (setf binder) () ()))))))
 
 
-(define-test test/sticky-rte-typecase
+(define-test test/sticky-rte-case
   (assert-true (equal :c
-                      (rte-typecase '(1 2)
+                      (rte-case '(1 2)
                         ((:cat number number number)
                          :a)
                         ((:cat t t t)
@@ -327,7 +327,7 @@
 
 (define-test test/parse-defmethod-2b
   (flet ((parse (form)
-           (rte-typecase form
+           (rte-case form
              ((:cat (eql defmethod) symbol  (:+ keyword)      )
               1)
              ;; default
@@ -339,7 +339,7 @@
 
 (define-test test/parse-defmethod-2c
   (flet ((parse (form)
-           (rte-typecase form
+           (rte-case form
              ((:cat t symbol  (:+ keyword)      )
               1)
              ;; default
@@ -351,7 +351,7 @@
 
 (define-test test/parse-defmethod-2d
   (flet ((parse (form)
-           (rte-typecase form
+           (rte-case form
              ((:cat t symbol  (:+ t)      )
               1)
              ;; default
@@ -363,7 +363,7 @@
 
 (define-test test/parse-defmethod-2e
   (flet ((match (form)
-           (rte-typecase form
+           (rte-case form
              ((:cat string (:* t))
               1)
              ;; default
@@ -386,10 +386,10 @@
   (assert-false (typep '(1 2 3)
                        '(rte (:cat string (:* t))))))
 
-(define-test test/rte-etypecase
+(define-test test/rte-ecase
   (assert-error warning
                 (macroexpand-1
-                 '(rte-etypecase form
+                 '(rte-ecase form
                    ((:not (:cat (eql defmethod)
                                 (:and (:not keyword)
                                       (:not (eql t))
@@ -431,7 +431,7 @@
 
 (define-test test/parse-defmethod-4
   (flet ((parse (form)
-           (rte-etypecase form
+           (rte-ecase form
              ((:not (:cat (eql defmethod)
                           (:and (:not keyword)
                                 (:not (eql t))

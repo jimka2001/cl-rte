@@ -33,8 +33,8 @@
                                          :boolean-function boolean-function))
                dfas :initial-value (rte-to-dfa :empty-set)))
 
-(defun rte-typecase-clauses-to-dfa (clauses &key (reduce nil) (disjoint-clauses t) (view nil))
-  "Helper function for rte-typecase. Parses the clauses to compute three objects:
+(defun rte-case-clauses-to-dfa (clauses &key (reduce nil) (disjoint-clauses t) (view nil))
+  "Helper function for rte-case. Parses the clauses to compute three objects:
 1) the list of unreachable-bodys
 2) the dfa
 3) a pair (transit boolean), the boolean indicates whether there is a transit through the
@@ -95,21 +95,21 @@
                                    :title "syncronized product"))
         (list unreachable-bodys product transit)))))
 
-(defun rte-typecase-expander (object-form clauses &key (complain-remainder nil))
-  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-typecase-clauses-to-dfa clauses)
+(defun rte-case-expander (object-form clauses &key (complain-remainder nil))
+  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-case-clauses-to-dfa clauses)
     (let ((object (gensym "RTE")))
       (cond
         ((and remainderp
               complain-remainder)
-         ;; if there is a sequence not covered by this rte-etypecase,
+         ;; if there is a sequence not covered by this rte-ecase,
          ;; issue a discriptive warning message and recursively expand
-         ;; to rte-etypecase with a (:* t) clause to force a runtime
+         ;; to rte-ecase with a (:* t) clause to force a runtime
          ;; error if called with an otherwise non-matching form.
          (if remainder
-             (warn "rte-etypecase not exaustive: for example, ~A" remainder)
-             (warn "rte-etypecase not exaustive: for example, the empty list"))
+             (warn "rte-ecase not exaustive: for example, ~A" remainder)
+             (warn "rte-ecase not exaustive: for example, the empty list"))
          `(let ((,object ,object-form))
-            (rte-etypecase ,object ,@clauses ((:* t) (error "The sequence ~A fell through the RTE-ETYPECASE" ,object)))))
+            (rte-ecase ,object ,@clauses ((:* t) (error "The sequence ~A fell through the RTE-ECASE" ,object)))))
         (t
          (flet ((unreachable-clause (unreachable-body)
                   `(nil ,@unreachable-body)))
@@ -121,13 +121,13 @@
                  (funcall ,(dump-code dfa :var object)
                           ,object))))))))))
 
-(defmacro rte-etypecase (object-form &body clauses)
+(defmacro rte-ecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (rte-typecase-expander object-form clauses :complain-remainder t))
+  (rte-case-expander object-form clauses :complain-remainder t))
 
-(defmacro rte-typecase (object-form &body clauses)
+(defmacro rte-case (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (rte-typecase-expander object-form clauses :complain-remainder nil))
+  (rte-case-expander object-form clauses :complain-remainder nil))
 

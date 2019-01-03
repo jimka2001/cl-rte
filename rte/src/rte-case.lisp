@@ -95,8 +95,8 @@
                                    :title "syncronized product"))
         (list unreachable-bodys product transit)))))
 
-(defun rte-case-expander (object-form clauses &key (complain-remainder nil))
-  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-case-clauses-to-dfa clauses)
+(defun rte-case-expander (object-form clauses &key (complain-remainder nil) (view nil))
+  (destructuring-bind (unreachable-bodys dfa (remainder remainderp)) (rte-case-clauses-to-dfa clauses :view view)
     (let ((object (gensym "RTE")))
       (cond
         ((and remainderp
@@ -124,10 +124,10 @@
 (defmacro rte-ecase (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (rte-case-expander object-form clauses :complain-remainder t))
+  (rte-case-expander object-form clauses :complain-remainder t :view nil))
 
 (defmacro rte-case (object-form &body clauses)
   "OBJECT-FORM is the form to be evaluated,
 CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TYPE-EXPRESSION &REST BODY)"
-  (rte-case-expander object-form clauses :complain-remainder nil))
+  (rte-case-expander object-form clauses :complain-remainder nil :view nil))
 

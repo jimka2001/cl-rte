@@ -72,6 +72,7 @@
                                                 :state-legend t
                                                 :prefix (format nil "clause-~D" clause-index)
                                                 :transition-abrevs transition-abrevs
+                                                :equal-transition-labels #'equivalent-types-p
                                                 :transition-label-cb (lambda (label name)
                                                                        (pushnew (list label name)
                                                                                 transition-abrevs))
@@ -92,6 +93,7 @@
         (when view
           (ndfa-to-dot product nil :view t :transition-legend t :state-legend t :prefix "product"
                                    :transition-abrevs transition-abrevs
+                                   :equal-transition-labels #'equivalent-types-p
                                    :title "syncronized product"))
         (list unreachable-bodys product transit)))))
 

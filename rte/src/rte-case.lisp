@@ -66,6 +66,7 @@
                                               :reduce reduce
                                               :final-body (exit-form body)
                                               :clause-index (incf clause-index))))
+                         (push dfa dfas)
                          (when view
                            (ndfa-to-dot dfa nil :view t :transition-legend t
                                                 :state-legend t
@@ -77,8 +78,7 @@
                                                 :title (let ((*print-case* :downcase))
                                                          (if disjoint-clauses
                                                              (format nil "disjoint-pattern = ~s" derived-pattern)
-                                                             (format nil "pattern = ~s" pattern)))))
-                         (push dfa dfas)))))))
+                                                             (format nil "pattern = ~s" pattern)))))))))))
       (dolist (clause clauses)
         (transform-clause clause))
       (let* ((dfa-remainder (rte-to-dfa `(:and (:* t) (:not (:or ,@previous-patterns))) :reduce t))

@@ -500,11 +500,15 @@ a fixed point is found."
                                           (sm1 rte-state-machine)
                                           (sm2 rte-state-machine)
                                           &key (boolean-function (lambda (a b) (and a b)))
-                                            (union-labels (lambda (labels1 labels2)
-                                                            (ltbdd-with-new-hash ()
-                                                              (mdtd-bdd (union labels1 labels2 :test #'equal)))))
+                                            
                                             (minimize t)
-                                            (match-label #'subtypep)
+                                            (complement-transition-label (lambda (state)
+                                                                           `(and t (not (or ,@(and state (mapcar #'transition-label (transitions state))))))))
+                                            (merge-transition-labels (lambda (label-1 label-2)
+                                                                       (lisp-types:type-to-dnf-bottom-up `(and ,label-1
+                                                                                                               ,label-2))))
+                                            
+                                                               
                                             (final-state-callback (lambda (product-state st1 st2)
                                                                     (setf (state-exit-form product-state)
                                                                           (cond
@@ -522,9 +526,9 @@ a fixed point is found."
                                                                              (or (and st1 (state-exit-form st1))
                                                                                  (and st2 (state-exit-form st2)))))))))
   (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
-                                       :union-labels union-labels
-                                       :match-label match-label
                                        :minimize minimize
+                                       :merge-transition-labels merge-transition-labels
+                                       :complement-transition-label complement-transition-label
                                        :final-state-callback final-state-callback))
 
 (defgeneric dump-code (object &key var))

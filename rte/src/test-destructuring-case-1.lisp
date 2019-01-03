@@ -229,17 +229,22 @@
 )
 
 (define-test test-231
-  (assert (equal 3 (RTE-CASE '((X) Y)
+  (assert-true (equal 3 (RTE-CASE '((X) Y)
                      ((:CAT (:AND LIST (RTE T)) T)
                       3))))
-  (assert (equal 3 (RTE-CASE '((X) Y)
+  (assert-true (equal 3 (RTE-CASE '((X) Y)
+                          ((:CAT T (:AND LIST (RTE T)))
+                           2)
+                          ((:CAT (:AND LIST (RTE T)) T)
+                           3))))
+  (assert-true (equal 3 (RTE-CASE '((X) Y)
                      (T 1)
                      ((:CAT T (:AND LIST (RTE T)))
                       2)
                      ((:CAT (:AND LIST (RTE T)) T)
                       3)))))
 
-(defrte (:AND LIST (RTE T)))
+;; (defrte (:AND LIST (RTE T)))
 
 (define-test test/destructuring-case-3
   (let ((n 0))

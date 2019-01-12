@@ -22,35 +22,6 @@
 
 (in-package   :rte)
 
-(defun map-subsets (visitor data)
-  "call the given VISITOR function once for each subset of the list DATA"
-  (dotimes (n (expt 2 (length data)))
-    (let ((n n)
-          (data data)
-          subset)
-      (loop :while (and data (plusp n))
-            :do (progn (when (oddp n)
-                         (push (car data) subset))
-                       (pop data)
-                       (setf n (truncate n 2))))
-      (funcall visitor subset))))
-
-(defun map-permutations (visit data)
-  "call the given VISITOR function once for each permutation of the given list DATA"
-  (declare (type list data)
-           (type (function (list) t)))
-  (let ((N (length data)))
-    (labels ((next (so-far k)
-               (cond
-                 ((eql k N)
-                  (funcall visit (mapcar #'car so-far)))
-                 (t
-                  (incf k)
-                  (loop :for items :on data
-                        :do (unless (member items so-far :test #'eq)
-                              (next (cons items so-far) k)))))))
-      (next nil 0))))
-
 (defun traverse-pattern (pattern &rest functions
                          &key
                            (client #'(lambda (pattern)

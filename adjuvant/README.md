@@ -109,10 +109,12 @@ If `N > (length of data)` then a permutation of `DATA` is returned.
 * `rnd-element` -- Returns a list of two elements 1) a randomly selected element of `DATA`
   and 2) a copy of DATA with the element removed, sharing a tail of `DATA`.
 
-
-
-
 ### Iterators
+
+* `map-subsets` --  call the given VISITOR function once for each subset of the list DATA
+
+* `map-permutations` -- call the given VISITOR function once for each permutation of the given list DATA
+
 * `exists` -- Tests whether there exists an element which satisfies an expression.  E.g., `(exists x '(1 2 3) (evenp x))`
 * `forall` -- Tests whether all the elements in a given list satisfies an expression.  E.g., `(forall x '(2 4 6 8 10) (evenp x))`
 * `setof` -- Construct a new list of all the elements which satisfy an expression.  E.g., `(setof x '(2 3 5 6 7) (evenp x))`

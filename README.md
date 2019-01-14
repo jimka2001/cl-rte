@@ -79,6 +79,15 @@ rte.asd loads the RTE system and its dependencies.
 However, if you do not wish to use RTE, you may also use ndfa.asd, 2d-array.asd, or lisp-types.asd
 as starting points.
 
+## External dependencies
+
+This code references several external asdf systems.  These may be found and installed using quicklisp or gitlab.lrde.epita.fr.
+
+### cl-fad (quicklisp)
+### closer-mop (quicklisp)
+### subtypep (gitlab.lrde.epita.fr)
+### bordeaux-threads (quicklisp)
+### yacc (quicklisp)
 
 ## API Reference
 

@@ -172,3 +172,8 @@
 		     (fixed-point #'copy-list
 				  data
 				  :test #'equal)))))
+
+(define-test types/find-duplicates
+  (assert-true (equal '(a b) (find-duplicates '(a b a b)))))
+
+

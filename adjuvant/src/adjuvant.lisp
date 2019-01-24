@@ -33,6 +33,7 @@
    "DOLIST-TCONC"
    "ENCODE-TIME"
    "EXISTS"
+   "FIND-DUPLICATES"
    "FIXED-POINT"
    "FORALL"
    "GARBAGE-COLLECT"
@@ -597,4 +598,14 @@ is replaced with replacement."
                         :do (unless (member items so-far :test #'eq)
                               (next (cons items so-far) k)))))))
       (next nil 0))))
+
+(defun find-duplicates (data &key (test #'eql) (key #'identity))
+  "return a uniquified list of elements, each of which appear more than once in the given DATA list"
+  (remove-duplicates
+   (mapcon (lambda (tail &aux (item (car tail)))
+	      (when (member item (cdr tail) :test test :key key)
+		(list item)))
+	    data)
+   :test test
+   :key key))
 

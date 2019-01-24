@@ -147,6 +147,15 @@ PKG> (type-expand '(and-not integer fixnum))
 
 ### Other
 
+* `diff-files` -- Given two file names, acceptable as 2nd argument of `CL:WITH-OPEN-FILE`, return TRUE
+if the files differ and return FALSE if they are the same.
+Same ==> FALSE
+Different ==> TRUE
+Same vs different are judged by the content.  If the files are different lengths
+the files are different, otherwise when reading the files in parallel one character at
+a time using `CL:READ-CHAR`, if all each sequence of characters are the same according to
+EQL, then the files are judged to be the same.
+
 * `replace-all` -- find an replace all occurances of once string in another.
 ```lisp
 (replace-all "abc++def++ghi++" "++" "---")

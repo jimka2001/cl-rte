@@ -5,20 +5,20 @@ Simple string regular expression matcher based on rte
 
 ## API
 * `regexp-to-rte` -- convert a string regular expression into a regular type expression E.g.,
-````lisp
+```lisp
 (regexp-to-rte "a*b+c")
 ===> (:CAT (:0-* (EQL #\a)) (EQL #\b) (:0-* (EQL #\b)) (EQL #\c))
-````
+```
 
 * `rte-string-matcher` --  Given a regular-expression as a string, `str-regexp`, returns a unary function which when called with a target string will return `TRUE` or `FALSE` indicating whether the target string matches the regular expression, `str-regexp`.
-````lisp
+```lisp
 PKG> (defvar *match-me* (rte-regexp::rte-string-matcher "a*b+c"))
 *MATCH-ME*
 CL-USER> (funcall *match-me* "aaaaabbbbbc")
 T
 CL-USER> (funcall *match-me* "abcccc")
 NIL
-````
+```
 
 
 
@@ -27,7 +27,7 @@ NIL
 
 ## License
 
-```
+~~~~
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation
 files (the "Software"), to deal in the Software without restriction,
@@ -46,4 +46,4 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
+~~~~

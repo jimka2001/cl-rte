@@ -21,7 +21,7 @@ where `constraint-alist` is an car/cdr alist mapping a type specifier to a list 
 names of that type.   The variables will be implicitly declared in the body.
 E.g.,
 
-````lisp
+```lisp
   (destructuring-case '(1 2 :x 3)
     ((a b c) 
      (declare (type integer a b) (type symbol c))
@@ -30,7 +30,7 @@ E.g.,
      (declare (type integer a b x y))
      :second))
 ==> :second
-````
+```
 
 * `destructuring-methods` -- A variant of `destructuring-case`, but allows a `call-next-method` feature.
 The first matching clause is executed, if it calls the `call-next-method` function
@@ -39,7 +39,7 @@ The `call-next-method function` defaults to `CALL-NEXT-METHOD`, but may be renam
 using the `:CALL-NEXT-METHOD` keyword argument.
 E.g.
 
-````lisp
+```lisp
 (destructuring-methods '(1 2 3) (:call-next-method cnm)
   ((a b c)
    (declare (type number a b c))
@@ -47,13 +47,13 @@ E.g.
   ((a b c)
    (declare (type fixnum a b c))
    3))
-````
+```
 
 * `canonicalize-pattern` --  Given a regular-type-expression, return a canonical form.
 This creates an `(:or ..)` of `(:and ...)` forms, and
 removing or resolving redundant or trivial type designators.  E.g.,
 
-````lisp
+```lisp
 (canonicalize-pattern '(:and (:or A B C) D E (:or F G)))
 ==> (:OR (:AND A D E F)
          (:AND A D E G)
@@ -61,13 +61,13 @@ removing or resolving redundant or trivial type designators.  E.g.,
          (:AND B D E G)
          (:AND C D E F)
          (:AND C D E G))
-````
+```
 
 * `defrte` -- Declare a given RTE patter so that that it can be used when loaded from fasl.  E.g.,
-````lisp
+```lisp
 (defrte (:cat number number number))
 (defrte (:+ (:cat keyword number)))
-````
+```
 
 ## Syntax of regular type expressions
 
@@ -139,7 +139,7 @@ Here is an example.
 
 ## License
 
-```
+~~~~
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation
 files (the "Software"), to deal in the Software without restriction,
@@ -158,4 +158,4 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
+~~~~

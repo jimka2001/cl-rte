@@ -267,9 +267,31 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
 (defun make-temp-dir (suffix)
   (format nil "~A~A/~A/" *tmp-dir-root* (incf *tmp-dir-count*) suffix))
 
-(defun make-temp-file-name (base &key (extension nil) (ensure-file-exists nil) (ensure-dir-exists t))
-  (let* ((dir-name (make-temp-dir "tmp-dir"))
-	 (file-name (format nil "~A/~A~A" dir-name base (if extension (concatenate 'string "." extension) ""))))
+(defun replace-all (string part replacement &key (test #'char=))
+  "Returns a new string in which all the occurences of the part 
+is replaced with replacement."
+  (with-output-to-string (out)
+    (loop with part-length = (length part)
+          for old-pos = 0 then (+ pos part-length)
+          for pos = (search part string
+                            :start2 old-pos
+                            :test test)
+          do (write-string string out
+                           :start old-pos
+                           :end (or pos (length string)))
+          when pos do (write-string replacement out)
+            while pos)))
+
+
+(defun make-temp-file-name (base &key (dir-name (make-temp-dir "tmp-dir")) (extension nil) (ensure-file-exists nil) (ensure-dir-exists t))
+  "Make a temporary file name.
+If :DIR-NAME is not given, a new filename (string) will be returned,  however,
+if :DIR-NAME is given, then a string will be returned which is a function of BASE, DIR-NAME, EXTENSION;
+   thus if the same values are used on a subsequent function call, the same string will be returned.
+:ENSURE-FILE-EXISTS (default false) will create an empty file of this name.
+:ENSURE-DIR-EXISTS (default true) will create the directory if necessary."
+  (let ((file-name (replace-all (format nil "~A/~A~A" dir-name base (if extension (concatenate 'string "." extension) ""))
+                                "//" "/")))
     (when ensure-dir-exists
       (ensure-directories-exist dir-name))
     (when ensure-file-exists
@@ -280,8 +302,8 @@ KEY -- binary function, applied to each element of the OBJECT-LIST before it is 
       (with-open-file (str file-name
 			   :if-exists :error
 			   :if-does-not-exist :create)
-	())
-      file-name)))
+	()))
+    file-name))
 
 (defun boolean-expr-to-latex (expr &optional (stream t))
   (etypecase expr
@@ -474,7 +496,6 @@ If N > (length of data) then a permutation of DATA is returned"
                        (lambda () ,access-count)
                        (lambda () (incf ,access-count)))))))
 
-
 (defun compare-objects (t1 t2)
   "Deterministic compare function:  returns a symbol in (< > =)."
   (cond
@@ -555,21 +576,6 @@ If N > (length of data) then a permutation of DATA is returned"
     (if (eq test #'equal)
 	arg
 	result)))
-
-(defun replace-all (string part replacement &key (test #'char=))
-  "Returns a new string in which all the occurences of the part 
-is replaced with replacement."
-  (with-output-to-string (out)
-    (loop with part-length = (length part)
-          for old-pos = 0 then (+ pos part-length)
-          for pos = (search part string
-                            :start2 old-pos
-                            :test test)
-          do (write-string string out
-                           :start old-pos
-                           :end (or pos (length string)))
-          when pos do (write-string replacement out)
-            while pos)))
 
 (defun map-subsets (visitor data)
   "call the given VISITOR function once for each subset of the list DATA"

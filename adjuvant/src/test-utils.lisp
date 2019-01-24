@@ -177,3 +177,10 @@
   (assert-true (equal '(a b) (find-duplicates '(a b a b)))))
 
 
+(define-test test-diff-files
+  (assert-false (diff-files "/bin/ls" "/bin/ls"))
+  (assert-true (diff-files "/bin/ls" "/dev/null"))
+  (assert-true (diff-files "/dev/null" "/bin/ls"))
+  (assert-false (diff-files "/dev/null" "/dev/null"))
+  (assert-true (diff-files "/bin/ls" "/bin/cp"))
+  (assert-true (diff-files "/bin/cp" "/bin/ls")))

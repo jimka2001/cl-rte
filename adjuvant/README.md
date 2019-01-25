@@ -222,6 +222,8 @@ returned.
 
 * `compare-objects` -- Deterministic compare function:  returns a symbol in `(< > =)`.
 
+* `locate-symbol` -- Return a list of symbols which is a collection of symbols from all packages which have the given symbol-name.
+
 ## License
 
 ~~~~

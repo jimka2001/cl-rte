@@ -24,8 +24,8 @@
 (defpackage :adjuvant
   (:use :cl)
   (:export
-   "*TMP-DIR-ROOT*"
    "*DOT-PATH*"
+   "*TMP-DIR-ROOT*"
    "BOOLEAN-EXPR-TO-LATEX"
    "CHOOSE-RANDOMLY"
    "COMPARE-OBJECTS"
@@ -43,6 +43,7 @@
    "GROUP-BY"
    "GROUP-BY-EQUIVALENCE"
    "LCONC"
+   "LOCATE-SYMBOL"
    "MAKE-TEMP-DIR"
    "MAKE-TEMP-FILE-NAME"
    "MAP-PAIRS"
@@ -693,4 +694,14 @@ in the topological ordering (i.e., the first value)."
                   all-sorted-p
                   (unless all-sorted-p
                     entries)))))))
+
+(defun locate-symbol (name)
+  "Return a list of symbols which is a collection of symbols from all packages which have the given symbol-name"
+  (let (symbols)
+    (dolist (p (list-all-packages))
+      (do-symbols (s p)
+        (when (and (symbol-name s)
+                   (string= name (symbol-name s)))
+          (pushnew s symbols))))
+    symbols))
 

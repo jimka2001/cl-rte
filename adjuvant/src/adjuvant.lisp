@@ -27,7 +27,9 @@
    "*DOT-PATH*"
    "*TMP-DIR-ROOT*"
    "BOOLEAN-EXPR-TO-LATEX"
+   "CHANGE-EXTENSION"
    "CHOOSE-RANDOMLY"
+   "CHOP-PATHNAME"
    "COMPARE-OBJECTS"
    "DEF-CACHE-FUN"
    "DIFF-FILES"
@@ -42,6 +44,7 @@
    "GETTER"
    "GROUP-BY"
    "GROUP-BY-EQUIVALENCE"
+   "INSERT-SUFFIX"
    "LCONC"
    "LOCATE-SYMBOL"
    "MAKE-TEMP-DIR"
@@ -704,4 +707,32 @@ in the topological ordering (i.e., the first value)."
                    (string= name (symbol-name s)))
           (pushnew s symbols))))
     symbols))
+
+(defun change-extension (filename new-extension)
+  "change file name extension:
+E.g., (change-extension \"/path/to/file.gnu\" \"png\") --> \"/path/to/file.png\""
+  (let ((index (search "." filename :from-end t)))
+    (when index
+      (let ((head (subseq filename 0 index)))
+        (concatenate 'string head "." new-extension)))))
+
+(defun insert-suffix (filename suffix)
+  "insert the given SUFFIX before the filename extension: 
+ E.g., (insert-suffix \"/path/to/file.gnu\" \"-smooth\") --> \"/path/to/file-smooth.gnu\""
+  ;; find the final "."
+  (let ((index (search "." filename :from-end t)))
+    (when index
+      (let ((tail (subseq filename index))
+            (head (subseq filename 0 index)))
+        (concatenate 'string head suffix tail)))))
+
+(defun chop-pathname (filename)
+"Return the file name portion of a string, copping off the leading directory name
+E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extension\""
+  (let ((slash (search "/" filename :from-end t)))
+    (cond
+      ((null slash)
+       filename)
+      (t
+       (subseq filename (1+ slash))))))
 

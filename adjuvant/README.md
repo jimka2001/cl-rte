@@ -224,6 +224,17 @@ returned.
 
 * `locate-symbol` -- Return a list of symbols which is a collection of symbols from all packages which have the given symbol-name.
 
+* `change-extension` -- change file name extension:
+E.g., `(change-extension "/path/to/file.gnu" "png")` --> `"/path/to/file.png"`
+
+* `insert-suffix` -- insert the given SUFFIX before the filename extension: 
+E.g., `(insert-suffix "/path/to/file.gnu" "-smooth")` --> `"/path/to/file-smooth.gnu"`
+
+* `chop-pathname` -- return the file name portion of a string, copping off the leading directory name
+E.g.,  `(chop-pathname "/full/path/name/to/file.extension")` --> `"file.extension"`
+
+
+
 ## License
 
 ~~~~

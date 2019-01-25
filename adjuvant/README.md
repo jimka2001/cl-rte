@@ -113,6 +113,14 @@ If `N > (length of data)` then a permutation of `DATA` is returned.
 * `rnd-element` -- Returns a list of two elements 1) a randomly selected element of `DATA`
   and 2) a copy of DATA with the element removed, sharing a tail of `DATA`.
 
+* `topological-sort` -- Graph is an association list whose keys are objects and whose
+values are lists of objects on which the corresponding key depends.
+Test is used to compare elements, and should be a suitable test for
+hash-tables.  Topological-sort returns two values.  The first is a
+list of objects sorted toplogically.  The second is a boolean
+indicating whether all of the objects in the input graph are present
+in the topological ordering (i.e., the first value).
+
 ### Iterators
 
 * `map-subsets` --  call the given VISITOR function once for each subset of the list DATA

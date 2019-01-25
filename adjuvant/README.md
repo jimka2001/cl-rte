@@ -233,6 +233,10 @@ E.g., `(insert-suffix "/path/to/file.gnu" "-smooth")` --> `"/path/to/file-smooth
 * `chop-pathname` -- return the file name portion of a string, copping off the leading directory name
 E.g.,  `(chop-pathname "/full/path/name/to/file.extension")` --> `"file.extension"`
 
+* `empty-file-p` -- Predicate to determine whether a file is empty.  A limitation of the `CL:OPEN` function
+is that this only works if the user has read permission on the file.  This is unfortunate
+as it is not a UNIX limitation.
+
 
 
 ## License

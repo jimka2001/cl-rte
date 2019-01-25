@@ -135,6 +135,10 @@ in the topological ordering (i.e., the first value).
 
 ### Implementation independent interfaces sbcl/Allegro
 
+* `valid-type-p` -- Predicate to determine whether the given object is
+a valid type specifier.
+
+
 * `type-expand` -- expand a type specifier into base types. E.g.,
 ```lisp
 PKG> (deftype and-not (x y)
@@ -236,7 +240,6 @@ E.g.,  `(chop-pathname "/full/path/name/to/file.extension")` --> `"file.extensio
 * `empty-file-p` -- Predicate to determine whether a file is empty.  A limitation of the `CL:OPEN` function
 is that this only works if the user has read permission on the file.  This is unfortunate
 as it is not a UNIX limitation.
-
 
 
 ## License

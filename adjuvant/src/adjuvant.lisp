@@ -49,6 +49,7 @@
    "MAP-PERMUTATIONS"
    "MAP-SUBSETS"
    "PROCESS-KILL"
+   "REMFQ"
    "REPLACE-ALL"
    "RND-ELEMENT"
    "RUN-PROGRAM"
@@ -149,6 +150,10 @@
 
 (defun getter (field)
   (lambda (obj) (getf obj field)))
+
+(defmacro remfq (obj place)
+  "remove (with CL:REMOVe) element from place destructivly using EQ for equivalence."
+  `(setf ,place (remove ,obj ,place :test #'eq)))
 
 (defun user-read (&rest args)
   "Calls read with the specified ARGS, but with *PACKAGE* bound to the CL-USER package.  

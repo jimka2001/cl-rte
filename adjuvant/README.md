@@ -7,6 +7,8 @@ Utility functions used in other packages.
 ## API
 
 ### List Manipulation
+* `remfq` -- remove (with `CL:REMOVE`) element from place destructivly using `EQ` for equivalence.
+
 * `find-duplicates` -- Return a uniquified list of elements, each of which appear more than once in the given DATA list.
 
 * `group-by` -- Create an alist by applying a key function to every element of a sequence

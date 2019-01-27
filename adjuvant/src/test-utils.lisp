@@ -71,10 +71,10 @@
 
 (define-test test/exists-tail
   (assert-true (equal (exists-tail x '(1 3 5 2 x x x)
-                        (evenp x))
+                        (evenp (car x)))
                       '(2 x x x)))
-  (assert-false (exists-tail x '(1 2 3 4 5 6)
-                  (stringp x))))
+  (assert-true (null (exists-tail x '(1 2 3 4 5 6)
+                       (stringp (car x))))))
 
 (define-test test/group-by
   (assert-true (null (group-by nil)))

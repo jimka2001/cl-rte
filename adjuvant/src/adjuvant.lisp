@@ -123,7 +123,7 @@
 
 (defmacro exists-tail (var list &body body)
   "Return the first tail of the given LIST for which BODY evaluates to true.   The given VAR
-is bound in turn to each element of the list until one is found which verifies the BODY."
+is bound in turn to each cons cell list, as if by CL:MAPL, until one is found which verifies the BODY."
   (let ((name (gensym)))
     `(block ,name
        (mapl #'(lambda (,var)

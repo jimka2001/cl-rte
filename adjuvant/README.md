@@ -7,9 +7,17 @@ Utility functions used in other packages.
 ## API
 
 ### List Manipulation
-* `exists-tail` -- iterate a variable across a list until an element is found to verify
+* `exists-tail` -- iterate a variable across a list, as if by `CL:MAPL`, until an element is found to verify
 the `BODY`, at which point the tail, including the verifying element, is returned.
+The values of the variable are the cons cells of the given list, not the individual elements.
 Otherwise, `NIL` is returned.
+```lisp
+(exists-tail x '(1 3 5 2 x x x)
+  (evenp (car x)))
+==> (2 x x x)
+```
+
+
 
 * `remfq` -- remove (with `CL:REMOVE`) element from place destructivly using `EQ` for equivalence.
 

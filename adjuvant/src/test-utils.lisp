@@ -48,7 +48,7 @@
 
 (define-test test-prog1-let
   (let (b)
-    (assert-true (equal 4 (prog1-let ((a 0))
+    (assert-true (equal 4 (prog1-let (a 0)
                             1
                             2
                             3
@@ -57,7 +57,7 @@
                             6
                             7
                             (setf b 8))))
-    (assert-true (equal 0 (prog1-let ((a 0))
+    (assert-true (equal 0 (prog1-let (a 0)
                             1
                             2
                             3

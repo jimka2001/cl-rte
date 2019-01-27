@@ -46,6 +46,29 @@
 			'(10 9 8 7 6 5 4 3 2 1)))))
 
 
+(define-test test-prog1-let
+  (let (b)
+    (assert-true (equal 4 (prog1-let ((a 0))
+                            1
+                            2
+                            3
+                            (setf a 4)
+                            5
+                            6
+                            7
+                            (setf b 8))))
+    (assert-true (equal 0 (prog1-let ((a 0))
+                            1
+                            2
+                            3
+                            4
+                            5
+                            6
+                            7
+                            (setf b 8))))
+    
+    (assert-true (equal 8 b))))
+
 
 (define-test test/group-by
   (assert-true (null (group-by nil)))

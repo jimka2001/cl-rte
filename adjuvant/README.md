@@ -149,6 +149,15 @@ PKG> (type-expand '(and-not integer fixnum))
 
 ### Other
 
+* `prog1-let` -- This macro declares the given variable, and returns its value after the body has been evaluated. E.g.,
+```lisp
+(prog1-let (A 100)
+   ...)
+```
+This expression binds A to 100 and then evaluates the body.  It returns 100
+unless the body modifies the value of A, otherwise that new value of A is
+returned.
+
 * `diff-files` -- Given two file names, acceptable as 2nd argument of `CL:WITH-OPEN-FILE`, return TRUE
 if the files differ and return FALSE if they are the same.
 Same ==> FALSE

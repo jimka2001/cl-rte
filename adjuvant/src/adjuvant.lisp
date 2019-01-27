@@ -49,6 +49,7 @@
    "MAP-PERMUTATIONS"
    "MAP-SUBSETS"
    "PROCESS-KILL"
+   "PROG1-LET"
    "REMFQ"
    "REPLACE-ALL"
    "RND-ELEMENT"
@@ -648,3 +649,13 @@ EQL, then the files are judged to be the same."
              ;; read different character
              (return-from diff-files t))))))))
 
+(defmacro prog1-let ((var expr) &body body)
+  "This macro declares the given variable, and returns its value after the body has been evaluated. E.g.,
+(prog1-let (A 100)
+   ...)
+This expression binds A to 100 and then evaluates the body.  It returns 100
+unless the body modifies the value of A, otherwise that new value of A is
+returned."
+  `(let ((,var ,expr))
+     ,@body
+     ,var))

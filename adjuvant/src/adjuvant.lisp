@@ -34,6 +34,7 @@
    "DOLIST-TCONC"
    "ENCODE-TIME"
    "EXISTS"
+   "EXISTS-TAIL"
    "FIND-DUPLICATES"
    "FIXED-POINT"
    "FORALL"
@@ -119,6 +120,17 @@
                        ,@body)) ,data)))
     (t
      `(member-if (lambda (,obj) ,@body) ,data))))
+
+(defmacro exists-tail (var list &body body)
+  "Return the first tail of the given LIST for which BODY evaluates to true.   The given VAR
+is bound in turn to each element of the list until one is found which verifies the BODY."
+  (let ((name (gensym)))
+    `(block ,name
+       (mapl #'(lambda (,var)
+		 (when (progn ,@body)
+		   (return-from ,name ,var)))
+	     ,list)
+       nil)))
 
 (defmacro forall (var data &body body)
   "Tests whether all the elements in a given list satisfies an expression.  E.g., (forall x '(2 4 6 8 10) (evenp x))"
@@ -659,3 +671,5 @@ returned."
   `(let ((,var ,expr))
      ,@body
      ,var))
+
+

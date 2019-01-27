@@ -7,6 +7,10 @@ Utility functions used in other packages.
 ## API
 
 ### List Manipulation
+* `exists-tail` -- iterate a variable across a list until an element is found to verify
+the `BODY`, at which point the tail, including the verifying element, is returned.
+Otherwise, `NIL` is returned.
+
 * `remfq` -- remove (with `CL:REMOVE`) element from place destructivly using `EQ` for equivalence.
 
 * `find-duplicates` -- Return a uniquified list of elements, each of which appear more than once in the given DATA list.

@@ -76,6 +76,17 @@
   (assert-true (null (exists-tail x '(1 2 3 4 5 6)
                        (stringp (car x))))))
 
+(define-test test/env-var
+  (let ((env-var (format nil "var0"))
+        (index 0))
+    (loop :while (getenv env-var)
+          :do (setf env-var (format nil "var~D" (incf index))))
+    (assert-false (getenv env-var))
+    (assert-error error (demand-env-var env-var))
+    (assert-true (demand-env-var "USER"))))
+          
+
+
 (define-test test/group-by
   (assert-true (null (group-by nil)))
   (assert-false (set-exclusive-or '((1 (1 1 1)) (2 (2 2 2)) (3 (3 3)) (4 (4)))

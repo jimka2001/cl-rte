@@ -30,6 +30,7 @@
    "CHOOSE-RANDOMLY"
    "COMPARE-OBJECTS"
    "DEF-CACHE-FUN"
+   "DEMAND-ENV-VAR"
    "DIFF-FILES"
    "DOLIST-TCONC"
    "ENCODE-TIME"
@@ -103,6 +104,11 @@
   "Wrapper around the implementation dependent (sbcl/Allegro) UNIX environment variable reader."
   #+sbcl (sb-posix:getenv envvar)
   #+allegro (sys:getenv envvar))
+
+(defun demand-env-var (env-var-name)
+  "Signal an error if the named environment variable is missing, otherwise return its value."
+  (or (getenv env-var-name)
+      (error "Missing env var ~s" env-var-name)))
 
 (defun process-kill (process signal)
   "Kill a process started by RUN-PROGRAM, if it was started with (run-program ... :wait t)"

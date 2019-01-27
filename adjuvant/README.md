@@ -157,6 +157,8 @@ PKG> (type-expand '(and-not integer fixnum))
 
 * `getenv` -- Wrapper around the implementation dependent (sbcl/Allegro) UNIX environment variable reader.
 
+* `demand-env-var` --  Signal an error if the named environment variable is missing, otherwise return its value. 
+
 * `garbage-collect` -- run the garbage collector
 
 ### Other

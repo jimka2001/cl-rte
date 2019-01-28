@@ -686,6 +686,7 @@ returned."
   `(let ((,var ,expr))
      ,@body
      ,var))
+
 (defun topological-sort (graph &key (test 'eql))
   ;; this function was taking verbatim from rosettacode.org
   ;; https://rosettacode.org/wiki/Topological_sort#Common_Lisp

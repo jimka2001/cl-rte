@@ -736,3 +736,39 @@ in the topological ordering (i.e., the first value)."
                   all-sorted-p
                   (unless all-sorted-p
                     entries)))))))
+
+
+(defun valid-type-p (type-designator)
+  "Predicate to determine whether the given object is a valid type specifier."
+  #+sbcl (handler-case (and (SB-EXT:VALID-TYPE-SPECIFIER-P type-designator)
+                            (not (eq type-designator 'cl:*)))
+           (SB-KERNEL::PARSE-UNKNOWN-TYPE (c) (declare (ignore c)) nil))
+  #+(or clisp  allegro) (ignore-errors (subtypep type-designator t))
+  #-(or sbcl clisp allegro) (error "VALID-TYEP-P not implemented for ~A" (lisp-implementation-type))
+)
+
+
+(defmacro destructuring-lambda (destructuring-lambda-list &body body)
+  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
+ (mapcar (destructuring-lambda (a (b) (&key c d &allow-other-keys))
+          ...) '((1 (2) (:d 1 :a 2 :b 3 :c 4))
+                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
+                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
+                 ...)
+ ...)"
+  (let ((arg (gensym)))
+    `(lambda (&rest ,arg)
+       (destructuring-bind ,destructuring-lambda-list ,arg
+         ,@body))))
+
+(defmacro destructuring-let (bindings &body body)
+  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
+ (destructuring-let ((a 1)
+                    ((b) '(2))
+                    ((&key c d &allow-other-keys) '(:d 1 :a 2 :b 3 :c 4)))
+ ...)"
+  (let ((vars (mapcar #'car bindings))
+        (values (mapcar #'cadr bindings)))
+    `(funcall (destructuring-lambda ,vars
+        ,@body)
+      ,@values)))

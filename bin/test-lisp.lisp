@@ -1,4 +1,4 @@
-#!/lrde/home/jnewton/opt/sbcl/bin/sbcl --script
+#!/lrde/cluster/jnewton/opt/sbcl/bin/sbcl --script
 
 (require :asdf)
 (require :sb-posix)

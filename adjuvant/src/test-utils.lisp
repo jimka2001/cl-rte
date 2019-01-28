@@ -184,3 +184,86 @@
   (assert-false (diff-files "/dev/null" "/dev/null"))
   (assert-true (diff-files "/bin/ls" "/bin/cp"))
   (assert-true (diff-files "/bin/cp" "/bin/ls")))
+
+(define-test test-destructuring-lambda
+  (let ((executed nil))
+    (funcall (destructuring-lambda (a (b) (&key c))
+               (assert-true (equal 1 a))
+               (assert-true (equal 2 b))
+               (assert-true (equal 3 c))
+               (setf executed t))
+             1 '(2) '(:C 3))
+    (assert-true executed))
+
+  (let ((count 0))
+    
+    (apply (destructuring-lambda (a (b) &key c d &allow-other-keys)
+             (incf count)
+             (assert-true (equal 1 a))
+             (assert-true (equal 2 b))
+             (assert-true (equal 4 c))
+             (assert-true (equal 1 d))
+             )
+           '(1 (2) :d 1 :a 2 :b 3 :c 4))
+    
+    (assert-true (eql count 1)))
+
+  (let ((count 0))
+    
+    (apply (destructuring-lambda (a (b) (&key c d &allow-other-keys))
+             (incf count)
+             (assert-true (equal 1 a))
+             (assert-true (equal 2 b))
+             (assert-true (equal 4 c))
+             (assert-true (equal 1 d))
+             )
+           '(1 (2) (:d 1 :a 2 :b 3 :c 4)))
+
+    (assert-true (eql count 1)))
+
+  (let ((count 0))
+    
+    (mapcar (destructuring-lambda ((a (b) (&key c d &allow-other-keys)))
+              (incf count)
+              (assert-true (equal 1 a))
+              (assert-true (equal 2 b))
+              (assert-true (equal 4 c))
+              (assert-true (equal 1 d))
+              )
+            '((1 (2) (:d 1 :a 2 :b 3 :c 4))
+              (1 (2) (:d 1 :a 2 :b 3 :c 4))
+              (1 (2) (:d 1 :a 2 :b 3 :c 4))))
+
+    (assert-true (eql count 3)))
+
+  (let ((count 0))
+    
+    (mapcar (destructuring-lambda (a (b) (&key c d &allow-other-keys))
+              (incf count)
+              (assert-true (equal 1 a))
+              (assert-true (equal 2 b))
+              (assert-true (equal 4 c))
+              (assert-true (equal 1 d))
+              )
+            '(1 1 1)
+            '((2) (2) (2))
+            
+            '((:d 1 :a 2 :b 3 :c 4)
+              (:d 1 :a 2 :b 3 :c 4)
+              (:d 1 :a 2 :b 3 :c 4)))
+
+    (assert-true (eql count 3))))
+
+(define-test test-destructuring-let
+  (let ((executed nil))
+    (destructuring-let ((a 1)
+                        ((b) '(2))
+                        ((&key c) '(:c 3))
+                        )
+      (assert-true (equal 1 a))
+      (assert-true (equal 2 b))
+      (assert-true (equal 3 c))
+      (setf executed t)
+      )
+    (assert-true executed)
+  ))

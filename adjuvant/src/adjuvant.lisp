@@ -32,6 +32,8 @@
    "CHOP-PATHNAME"
    "COMPARE-OBJECTS"
    "DEF-CACHE-FUN"
+   "DESTRUCTURING-LAMBDA"
+   "DESTRUCTURING-LET"
    "DIFF-FILES"
    "DOLIST-TCONC"
    "EMPTY-FILE-P"
@@ -760,3 +762,28 @@ as it is not a UNIX limitation."
 
 ;;(assert (not (valid-type-p (gensym))))
 ;;(assert (valid-type-p 'bignum))
+
+(defmacro destructuring-lambda (destructuring-lambda-list &body body)
+  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
+(mapcar (destructuring-lambda (a (b) (&key c d &allow-other-keys))
+          ...) '((1 (2) (:d 1 :a 2 :b 3 :c 4))
+                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
+                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
+                 ...)
+ ...)"
+  (let ((arg (gensym)))
+    `(lambda (&rest ,arg)
+       (destructuring-bind ,destructuring-lambda-list ,arg
+         ,@body))))
+
+(defmacro destructuring-let (bindings &body body)
+  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
+(destructuring-let ((a 1)
+                    ((b) '(2))
+                    ((&key c d &allow-other-keys) '(:d 1 :a 2 :b 3 :c 4)))
+ ...)"
+  (let ((vars (mapcar #'car bindings))
+        (values (mapcar #'cadr bindings)))
+    `(funcall (destructuring-lambda ,vars
+        ,@body)
+      ,@values)))

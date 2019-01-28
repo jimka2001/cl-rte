@@ -242,6 +242,15 @@ is that this only works if the user has read permission on the file.  This is un
 as it is not a UNIX limitation.
 
 
+* `destructuring-let` -- macro -- Similar to `CL:LET`, but the variables also understand destructuring like with `CL:DESTRUCTURING-BIND`:  E.g.,
+```lisp
+(destructuring-let ((a 1)
+                    ((b) '(2))
+                    ((&key c d &allow-other-keys) '(:d 1 :a 2 :b 3 :c 4)))
+ ...)
+```
+
+
 ## License
 
 ~~~~

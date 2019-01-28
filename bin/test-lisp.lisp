@@ -34,7 +34,7 @@
   (format t "-------------------------------------------------~%")
   (format t "-------------------------------------------------~%")
   (format t "*bucket-index* = ~A~%" *bucket-index*)
-  (format t "starting parameterization-report ~A ~%" *bucket*)
+  (format t "starting test-lisp ~A ~%" *bucket*)
   (format t "-------------------------------------------------~%")
   (finish-output)
 

@@ -1,5 +1,4 @@
 #!/bin/bash
-env
 
 export CLUSTER_JOB_NUM=$$
 if [ -d cluster.$$ ]; then
@@ -7,7 +6,7 @@ if [ -d cluster.$$ ]; then
 fi
 mkdir cluster.$$
 cd cluster.$$
-echo starting jobs in cluster.$$
+echo starting jobs in $PWD
 BIN="$HOME/sw/regular-type-expression/bin/"
 
 

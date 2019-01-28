@@ -7,6 +7,20 @@ Utility functions used in other packages.
 ## API
 
 ### List Manipulation
+* `exists-tail` -- iterate a variable across a list, as if by `CL:MAPL`, until an element is found to verify
+the `BODY`, at which point the tail, including the verifying element, is returned.
+The values of the variable are the cons cells of the given list, not the individual elements.
+Otherwise, `NIL` is returned.
+```lisp
+(exists-tail x '(1 3 5 2 x x x)
+  (evenp (car x)))
+==> (2 x x x)
+```
+
+
+
+* `remfq` -- remove (with `CL:REMOVE`) element from place destructivly using `EQ` for equivalence.
+
 * `find-duplicates` -- Return a uniquified list of elements, each of which appear more than once in the given DATA list.
 
 * `group-by` -- Create an alist by applying a key function to every element of a sequence
@@ -155,9 +169,20 @@ PKG> (type-expand '(and-not integer fixnum))
 
 * `getenv` -- Wrapper around the implementation dependent (sbcl/Allegro) UNIX environment variable reader.
 
+* `demand-env-var` --  Signal an error if the named environment variable is missing, otherwise return its value. 
+
 * `garbage-collect` -- run the garbage collector
 
 ### Other
+
+* `prog1-let` -- This macro declares the given variable, and returns its value after the body has been evaluated. E.g.,
+```lisp
+(prog1-let (A 100)
+   ...)
+```
+This expression binds A to 100 and then evaluates the body.  It returns 100
+unless the body modifies the value of A, otherwise that new value of A is
+returned.
 
 * `diff-files` -- Given two file names, acceptable as 2nd argument of `CL:WITH-OPEN-FILE`, return TRUE
 if the files differ and return FALSE if they are the same.

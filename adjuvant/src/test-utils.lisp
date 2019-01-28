@@ -46,6 +46,46 @@
 			'(10 9 8 7 6 5 4 3 2 1)))))
 
 
+(define-test test-prog1-let
+  (let (b)
+    (assert-true (equal 4 (prog1-let (a 0)
+                            1
+                            2
+                            3
+                            (setf a 4)
+                            5
+                            6
+                            7
+                            (setf b 8))))
+    (assert-true (equal 0 (prog1-let (a 0)
+                            1
+                            2
+                            3
+                            4
+                            5
+                            6
+                            7
+                            (setf b 8))))
+    
+    (assert-true (equal 8 b))))
+
+(define-test test/exists-tail
+  (assert-true (equal (exists-tail x '(1 3 5 2 x x x)
+                        (evenp (car x)))
+                      '(2 x x x)))
+  (assert-true (null (exists-tail x '(1 2 3 4 5 6)
+                       (stringp (car x))))))
+
+(define-test test/env-var
+  (let ((env-var (format nil "var0"))
+        (index 0))
+    (loop :while (getenv env-var)
+          :do (setf env-var (format nil "var~D" (incf index))))
+    (assert-false (getenv env-var))
+    (assert-error error (demand-env-var env-var))
+    (assert-true (demand-env-var "USER"))))
+          
+
 
 (define-test test/group-by
   (assert-true (null (group-by nil)))

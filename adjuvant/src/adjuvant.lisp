@@ -32,6 +32,7 @@
    "CHOP-PATHNAME"
    "COMPARE-OBJECTS"
    "DEF-CACHE-FUN"
+   "DEMAND-ENV-VAR"
    "DESTRUCTURING-LAMBDA"
    "DESTRUCTURING-LET"
    "DIFF-FILES"
@@ -39,6 +40,7 @@
    "EMPTY-FILE-P"
    "ENCODE-TIME"
    "EXISTS"
+   "EXISTS-TAIL"
    "FIND-DUPLICATES"
    "FIXED-POINT"
    "FORALL"
@@ -56,6 +58,8 @@
    "MAP-PERMUTATIONS"
    "MAP-SUBSETS"
    "PROCESS-KILL"
+   "PROG1-LET"
+   "REMFQ"
    "REPLACE-ALL"
    "RND-ELEMENT"
    "RUN-PROGRAM"
@@ -110,6 +114,11 @@
   #+sbcl (sb-posix:getenv envvar)
   #+allegro (sys:getenv envvar))
 
+(defun demand-env-var (env-var-name)
+  "Signal an error if the named environment variable is missing, otherwise return its value."
+  (or (getenv env-var-name)
+      (error "Missing env var ~s" env-var-name)))
+
 (defun process-kill (process signal)
   "Kill a process started by RUN-PROGRAM, if it was started with (run-program ... :wait t)"
   #+sbcl (sb-ext:process-kill process signal)
@@ -126,6 +135,17 @@
                        ,@body)) ,data)))
     (t
      `(member-if (lambda (,obj) ,@body) ,data))))
+
+(defmacro exists-tail (var list &body body)
+  "Return the first tail of the given LIST for which BODY evaluates to true.   The given VAR
+is bound in turn to each cons cell list, as if by CL:MAPL, until one is found which verifies the BODY."
+  (let ((name (gensym)))
+    `(block ,name
+       (mapl #'(lambda (,var)
+		 (when (progn ,@body)
+		   (return-from ,name ,var)))
+	     ,list)
+       nil)))
 
 (defmacro forall (var data &body body)
   "Tests whether all the elements in a given list satisfies an expression.  E.g., (forall x '(2 4 6 8 10) (evenp x))"
@@ -158,6 +178,10 @@
 
 (defun getter (field)
   (lambda (obj) (getf obj field)))
+
+(defmacro remfq (obj place)
+  "remove (with CL:REMOVe) element from place destructivly using EQ for equivalence."
+  `(setf ,place (remove ,obj ,place :test #'eq)))
 
 (defun user-read (&rest args)
   "Calls read with the specified ARGS, but with *PACKAGE* bound to the CL-USER package.  
@@ -652,6 +676,16 @@ EQL, then the files are judged to be the same."
              ;; read different character
              (return-from diff-files t))))))))
 
+(defmacro prog1-let ((var expr) &body body)
+  "This macro declares the given variable, and returns its value after the body has been evaluated. E.g.,
+(prog1-let (A 100)
+   ...)
+This expression binds A to 100 and then evaluates the body.  It returns 100
+unless the body modifies the value of A, otherwise that new value of A is
+returned."
+  `(let ((,var ,expr))
+     ,@body
+     ,var))
 (defun topological-sort (graph &key (test 'eql))
   ;; this function was taking verbatim from rosettacode.org
   ;; https://rosettacode.org/wiki/Topological_sort#Common_Lisp
@@ -701,89 +735,3 @@ in the topological ordering (i.e., the first value)."
                   all-sorted-p
                   (unless all-sorted-p
                     entries)))))))
-
-(defun locate-symbol (name)
-  "Return a list of symbols which is a collection of symbols from all packages which have the given symbol-name"
-  (let (symbols)
-    (dolist (p (list-all-packages))
-      (do-symbols (s p)
-        (when (and (symbol-name s)
-                   (string= name (symbol-name s)))
-          (pushnew s symbols))))
-    symbols))
-
-(defun change-extension (filename new-extension)
-  "change file name extension:
-E.g., (change-extension \"/path/to/file.gnu\" \"png\") --> \"/path/to/file.png\""
-  (let ((index (search "." filename :from-end t)))
-    (when index
-      (let ((head (subseq filename 0 index)))
-        (concatenate 'string head "." new-extension)))))
-
-(defun insert-suffix (filename suffix)
-  "insert the given SUFFIX before the filename extension: 
- E.g., (insert-suffix \"/path/to/file.gnu\" \"-smooth\") --> \"/path/to/file-smooth.gnu\""
-  ;; find the final "."
-  (let ((index (search "." filename :from-end t)))
-    (when index
-      (let ((tail (subseq filename index))
-            (head (subseq filename 0 index)))
-        (concatenate 'string head suffix tail)))))
-
-(defun chop-pathname (filename)
-"Return the file name portion of a string, copping off the leading directory name
-E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extension\""
-  (let ((slash (search "/" filename :from-end t)))
-    (cond
-      ((null slash)
-       filename)
-      (t
-       (subseq filename (1+ slash))))))
-
-
-(defun empty-file-p (fname)
-  "Predicate to determine whether a file is empty.  A limitation of the CL:OPEN function
-is that this only works if the user has read permission on the file.  This is unfortunate
-as it is not a UNIX limitation."
-  (with-open-file (stream fname :direction :input
-                                :element-type 'unsigned-byte
-                                :if-does-not-exist nil)
-    (and stream
-	 (zerop (file-length stream)))))
-
-(defun valid-type-p (type-designator)
-  "Predicate to determine whether the given object is a valid type specifier."
-  #+sbcl (handler-case (and (SB-EXT:VALID-TYPE-SPECIFIER-P type-designator)
-                            (not (eq type-designator 'cl:*)))
-           (SB-KERNEL::PARSE-UNKNOWN-TYPE (c) (declare (ignore c)) nil))
-  #+(or clisp  allegro) (ignore-errors (subtypep type-designator t))
-  #-(or sbcl clisp allegro) (error "VALID-TYEP-P not implemented for ~A" (lisp-implementation-type))
-)
-
-;;(assert (not (valid-type-p (gensym))))
-;;(assert (valid-type-p 'bignum))
-
-(defmacro destructuring-lambda (destructuring-lambda-list &body body)
-  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
-(mapcar (destructuring-lambda (a (b) (&key c d &allow-other-keys))
-          ...) '((1 (2) (:d 1 :a 2 :b 3 :c 4))
-                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
-                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
-                 ...)
- ...)"
-  (let ((arg (gensym)))
-    `(lambda (&rest ,arg)
-       (destructuring-bind ,destructuring-lambda-list ,arg
-         ,@body))))
-
-(defmacro destructuring-let (bindings &body body)
-  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
-(destructuring-let ((a 1)
-                    ((b) '(2))
-                    ((&key c d &allow-other-keys) '(:d 1 :a 2 :b 3 :c 4)))
- ...)"
-  (let ((vars (mapcar #'car bindings))
-        (values (mapcar #'cadr bindings)))
-    `(funcall (destructuring-lambda ,vars
-        ,@body)
-      ,@values)))

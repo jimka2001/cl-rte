@@ -512,7 +512,11 @@ If N > (length of data) then a permutation of DATA is returned"
      (defun ,with-name (thunk)
        (declare (type (function () t) thunk))
        (if (null ,hash)
-           (let ((,hash (make-hash-table :test #'equal)))
+           ;; make this a weak hash table.  When using a strong hash
+           ;; table sometimes memory is exhausted on large runs.
+           (let ((,hash (make-hash-table :test #'equal
+                               #+sbcl :weakness #+sbcl :key-or-value
+                               #+allegro :values #+allegro :weak)))
              (declare (ignorable ,hash))
              (prog1 (funcall thunk)
                (when *verbose-caching*

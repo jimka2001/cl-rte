@@ -307,3 +307,43 @@
       )
     (assert-true executed)
   ))
+
+(define-test test-topological-sort
+  (let* ((dependency-graph '((des-system-lib   std synopsys std-cell-lib des-system-lib dw02 dw01 ramlib ieee)
+                             (dw01             ieee dw01 dware gtech)
+                             (dw02             ieee dw02 dware)
+                             (dw03             std synopsys dware dw03 dw02 dw01 ieee gtech)
+                             (dw04             dw04 ieee dw01 dware gtech)
+                             (dw05             dw05 ieee dware)
+                             (dw06             dw06 ieee dware)
+                             (dw07             ieee dware)
+                             (dware            ieee dware)
+                             (gtech            ieee gtech)
+                             (ramlib           std ieee)
+                             (std-cell-lib     ieee std-cell-lib)
+                             (synopsys)))
+         (sorted (topological-sort dependency-graph)))
+    (dolist (node dependency-graph)
+      (destructuring-bind (later &rest earlier) node
+        (dolist (early earlier)
+          (assert-true (member later (member early sorted))))))))
+
+(define-test test/bfs-graph
+  (let* ((edge-list '((a b)
+                      (b c)
+                      (c d)
+                      (d a)))
+         (adj-hash (edges-to-adjacency-hash edge-list :test #'eq)))
+    (assert-true (hash-table-p adj-hash))
+    (let ((edges nil))
+      (bfs-graph 'a
+                 adj-hash
+                 (lambda (to from)
+                   (push (list to from) edges)))
+      (assert-true (= 4 (length edges)))
+      (assert-true (member '(a a) edges :test #'equal))
+      (assert-true (member '(b a) edges :test #'equal))
+      (assert-true (member '(c b) edges :test #'equal))
+      (assert-true (member '(d c) edges :test #'equal))
+      (assert-false (member '(a d) edges :test #'equal)))))
+        

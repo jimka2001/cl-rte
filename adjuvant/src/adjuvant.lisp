@@ -26,6 +26,7 @@
   (:export
    "*DOT-PATH*"
    "*TMP-DIR-ROOT*"
+   "BFS-GRAPH"
    "BOOLEAN-EXPR-TO-LATEX"
    "CHANGE-EXTENSION"
    "CHOOSE-RANDOMLY"
@@ -37,6 +38,7 @@
    "DESTRUCTURING-LET"
    "DIFF-FILES"
    "DOLIST-TCONC"
+   "EDGES-TO-ADJACENCY-HASH"
    "EMPTY-FILE-P"
    "ENCODE-TIME"
    "EXISTS"
@@ -694,7 +696,7 @@ returned."
 (defun topological-sort (graph &key (test 'eql))
   ;; this function was taking verbatim from rosettacode.org
   ;; https://rosettacode.org/wiki/Topological_sort#Common_Lisp
-  "Graph is an association list whose keys are objects and whose
+  "Graph is an car/cdr association list whose keys are objects and whose
 values are lists of objects on which the corresponding key depends.
 Test is used to compare elements, and should be a suitable test for
 hash-tables.  Topological-sort returns two values.  The first is a
@@ -727,7 +729,8 @@ in the topological ordering (i.e., the first value)."
         ;; Until there are no vertices with no outstanding dependencies,
         ;; process vertices from S, adding them to L.
         (do* () ((endp S))
-          (let* ((v (pop S)) (ventry (entry v)))
+          (let* ((v (pop S))
+                 (ventry (entry v)))
             (remhash v entries)
             (dolist (dependant (cdr ventry) (push v L))
               (when (zerop (decf (car (entry dependant))))
@@ -740,7 +743,6 @@ in the topological ordering (i.e., the first value)."
                   all-sorted-p
                   (unless all-sorted-p
                     entries)))))))
-
 
 (defun valid-type-p (type-designator)
   "Predicate to determine whether the given object is a valid type specifier."
@@ -777,6 +779,11 @@ in the topological ordering (i.e., the first value)."
         ,@body)
       ,@values)))
 
+(defmacro destructuring-dolist ((lambda-list list &optional result) &body body)
+  (let ((var (gensym)))
+    `(dolist (,var ,list ,result)
+       (destructuring-bind ,lambda-list ,var
+         ,@body))))
 
 (defun change-extension (filename new-extension)
   "change file name extension:
@@ -805,3 +812,33 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
        filename)
       (t
        (subseq filename (1+ slash))))))
+
+
+(defun edges-to-adjacency-hash (edge-list &key (test #'eql))
+"Convert a given list of pairs, EDGE-LIST, of verticies, into an adjacency-hash for
+  use in function BFS-GRAPH.
+ TEST is an equivalence test to compare graph vertices for equivalence."
+  (prog1-let (adjacency-hash (make-hash-table :test test))
+    (destructuring-dolist ((vertex-from pairs) (group-by edge-list :key #'car :test #'equal))
+      (setf (gethash vertex-from adjacency-hash) (mapcar #'cadr pairs)))))
+
+(defun bfs-graph (start-vertex adjacency-hash visitor &key (test #'eql))
+  "Visit every vertex of a graph exactly once, in breadth-first order,
+ calling VISITOR on each vertex.  VISITOR is called with two arguments, the
+ vertex and its parent, with parent being the same as the vertex in the particular case
+ of the first vertex examined.
+ ADJACENCY-HASH is a hash table (whose equivalence test is TEST), which maps
+ each vertex to the list of adjacent vertices.
+ TEST is an equivalence test to compare graph vertices for equivalence."
+  (declare (type hash-table adjacency-hash)
+           (type (function (t t) t) test))
+  (let ((conc-buf (tconc nil start-vertex))
+        (done (make-hash-table :test test)))
+    (funcall visitor start-vertex start-vertex)
+    (setf (gethash start-vertex done) t)
+    (dolist-tconc (vertex-from conc-buf)
+      (dolist (vertex-to (gethash vertex-from adjacency-hash))
+        (unless (gethash vertex-to done)
+          (funcall visitor vertex-to vertex-from)
+          (setf (gethash vertex-to done) t)
+          (tconc conc-buf vertex-to))))))

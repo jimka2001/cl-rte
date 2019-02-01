@@ -347,3 +347,6 @@
       (assert-true (member '(d c) edges :test #'equal))
       (assert-false (member '(a d) edges :test #'equal)))))
         
+(define-test test/empty-file-p
+  (assert-true (empty-file-p "/dev/null"))
+  (assert-false (empty-file-p "/etc/hosts")))

@@ -744,6 +744,16 @@ in the topological ordering (i.e., the first value)."
                   (unless all-sorted-p
                     entries)))))))
 
+(defun empty-file-p (fname)
+  "Predicate to determine whether a file is empty.  A limitation of the CL:OPEN function
+is that this only works if the user has read permission on the file.  This is unfortunate
+as it is not a UNIX limitation."
+  (with-open-file (stream fname :direction :input
+                                :element-type 'unsigned-byte
+                                :if-does-not-exist nil)
+    (and stream
+	 (zerop (file-length stream)))))
+
 (defun valid-type-p (type-designator)
   "Predicate to determine whether the given object is a valid type specifier."
   #+sbcl (handler-case (and (SB-EXT:VALID-TYPE-SPECIFIER-P type-designator)

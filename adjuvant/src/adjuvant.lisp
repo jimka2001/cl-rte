@@ -53,6 +53,7 @@
    "GROUP-BY-EQUIVALENCE"
    "INSERT-SUFFIX"
    "LCONC"
+   "LINEAR-REDUCE"
    "LOCATE-SYMBOL"
    "MAKE-TEMP-DIR"
    "MAKE-TEMP-FILE-NAME"
@@ -242,45 +243,69 @@ USE DOLIST-TCONC instead."
 
 (define-modify-macro unionf (&rest args) union)
 
+(defun linear-reduce (function sequence &key key from-end (start 0) end initial-value stop-when)
+  "The same as CL:REDUCE, except that LINEAR-REDUCE allows an extra keyword argument, :STOP-WHEN
+ which it ignores.   This is so LINEAR-REDUCE may be used as a drop-in replacement for TREE-REDUCE
+ for the purpose of testing and profiling."
+  (declare (ignore stop-when))
+  ;; remove :stop-when from argument list
+  (reduce function sequence :key key :from-end from-end :start start :end end :initial-value initial-value))
 
-(defun tree-reduce (fold-function object-list &key initial-value (key #'identity))
+(defvar *stop-when* (list nil))
+(defun tree-reduce (fold-function object-list &key initial-value (key #'identity) (stop-when *stop-when*))
   "Same semantics as CL:REDUCE, but does the evaluation tree-wise rather than left-to-right.
-I.e., it attempts to (+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7))),
-Of course this is only possible if the number of objects given is a power of 2.
-Otherwise, there will be a somewhat lopsided tree.
+ I.e., it attempts to (+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7))),
+ Of course this is only possible if the number of objects given is a power of 2.
+ Otherwise, there will be a somewhat lopsided tree.
 
-FOLD-FUNCTION -- associative binary function, this function is called pairwise
+ FOLD-FUNCTION -- associative binary function, this function is called pairwise
    on the accumulated value and the next value from the OBJECT-LIST, after KEY
    has been applied to the next value of the OBJECT-LIST.
    The first call to the FOLD-FUNCTION is on the first two elements of the OBJECT-LIST
    (after application of KEY to both).
-INITIAL-VALUE -- the value to return if the OBJECT-LIST is empty, otherwise it is unused,
+ INITIAL-VALUE -- the value to return if the OBJECT-LIST is empty, otherwise it is unused,
    this value is returned as-is, and the KEY function is not applied to it.
-KEY -- binary function, applied to each element of the OBJECT-LIST before it is passed
-   to the FOLD-FUNCTION."
+ KEY -- binary function, applied to each element of the OBJECT-LIST before it is passed
+   to the FOLD-FUNCTION.
+ STOP-WHEN -- if this value occurs either in the object-list (after applying the KEY function)
+   or as an accumulated value, it is returned immediately, and the iteration is aborted.  
+   This term is used for example when multiplying numbers, when 0 occurs, it is returned
+   because multiplying the rest of the list would just be wasted time."
   (declare (type (function (t t) t) fold-function)
 	   (type (function (t) t) key)
 	   (type list object-list)
 	   (optimize (speed 3) (debug 0) (compilation-speed 0)))
   (cond
     ((cdr object-list)
-     (labels ((compactify (stack)
+     (labels ((local-key (obj &aux (value (funcall key obj)))
+                (if (eql value stop-when)
+                    (return-from tree-reduce stop-when)
+                    value))
+              (compactify (stack)
 		(if (null (cdr stack))
 		    stack
 		    (destructuring-bind ((n1 obj1) (n2 obj2) &rest tail) stack
-		      (declare (type (and fixnum unsigned-byte) n1 n2))
-		      (if (= n1 n2)
-			  (compactify (cons (list (1+ n1) (funcall fold-function obj1 obj2)) tail))
-			  stack))))
+		      (declare (type (unsigned-byte 16) n1 n2))
+                      (cond
+                        ((= n1 n2)
+                         (let ((value (funcall fold-function obj1 obj2)))
+                           (if (eql value stop-when)
+                               (return-from tree-reduce stop-when)
+                               (compactify (cons (list (1+ n1) value) tail)))))
+                        (t
+                         stack)))))
 	      (finish-stack (acc stack)
+                (when (eql acc stop-when)
+                  (return-from tree-reduce stop-when))
 		(if stack
 		    (finish-stack (funcall fold-function acc (cadr (car stack)))
 				  (cdr stack))
 		    acc)))
-       (destructuring-bind ((_ obj) &rest tail) (reduce (lambda (stack item)
-							  (compactify (cons (list 1 (funcall key item)) stack)))
-							(cdr object-list)
-							:initial-value (list (list 1 (funcall key (car object-list)))))
+       (destructuring-bind ((_ obj) &rest tail)
+           (reduce (lambda (stack item)
+                     (compactify (cons (list 1 (local-key item)) stack)))
+                   (cdr object-list)
+                   :initial-value (list (list 1 (local-key (car object-list)))))
 	 (declare (ignore _))
 	 (finish-stack obj tail))))
     (object-list

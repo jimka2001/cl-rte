@@ -101,6 +101,9 @@ PKG> (car *BUF*)
 ==> (10 9 8 7 6 5 4 3 2 1)
 ```
 
+* `linear-reduce` -- The same as `CL:REDUCE`, except that `LINEAR-REDUCE` allows an extra keyword argument, `:STOP-WHEN`
+ which it ignores.   This is so `LINEAR-REDUCE` may be used as a drop-in replacement for `TREE-REDUCE`
+ for the purpose of testing and profiling."
 
 * `tree-reduce` -- Same semantics as `CL:REDUCE`, but does the evaluation tree-wise rather than left-to-right.
 I.e., it attempts to evaluate as `(+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 x7)))`, rather than 

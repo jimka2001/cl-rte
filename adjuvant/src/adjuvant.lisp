@@ -53,6 +53,7 @@
    "GROUP-BY-EQUIVALENCE"
    "INSERT-SUFFIX"
    "LCONC"
+   "LINEAR-REDUCE"
    "LOCATE-SYMBOL"
    "MAKE-TEMP-DIR"
    "MAKE-TEMP-FILE-NAME"
@@ -241,6 +242,14 @@ USE DOLIST-TCONC instead."
     alist))
 
 (define-modify-macro unionf (&rest args) union)
+
+(defun linear-reduce (function sequence &key key from-end (start 0) end initial-value stop-when)
+  "The same as CL:REDUCE, except that LINEAR-REDUCE allows an extra keyword argument, :STOP-WHEN
+ which it ignores.   This is so LINEAR-REDUCE may be used as a drop-in replacement for TREE-REDUCE
+ for the purpose of testing and profiling."
+  (declare (ignore stop-when))
+  ;; remove :stop-when from argument list
+  (reduce function sequence :key key :from-end from-end :start start :end end :initial-value initial-value))
 
 (defvar *stop-when* (list nil))
 (defun tree-reduce (fold-function object-list &key initial-value (key #'identity) (stop-when *stop-when*))

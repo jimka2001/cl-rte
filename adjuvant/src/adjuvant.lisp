@@ -257,7 +257,11 @@ USE DOLIST-TCONC instead."
  INITIAL-VALUE -- the value to return if the OBJECT-LIST is empty, otherwise it is unused,
    this value is returned as-is, and the KEY function is not applied to it.
  KEY -- binary function, applied to each element of the OBJECT-LIST before it is passed
-   to the FOLD-FUNCTION."
+   to the FOLD-FUNCTION.
+ STOP-WHEN -- if this value occurs either in the object-list (after applying the KEY function)
+   or as an accumulated value, it is returned immediately, and the iteration is aborted.  
+   This term is used for example when multiplying numbers, when 0 occurs, it is returned
+   because multiplying the rest of the list would just be wasted time."
   (declare (type (function (t t) t) fold-function)
 	   (type (function (t) t) key)
 	   (type list object-list)

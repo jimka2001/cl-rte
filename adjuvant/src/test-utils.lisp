@@ -480,3 +480,17 @@
 (define-test test/empty-file-p
   (assert-true (empty-file-p "/dev/null"))
   (assert-false (empty-file-p "/etc/hosts")))
+
+(define-test test/count-1-bits
+  (assert-true (eql 0 (count-1-bits 0)))
+  (assert-true (eql 1 (count-1-bits 8)))
+  (assert-true (eql 3 (count-1-bits(+  8 4 2)))))
+
+
+(define-test test/count-bit-diffs
+  (assert-true (eql 1 (count-bit-diffs 0 1)))
+  (assert-true (eql 1 (count-bit-diffs 0 8)))
+  (assert-true (eql 1 (count-bit-diffs 8 0)))
+  (assert-true (eql 4 (count-bit-diffs 8 7)))
+  (assert-true (eql 3 (count-bit-diffs (+    8 4   1)
+                                       (+ 16 8 4 2 )))))

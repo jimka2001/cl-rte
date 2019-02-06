@@ -32,6 +32,8 @@
    "CHOOSE-RANDOMLY"
    "CHOP-PATHNAME"
    "COMPARE-OBJECTS"
+   "COUNT-1-BITS"
+   "COUNT-BIT-DIFFS"
    "DEF-CACHE-FUN"
    "DEMAND-ENV-VAR"
    "DESTRUCTURING-LAMBDA"
@@ -877,3 +879,20 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
           (funcall visitor vertex-to vertex-from)
           (setf (gethash vertex-to done) t)
           (tconc conc-buf vertex-to))))))
+
+(defun count-1-bits (n &aux (bits 0))
+  "Given an non-negative integer, count the number of 1 bits in its binary representation."
+  (declare (optimize (speed 3) (debug 0))
+           (type (and unsigned-byte fixnum) bits)
+           (type unsigned-byte n))
+  (while (not (eql 0 n))
+    (when (oddp n)
+      (incf bits))
+    (setf n (ash n -1)))
+  bits)
+
+(defun count-bit-diffs (a b)
+  "Given two unsigned integers, count the numbers of bits their binary representations differ by."
+  (declare (type unsigned-byte a b) ; warning maybe bignums
+           (optimize (speed 3) (debug 0)))
+  (count-1-bits (boole boole-xor a b)))

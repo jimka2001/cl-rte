@@ -178,6 +178,11 @@ PKG> (type-expand '(and-not integer fixnum))
 
 ### Other
 
+* `count-1-bits` -- given an non-negative integer, count the number of 1 bits in its binary representation
+
+* `count-bit-diffs` -- Given two unsigned integers, count the numbers of bits their binary representations differ by.
+
+
 * `prog1-let` -- This macro declares the given variable, and returns its value after the body has been evaluated. E.g.,
 ```lisp
 (prog1-let (A 100)

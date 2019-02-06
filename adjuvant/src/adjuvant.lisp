@@ -232,6 +232,17 @@ USE DOLIST-TCONC instead."
   #+allegro (excl::deftype-expand type))
 
 (defun group-by (sequence &key (key #'identity) (test #'eql))
+"Create a car/cadr alist by applying a key function to every element of a sequence
+ E.g., to group the lists in an array by length.
+  PKG> (group-by #((1) (1 2) (3) (1 2 3) (3 4)) :key #'length)
+  ==> ((3 ((1 2 3)))
+       (2 ((3 4) (1 2)))
+       (1 ((3) (1))))
+ E.g., to group strings together in `string-equal` case-independent equal lists.
+  PKG> (group-by list-of-strings :key #'identity :test #'string-equal)
+ If there are duplicates in the input list, there will be duplicates in some the output
+ lists. I.e., the alist is formed as if by push, not pushnew, so there is no way
+ to specify an equivalence function for the values."
   (declare (type sequence sequence)
            (type (function (t) t) key)
            (type (function (t t) t) test))

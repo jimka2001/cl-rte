@@ -66,7 +66,6 @@
    "PROCESS-KILL"
    "PROG1-LET"
    "REMFQ"
-   "REMOVEF"
    "REPLACE-ALL"
    "RND-ELEMENT"
    "RUN-PROGRAM"
@@ -256,7 +255,6 @@ USE DOLIST-TCONC instead."
 	 sequence)
     alist))
 
-(define-modify-macro removef (&rest args) remove)
 (define-modify-macro unionf (&rest args) union)
 
 (defun linear-reduce (function sequence &key key from-end (start 0) end initial-value stop-when)

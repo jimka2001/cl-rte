@@ -111,12 +111,6 @@ I.e., it attempts to evaluate as `(+ (+ (+ x0 x1) (+ x2 x3)) (+ (+ x4 x5) (+ x6 
 Of course this is only possible if the number of objects given is a power of 2.
 Otherwise, it will tree-fold what it can, and use a simple `cl:reduce` with the remaining elements.
 
-
-* `removef` -- destructively version of `CL:REMOVE`
-```lisp
-(removef '(1 2 3) (gethash key (aref vec i)) :test #'equal)
-```
-
 * `unionf` -- destructive union operator.
 ```lisp
 PKG> (setf *x* '(1 2 3 4))

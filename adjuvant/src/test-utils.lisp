@@ -503,3 +503,26 @@
                       (sort-unique '(1 2 3 3 4 3 5) #'< #'=)))
   (assert-true (equal '(1 2 3 4 5)
                       (sort-unique '(1 2 1 3 1 4 1 2 3 3 4 3 5) #'< #'=))))
+
+(define-test test/gnu-plot
+  (let ((name (make-temp-file-name "plot" :extension "gnu")))
+    (adjuvant:gnu-plot name :data '((:title "first"
+                            :xys ((1 1.1)
+                                  (2 2.11)
+                                  (3 3.111)
+                                  (4 4.1111)))
+                           (:title "second"
+
+                            :xys ((1.1 1.1)
+                                  (2.2 2.11)
+                                  (3.3 3.111)
+                                  (4.4 4.1111)))
+                           (:title "second"
+                            :xys ((1.11 1.1)
+                                  (2.21 2.11)
+                                  (2.7  2.88)
+                                  (3.31 3.111)
+                                  (3.8  3.76
+                                  (4.41 4.1111))))))))
+                           
+                           

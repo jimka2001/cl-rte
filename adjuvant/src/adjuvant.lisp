@@ -25,6 +25,7 @@
   (:use :cl)
   (:export
    "*DOT-PATH*"
+   "*GNUPLOT-PATH*"
    "*TMP-DIR-ROOT*"
    "BFS-GRAPH"
    "BOOLEAN-EXPR-TO-LATEX"
@@ -52,6 +53,7 @@
    "GARBAGE-COLLECT"
    "GETENV"
    "GETTER"
+   "GNU-PLOT"
    "GROUP-BY"
    "GROUP-BY-EQUIVALENCE"
    "INSERT-SUFFIX"
@@ -84,9 +86,9 @@
 
 (in-package :adjuvant)
 
-(defvar *dot-path* (if (probe-file "/opt/local/bin/dot")
-		  "/opt/local/bin/dot"
-		  "dot")
+(defvar *dot-path* (or (find-if #'probe-file '("/opt/local/bin/dot"
+                                               "/usr/local/bin/dot"))
+		       "dot")
   "Full path to the graphviz dot program")
 
 
@@ -931,3 +933,75 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
                   (unique-sorted (cdr data) (cons (car data) acc))))))
       (unique-sorted sorted nil))))
          
+
+
+(defvar *gnuplot-path* (or (find-if #'probe-file '("/opt/local/bin/gnuplot"
+                                                   "/usr/local/bin/gnuplot"
+                             ))
+		           "gnuplot"))
+
+(defun gnu-plot (gnu-name &key
+                            (comment "default comment")
+                            (title "default title")
+                            (x-log nil)
+                            (y-log nil)
+                            (x-label nil)
+                            (y-label nil)
+                            (create-png-p t)
+                            (with "linespoints") ;; or "points"
+                            data)
+  (with-open-file (gnu gnu-name
+                       :direction :output
+                       :if-exists :supersede
+                       :if-does-not-exist :create)
+    (format t "[writing to ~A~%" gnu-name)
+    (format gnu "# ~A~%" comment)
+    (format gnu "set term png~%")
+    (when x-log
+      (format gnu "set logscale x~%"))
+    (when y-log
+      (format gnu "set logscale y~%"))
+    (when x-label
+      (format gnu "set xlabel ~S~%" x-label))
+    (when y-label
+      (format gnu "set ylabel ~S~%" y-label))
+    (format gnu "set key bmargin~%")
+    (when title
+      (format gnu "set title ~S~%" title))
+
+    (format gnu "plot ")
+    (let ((header (make-string-output-stream))
+          (footer (make-string-output-stream)))
+      (flet ((plot (&key title xys)
+               (format header "~S using 1:2" "-")
+               (when with
+                 (format header " with ~A" with))
+               (when title
+                 (format header " title ~S" title)
+                 (format footer "# ~S~%" title))
+               (dolist (xy xys)
+                 (format footer "~A ~A~%" (car xy) (cadr xy)))
+               (format footer "end~%")))
+        (when data
+          (apply #'plot (car data))
+          (format header ",\\~%    ")
+          (dolist (d (cdr data))
+            (apply #'plot d))))
+      (format gnu "~A~%" (get-output-stream-string header))
+      (format gnu "~A" (get-output-stream-string footer))))
+    (format t "   ~A]~%" gnu-name)
+  (when create-png-p
+    (let* ((gnu-file (change-extension gnu-name "png"))
+           (#+sbcl process
+	    #+allegro exit-status
+	    (run-program *gnuplot-path* (list gnu-name)
+			 :wait t
+			 ;; TODO not sure whether allegro understands these options
+                         :output gnu-file
+                         :error *error-output*
+                         :if-output-exists :supersede)))
+      (when (empty-file-p gnu-file)
+        (warn "gnuplot exited with code=~A produced empty output file ~A from input ~A"
+              #+sbcl (sb-ext:process-exit-code process)
+	      #+allegro exit-status
+	      gnu-file gnu-name)))))

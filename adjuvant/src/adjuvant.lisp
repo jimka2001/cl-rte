@@ -950,6 +950,18 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
                             (create-png-p t)
                             (with "linespoints") ;; or "points"
                             data)
+  "Plot curves using the gnuplot UNIX program.
+ :DATA specifies a list of curve-specifiers, each curve-specifier is a plist
+    with fields :title and :xys.  :title specifies a string and :xys specifies
+    a list of xy points.  E.g.,
+    (gnu-plot \"/tmp/plot.gnu\" 
+              :title \"my plot\"
+              :data '((:title \"first\" :xys ((1 10) (2 20) (3 30)))
+                      (:title \"second\" :xys ((1.5 15.6) (2.1 20.8) (3.5 34.3) (3.7 37.96)))))
+   ==> \"/tmp/plot.png\"
+
+ If :CREATE-PNG-P nil is specified, then just the .gnu file is created, and nil
+ is returned."
   (with-open-file (gnu gnu-name
                        :direction :output
                        :if-exists :supersede
@@ -991,17 +1003,18 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
       (format gnu "~A" (get-output-stream-string footer))))
     (format t "   ~A]~%" gnu-name)
   (when create-png-p
-    (let* ((gnu-file (change-extension gnu-name "png"))
+    (let* ((png-file (change-extension gnu-name "png"))
            (#+sbcl process
 	    #+allegro exit-status
 	    (run-program *gnuplot-path* (list gnu-name)
 			 :wait t
 			 ;; TODO not sure whether allegro understands these options
-                         :output gnu-file
+                         :output png-file
                          :error *error-output*
                          :if-output-exists :supersede)))
-      (when (empty-file-p gnu-file)
+      (when (empty-file-p png-file)
         (warn "gnuplot exited with code=~A produced empty output file ~A from input ~A"
               #+sbcl (sb-ext:process-exit-code process)
 	      #+allegro exit-status
-	      gnu-file gnu-name)))))
+	      png-file gnu-name))
+      png-file)))

@@ -289,6 +289,19 @@ as it is not a UNIX limitation.
  ...)
 ```
 
+* `gnu-plot` -- Plot curves using the gnuplot UNIX program.
+`:DATA` specifies a list of curve-specifiers, each curve-specifier is a plist
+with fields `:title` and `:xys`.  `:title` specifies a string and `:xys` specifies
+a list of xy points.  E.g.,
+```lisp
+    (gnu-plot \"/tmp/plot.gnu\" 
+              :title \"my plot\"
+              :data '((:title \"first\" :xys ((1 10) (2 20) (3 30)))
+                      (:title \"second\" :xys ((1.5 15.6) (2.1 20.8) (3.5 34.3) (3.7 37.96)))))
+   ==> \"/tmp/plot.png\"
+```
+If `:create-png-p nil` is specified, then just the .gnu file is created, and `nil`
+is returned.
 
 ## License
 

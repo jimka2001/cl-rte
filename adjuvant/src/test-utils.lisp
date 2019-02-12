@@ -506,23 +506,23 @@
 
 (define-test test/gnu-plot
   (let ((name (make-temp-file-name "plot" :extension "gnu")))
-    (adjuvant:gnu-plot name :data '((:title "first"
-                            :xys ((1 1.1)
-                                  (2 2.11)
-                                  (3 3.111)
-                                  (4 4.1111)))
-                           (:title "second"
-
-                            :xys ((1.1 1.1)
-                                  (2.2 2.11)
-                                  (3.3 3.111)
-                                  (4.4 4.1111)))
-                           (:title "second"
-                            :xys ((1.11 1.1)
-                                  (2.21 2.11)
-                                  (2.7  2.88)
-                                  (3.31 3.111)
-                                  (3.8  3.76
-                                  (4.41 4.1111))))))))
+    (adjuvant:gnu-plot name :create-png-p nil
+                            :data '((:title "first"
+                                     :xys ((1 1.1)
+                                           (2 2.11)
+                                           (3 3.111)
+                                           (4 4.1111)))
+                                    (:title "second"
+                                     :xys ((1.1 1.1)
+                                           (2.2 2.11)
+                                           (3.3 3.111)
+                                           (4.4 4.1111)))
+                                    (:title "third"
+                                     :xys ((1.11 1.1)
+                                           (2.21 2.11)
+                                           (2.7  2.88)
+                                           (3.31 3.111)
+                                           (3.8  3.76
+                                            (4.41 4.1111))))))))
                            
                            

@@ -984,8 +984,8 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
                (format footer "end~%")))
         (when data
           (apply #'plot (car data))
-          (format header ",\\~%    ")
           (dolist (d (cdr data))
+            (format header ",\\~%    ")
             (apply #'plot d))))
       (format gnu "~A~%" (get-output-stream-string header))
       (format gnu "~A" (get-output-stream-string footer))))

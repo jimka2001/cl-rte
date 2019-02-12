@@ -71,6 +71,7 @@
    "RUN-PROGRAM"
    "SETOF"
    "SHUFFLE-LIST"
+   "SORT-UNIQUE"
    "TCONC"
    "TOPOLOGICAL-SORT"
    "TREE-REDUCE"
@@ -186,7 +187,7 @@ is bound in turn to each cons cell list, as if by CL:MAPL, until one is found wh
   (lambda (obj) (getf obj field)))
 
 (defmacro remfq (obj place)
-  "remove (with CL:REMOVe) element from place destructivly using EQ for equivalence."
+  "remove (with CL:REMOVE) element from place destructivly using EQ for equivalence."
   `(setf ,place (remove ,obj ,place :test #'eq)))
 
 (defun user-read (&rest args)
@@ -908,3 +909,25 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
   (declare (type unsigned-byte a b) ; warning maybe bignums
            (optimize (speed 3) (debug 0)))
   (count-1-bits (boole boole-xor a b)))
+
+(defun sort-unique (data predicate-< predicate-=)
+  "Sort a list and remove duplicate elements.  This is
+ more efficient than sorting and calling CL:REMOVE-DUPLICATES,
+ because duplicates can be removed in linear time when it is known
+ that the list is already sorted. E.g.,
+
+ (sort-unique '(1 4 3 5 3 4 1) #'< #'=)
+ ==> '(1 3 4 5)"
+  (let ((sorted (sort data predicate-<)))
+    (labels ((unique-sorted (data acc)
+               (cond
+                 ((null data)
+                  (nreverse acc))
+                 ((null (cdr data))
+                  (unique-sorted nil (cons (car data) acc)))
+                 ((funcall predicate-= (car data) (cadr data))
+                  (unique-sorted (cdr data) acc))
+                 (t
+                  (unique-sorted (cdr data) (cons (car data) acc))))))
+      (unique-sorted sorted nil))))
+         

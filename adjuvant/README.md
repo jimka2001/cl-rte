@@ -17,7 +17,14 @@ Otherwise, `NIL` is returned.
 ==> (2 x x x)
 ```
 
-
+* `sort-unique` -- sort a list and remove duplicate elements.  This is
+more efficient than sorting and calling `CL:REMOVE-DUPLICATES`,
+because duplicates can be removed in linear time when it is known
+that the list is already sorted. E.g.,
+```lisp
+(sort-unique '(1 4 3 5 3 4 1) #'< #'=)
+==> '(1 3 4 5)
+```
 
 * `remfq` -- remove (with `CL:REMOVE`) element from place destructivly using `EQ` for equivalence.
 

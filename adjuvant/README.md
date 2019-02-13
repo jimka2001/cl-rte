@@ -211,6 +211,8 @@ EQL, then the files are judged to be the same.
 ```lisp
 (replace-all "abc++def++ghi++" "++" "---")
 ==> "abc---def---ghi---"
+  (replace-all (format nil "~A/~A.~A" dir-name base extension)
+                                "//" "/")
 ```
 
 * `fixed-point` -- find the fixed point of a function.  I.e. call the given function

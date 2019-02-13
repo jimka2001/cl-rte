@@ -346,7 +346,9 @@ USE DOLIST-TCONC instead."
 
 (defun replace-all (string part replacement &key (test #'char=))
   "Returns a new string in which all the occurences of the part 
-is replaced with replacement."
+is replaced with replacement. E.g.,
+  (replace-all (format nil \"~A/~A.~A\" dir-name base extension)
+                                \"//\" \"/\")"
   (with-output-to-string (out)
     (loop with part-length = (length part)
           for old-pos = 0 then (+ pos part-length)

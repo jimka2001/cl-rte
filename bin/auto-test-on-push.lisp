@@ -12,9 +12,7 @@
 
 
 (let ((quicklisp-init
-	"ql/setup.lisp")
-      (ql-dir (merge-pathnames "quicklisp/." (user-homedir-pathname))))
-  (ensure-directories-exist ql-dir)
+	"quicklisp/setup.lisp"))
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))

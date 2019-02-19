@@ -10,8 +10,11 @@
 ;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
 (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
+
 (let ((quicklisp-init
-	"ql/setup.lisp"))
+	"ql/setup.lisp")
+      (ql-dir (merge-pathnames "quicklisp/." (user-homedir-pathname))))
+  (ensure-directories-exist ql-dir)
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))

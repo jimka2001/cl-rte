@@ -10,7 +10,7 @@
 ;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
 (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
-
+(format t "~A~%" (sb-posix:getcwd))
 (let ((quicklisp-init
 	"quicklisp/setup.lisp"))
   (if (probe-file quicklisp-init)

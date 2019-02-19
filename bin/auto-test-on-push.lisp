@@ -12,7 +12,7 @@
 
 (format t "~A~%" (sb-posix:getcwd))
 (let ((quicklisp-init
-	"quicklisp/quicklisp.lisp"))
+	"quicklisp.lisp"))
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))

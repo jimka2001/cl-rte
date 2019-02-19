@@ -12,11 +12,11 @@
 
 (format t "~A~%" (sb-posix:getcwd))
 (let ((quicklisp-init
-	"quicklisp.lisp"))
+	"/root/quicklisp/setup.lisp"))
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
-(quicklisp-quickstart:install)
+
 
 (setf sb-impl::*default-external-format* :utf-8)
 (setf sb-alien::*default-c-string-external-format* :utf-8)

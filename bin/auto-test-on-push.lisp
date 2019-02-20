@@ -10,6 +10,10 @@
 ;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
 (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
+(format t "installing git~%")
+(sb-ext:run-program "apt-get" (list "install" "-y" "git") :search t)
+(format t "cloning subtypep~%")
+(sb-ext:run-program "git" (list "clone" "git@gitlab.lrde.epita.fr:climb/subtypep.git") :search t)
 (format t "cwd=~A~%" (sb-posix:getcwd))
 (format t "user-homedir=~A~%" (user-homedir-pathname))
 (format t "PATH=~A~%" (sb-posix:getenv "PATH"))
@@ -22,9 +26,7 @@
 (ql:quickload :closer-mop)
 (ql:quickload :cl-ppcre)
 (ql:quickload :cl-fad)
-(sb-ext:run-program "apt-get" (list "update") :search t)
-(sb-ext:run-program "apt-get" (list "install" "-y" "git") :search t)
-(sb-ext:run-program "git" (list "clone" "git@gitlab.lrde.epita.fr:climb/subtypep.git") :search t)
+
 
 (asdf:initialize-source-registry `(:source-registry
                                    (:tree (,(sb-posix:getcwd)))

@@ -18,10 +18,8 @@
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
 
-(asdf:initialize-source-registry '(:source-registry
-                                   (:tree ("/Users/jnewton/common-lisp/"))
-                                   (:tree (:home "src/common-lisp/"))
-                                   (:tree (:home "share/common-lisp/source/"))
+(asdf:initialize-source-registry `(:source-registry
+                                   (:tree (,(user-homedir-pathname)))
                                    :inherit-configuration
                                    ))
 (setf sb-impl::*default-external-format* :utf-8)

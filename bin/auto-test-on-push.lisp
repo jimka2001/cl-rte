@@ -20,6 +20,7 @@
 (ql:quickload :closer-mop)
 (ql:quickload :cl-ppcre)
 (ql:quickload :cl-fad)
+(sb-ext:run-program "git" (list "clone" "git@gitlab.lrde.epita.fr:climb/subtypep.git"))
 
 (asdf:initialize-source-registry `(:source-registry
                                    (:tree (,(sb-posix:getcwd)))

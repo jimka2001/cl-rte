@@ -19,7 +19,7 @@
       (error "file not found ~S" quicklisp-init)))
 
 (asdf:initialize-source-registry `(:source-registry
-                                   (:tree (,(user-homedir-pathname)))
+                                   (:tree (,(sb-posix:getcwd)))
                                    :inherit-configuration
                                    ))
 (setf sb-impl::*default-external-format* :utf-8)

@@ -17,6 +17,9 @@
   (if (probe-file quicklisp-init)
       (load quicklisp-init)
       (error "file not found ~S" quicklisp-init)))
+(ql:quickload :closer-mop)
+(ql:quickload :cl-ppcre)
+(ql:quickload :cl-fad)
 
 (asdf:initialize-source-registry `(:source-registry
                                    (:tree (,(sb-posix:getcwd)))

@@ -10,6 +10,8 @@
 ;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
 (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
+(format t "apt-get update~%")
+(sb-ext:run-program "apt-get" (list "update") :search t)
 (format t "installing git~%")
 (sb-ext:run-program "apt-get" (list "install" "-y" "git") :search t)
 (format t "cloning subtypep~%")

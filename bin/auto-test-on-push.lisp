@@ -12,6 +12,7 @@
 
 (format t "cwd=~A~%" (sb-posix:getcwd))
 (format t "user-homedir=~A~%" (user-homedir-pathname))
+(format t "PATH=~A~%" (sb-posix:getenv "PATH"))
 (let ((quicklisp-init
 	"/root/quicklisp/setup.lisp"))
   (if (probe-file quicklisp-init)

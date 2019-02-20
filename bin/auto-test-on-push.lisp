@@ -22,6 +22,8 @@
 (ql:quickload :closer-mop)
 (ql:quickload :cl-ppcre)
 (ql:quickload :cl-fad)
+(sb-ext:run-program "apt-get" (list "update") :search t)
+(sb-ext:run-program "apt-get" (list "install" "-y" "git") :search t)
 (sb-ext:run-program "git" (list "clone" "git@gitlab.lrde.epita.fr:climb/subtypep.git") :search t)
 
 (asdf:initialize-source-registry `(:source-registry

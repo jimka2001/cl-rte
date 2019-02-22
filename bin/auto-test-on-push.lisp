@@ -11,11 +11,19 @@
 (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
 (format t "============= apt-get update~%")
-(sb-ext:run-program "apt-get" (list "update") :search t :output t)
+(sb-ext:run-program "apt-get" (list "update")
+                    :search t :output t)
 (format t "============= installing git~%")
-(sb-ext:run-program "apt-get" (list "install" "-y" "git") :search t  :output t)
+(sb-ext:run-program "apt-get" (list "install" "-y" "git")
+                    :search t  :output t)
 (format t "============= cloning subtypep~%")
-(sb-ext:run-program "git" (list "clone" "https://gitlab.lrde.epita.fr/climb/subtypep.git") :search t  :output t)
+;;y(sb-ext:run-program "git" (list "clone" "https://gitlab.lrde.epita.fr/climb/subtypep.git") :search t  :output t)
+;;  git clone http://<username>:<deploy_token>@gitlab.example.com/tanuki/awesome_project.git
+;; name gitlab+deploy-token-2
+;; password gLsySaNTMHGmqZS6xtVe
+;;  http://<username>:<deploy_token>@gitlab.example.com/tanuki/awesome_project.git
+(sb-ext:run-program "git" (list "clone" "http://gitlab+deploy-token-2:gLsySaNTMHGmqZS6xtVe>@gitlab.lrde.epita.fr/climb/subtypep.git")
+                    :search t :output t)
 (format t "cwd=~A~%" (sb-posix:getcwd))
 (format t "user-homedir=~A~%" (user-homedir-pathname))
 (format t "PATH=~A~%" (sb-posix:getenv "PATH"))

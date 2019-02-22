@@ -65,6 +65,7 @@
    "MAP-PAIRS"
    "MAP-PERMUTATIONS"
    "MAP-SUBSETS"
+   "MATRIX-MULTIPLY"
    "PROCESS-KILL"
    "PROG1-LET"
    "REMFQ"
@@ -1020,3 +1021,26 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
 	      #+allegro exit-status
 	      png-file gnu-name))
       png-file)))
+
+(defun matrix-multiply (mat-a mat-b)
+  "Given two matrices either as two 2-d arrays, or each as lists of list, (lists of rows)
+ calculate and return the product matrix."
+  (typecase (cons mat-a mat-b)
+    ((cons array array)
+     (destructuring-let (((q r) (array-dimensions mat-a))
+                         ((r2 s) (array-dimensions mat-b)))
+       (assert (eql r r2) () "cannot only multiple arrays with compatible dimensions")
+       (let ((prod (make-array (list q s))))
+         (loop :for i :from 0 :below q
+               :do (loop :for j :from 0 :below s
+                         :do (setf (aref prod i j)
+                                   (loop :for k :from 0 :below r
+                                         :summing (* (aref mat-a i k)
+                                                     (aref mat-b k j))))))
+         prod)))
+    ((cons list)
+     (matrix-multiply (make-array (list (length mat-a) (length (car mat-a))) :initial-contents mat-a)
+                      mat-b))
+    ((cons t (cons list))
+     (matrix-multiply mat-a
+                      (make-array (list (length mat-b) (length (car mat-b))) :initial-contents mat-b)))))

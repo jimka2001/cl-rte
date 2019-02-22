@@ -38,6 +38,7 @@
 (ql:quickload :closer-mop)
 (ql:quickload :cl-ppcre)
 (ql:quickload :cl-fad)
+(ql:quickload :iterate)
 
 
 (asdf:initialize-source-registry `(:source-registry

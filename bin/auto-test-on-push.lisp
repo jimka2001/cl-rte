@@ -22,7 +22,9 @@
 ;; name gitlab+deploy-token-2
 ;; password gLsySaNTMHGmqZS6xtVe
 ;;  http://<username>:<deploy_token>@gitlab.example.com/tanuki/awesome_project.git
-(sb-ext:run-program "git" (list "clone" "http://gitlab+deploy-token-2:gLsySaNTMHGmqZS6xtVe>@gitlab.lrde.epita.fr/climb/subtypep.git")
+;; user name gitlab+deploy-token-2
+;; token = gLsySaNTMHGmqZS6xtVe
+(sb-ext:run-program "git" (list "clone" "http://gitlab+deploy-token-2:gLsySaNTMHGmqZS6xtVe@gitlab.lrde.epita.fr/climb/subtypep.git")
                     :search t :output t)
 (format t "cwd=~A~%" (sb-posix:getcwd))
 (format t "user-homedir=~A~%" (user-homedir-pathname))

@@ -17,14 +17,13 @@
 (sb-ext:run-program "apt-get" (list "install" "-y" "git")
                     :search t  :output t)
 (format t "============= cloning subtypep~%")
-;;y(sb-ext:run-program "git" (list "clone" "https://gitlab.lrde.epita.fr/climb/subtypep.git") :search t  :output t)
+
 ;;  git clone http://<username>:<deploy_token>@gitlab.example.com/tanuki/awesome_project.git
-;; name gitlab+deploy-token-2
-;; password gLsySaNTMHGmqZS6xtVe
 ;;  http://<username>:<deploy_token>@gitlab.example.com/tanuki/awesome_project.git
 ;; user name gitlab+deploy-token-2
 ;; token = gLsySaNTMHGmqZS6xtVe
 (sb-ext:run-program "git" (list "clone" "http://gitlab+deploy-token-2:gLsySaNTMHGmqZS6xtVe@gitlab.lrde.epita.fr/climb/subtypep.git")
+                    ;; clone subtypep repo
                     :search t :output t)
 (format t "cwd=~A~%" (sb-posix:getcwd))
 (format t "user-homedir=~A~%" (user-homedir-pathname))
@@ -39,7 +38,7 @@
 (ql:quickload :cl-ppcre)
 (ql:quickload :cl-fad)
 (ql:quickload :iterate)
-
+(ql:quickload :yacc)
 
 (asdf:initialize-source-registry `(:source-registry
                                    (:tree (,(sb-posix:getcwd)))

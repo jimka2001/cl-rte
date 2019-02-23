@@ -50,10 +50,11 @@
 (setf sb-alien::*default-c-string-external-format* :utf-8)
 (asdf:load-system :research)
 (in-package :scrutiny)
-(run-tests)
-
-(if *failed-tests*
-    (sb-ext:exit :code 1)
-    (sb-ext:exit :code 0))
+(case (run-tests)
+  ((0)
+   (sb-ext:exit :code 0))
+  (t
+   (format *error-output* "exiting non-zero because of failing tests")
+   (sb-ext:exit :code 1)))
 
 

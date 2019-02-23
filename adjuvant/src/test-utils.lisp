@@ -83,7 +83,7 @@
           :do (setf env-var (format nil "var~D" (incf index))))
     (assert-false (getenv env-var))
     (assert-error error (demand-env-var env-var))
-    (assert-true (demand-env-var "USER"))))
+    (assert-true (demand-env-var "HOME"))))
           
 
 

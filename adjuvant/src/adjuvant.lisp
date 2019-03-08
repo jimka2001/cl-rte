@@ -1,4 +1,4 @@
-;; Copyright (c) 2018 EPITA Research and Development Laboratory
+;; Copyright (c) 2018,19 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -18,72 +18,6 @@
 ;; LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-
-(defpackage :adjuvant
-  (:use :cl)
-  (:export
-   "*DOT-PATH*"
-   "*GNUPLOT-PATH*"
-   "*TMP-DIR-ROOT*"
-   "BFS-GRAPH"
-   "BOOLEAN-EXPR-TO-LATEX"
-   "CHANGE-EXTENSION"
-   "CHOOSE-RANDOMLY"
-   "CHOP-PATHNAME"
-   "COMPARE-OBJECTS"
-   "COUNT-1-BITS"
-   "COUNT-BIT-DIFFS"
-   "DEF-CACHE-FUN"
-   "DEMAND-ENV-VAR"
-   "DESTRUCTURING-DOLIST"
-   "DESTRUCTURING-LAMBDA"
-   "DESTRUCTURING-LET"
-   "DIFF-FILES"
-   "DOLIST-TCONC"
-   "EDGES-TO-ADJACENCY-HASH"
-   "EMPTY-FILE-P"
-   "ENCODE-TIME"
-   "EXISTS"
-   "EXISTS-TAIL"
-   "FIND-DUPLICATES"
-   "FIXED-POINT"
-   "FORALL"
-   "GARBAGE-COLLECT"
-   "GETENV"
-   "GETTER"
-   "GNU-PLOT"
-   "GROUP-BY"
-   "GROUP-BY-EQUIVALENCE"
-   "INSERT-SUFFIX"
-   "LCONC"
-   "LINEAR-REDUCE"
-   "LOCATE-SYMBOL"
-   "MAKE-TEMP-DIR"
-   "MAKE-TEMP-FILE-NAME"
-   "MAP-PAIRS"
-   "MAP-PERMUTATIONS"
-   "MAP-SUBSETS"
-   "MATRIX-MULTIPLY"
-   "PROCESS-KILL"
-   "PROG1-LET"
-   "REMFQ"
-   "REPLACE-ALL"
-   "RND-ELEMENT"
-   "RUN-PROGRAM"
-   "SETOF"
-   "SHUFFLE-LIST"
-   "SORT-UNIQUE"
-   "TCONC"
-   "TOPOLOGICAL-SORT"
-   "TREE-REDUCE"
-   "TYPE-EXPAND"
-   "UNIONF"
-   "USER-READ"
-   "VALID-TYPE-P"
-   "WHILE"
-))
 
 (in-package :adjuvant)
 
@@ -807,38 +741,6 @@ as it is not a UNIX limitation."
   #+(or clisp  allegro) (ignore-errors (subtypep type-designator t))
   #-(or sbcl clisp allegro) (error "VALID-TYEP-P not implemented for ~A" (lisp-implementation-type))
 )
-
-
-(defmacro destructuring-lambda (destructuring-lambda-list &body body)
-  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
- (mapcar (destructuring-lambda (a (b) (&key c d &allow-other-keys))
-          ...) '((1 (2) (:d 1 :a 2 :b 3 :c 4))
-                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
-                 (1 (2) (:d 1 :a 2 :b 3 :c 4))
-                 ...)
- ...)"
-  (let ((arg (gensym)))
-    `(lambda (&rest ,arg)
-       (destructuring-bind ,destructuring-lambda-list ,arg
-         ,@body))))
-
-(defmacro destructuring-let (bindings &body body)
-  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
- (destructuring-let ((a 1)
-                    ((b) '(2))
-                    ((&key c d &allow-other-keys) '(:d 1 :a 2 :b 3 :c 4)))
- ...)"
-  (let ((vars (mapcar #'car bindings))
-        (values (mapcar #'cadr bindings)))
-    `(funcall (destructuring-lambda ,vars
-        ,@body)
-      ,@values)))
-
-(defmacro destructuring-dolist ((lambda-list list &optional result) &body body)
-  (let ((var (gensym)))
-    `(dolist (,var ,list ,result)
-       (destructuring-bind ,lambda-list ,var
-         ,@body))))
 
 (defun change-extension (filename new-extension)
   "change file name extension:

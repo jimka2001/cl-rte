@@ -29,5 +29,7 @@
   :components
   ((:module "src"
     :components
-    ((:file "adjuvant")
+    ((:file "adjuvant-package")
+     (:file "destructuring")
+     (:file "adjuvant")
      ))))

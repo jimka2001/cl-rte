@@ -458,9 +458,16 @@ a fixed point is found."
    (deterministicp :initform t)
    (transition-label-combine :initform (lambda (a b)
                                          (bdd-reduce-lisp-type  `(or ,a ,b))))
-   (transition-label-equal :initform (lambda (a b)
-                                       (and (subtypep a b)
-                                            (subtypep b a))))))
+   (transition-label-omit :initform (lambda (label)
+                                      ;; we omit creating nil  transitions
+                                      ;;    (ie. transitions whose label is nil)
+                                      ;;    on these state machines.
+                                      (eq nil (lisp-types:type-to-dnf-bottom-up label))))
+   (transition-label-equal :initform (lambda (a b &aux
+                                                    (a-reduc (lisp-types:type-to-dnf-bottom-up a))
+                                                    (b-reduc (lisp-types:type-to-dnf-bottom-up b)))
+                                       (and (subtypep a-reduc b-reduc)
+                                            (subtypep b-reduc a-reduc))))))
 
 (defmethod print-object ((rte rte-state-machine) stream)
   (print-unreadable-object (rte stream :type t :identity nil)

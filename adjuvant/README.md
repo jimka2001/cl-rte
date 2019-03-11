@@ -146,10 +146,25 @@ in the topological ordering (i.e., the first value).
 
 * `take-while` -- Returns a copy of the head of the given list of `ITEMS` containing all the element of `ITEMS`
  for which the given `PREDICATE` returns true.  The list returns terminates (and does not include
- the first item which satisfies the given `PREDICATE`."
+ the first item which satisfies the given `PREDICATE`.
+ This function returns two values, first is the head of the list as described above,
+ second is the rest of the list from that point.
+"
 ```lisp
 PKG> (take-while #evenp '(2 4 6 8 9 10 11 12))
-(2 4 6 8)
+(2 4 6 8), (9 10 11 12)
+```
+
+* `delimit-on` -- Nondestructively chop a given list of `ITEMS` into consecutive sublists such that if you append them back together
+ you get the original list.  The chopping occurs on each element for which the given `PREDICATE`
+ returns `true`.  A list is returned whose first element is a possibly `NIL` list of the leading
+ elements for which the `PREDICATE` is false, thereafter the elements are lists whose first element
+ satisfies the `PREDICATE`, and whose trailing elements do not satisfy the `PREDICATE`. e.g.,
+```lisp
+ (delimit-on #'evenp '(1 3 5 2 5 7 10 12 3 5 7)
+ =>   ((1 3 5) (2 5 7) (10) (12 3 5 7))
+ (delimit-on #'evenp '(2 5 7 10 12 3 5 7)
+ =>   (nil (2 5 7) (10) (12 3 5 7))"
 ```
 
 ### Iterators

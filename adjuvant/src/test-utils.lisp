@@ -545,17 +545,36 @@
                            
                            
 (define-test test/take-while
-  (assert-true (equal '(1 2 3)
-                      (take-while (lambda (x)
-                                    (< x 4))
-                                  '(1 2 3 4 5 6 7))))
-  (assert-true (equal nil 
-                      (take-while #'evenp
-                                  '(1 2 3 4 5 6 7))))
+  (assert-true (equal '((1 2 3) (4 5 6 7))
+                      (multiple-value-list (take-while (lambda (x)
+                                                         (< x 4))
+                                                       '(1 2 3 4 5 6 7)))))
+  (assert-true (equal '(nil (1 2 3 4 5 6 7))
+                      (multiple-value-list (take-while #'evenp
+                                                       '(1 2 3 4 5 6 7)))))
 
-  (assert-true (equal nil
-                      (take-while #'symbolp
-                                  '(1 2 3 4 5 6 7))))
-  (assert-true (equal '(1 2 3 4 5 6 7)
-                      (take-while #'numberp
-                                  '(1 2 3 4 5 6 7)))))
+  (assert-true (equal '(nil (1 2 3 4 5 6 7))
+                      (multiple-value-list (take-while #'symbolp
+                                                       '(1 2 3 4 5 6 7)))))
+  (assert-true (equal '((1 2 3 4 5 6 7) nil)
+                      (multiple-value-list (take-while #'numberp
+                                                       '(1 2 3 4 5 6 7))))))
+
+(define-test test/delimit-on
+  (assert-true (equal '((1 2 3) (a 10 20 30) (b 100 200 300))
+                      (delimit-on #'symbolp
+                                '(1 2 3 a 10 20 30 b 100 200 300))))
+  (assert-true (equal '(nil (a 10 20 30) (b 100 200 300))
+                      (delimit-on #'symbolp
+                                '(a 10 20 30 b 100 200 300))))
+  (assert-true (equal '(nil (a 10 20 30))
+                      (delimit-on #'symbolp
+                                '(a 10 20 30))))
+  (assert-true (equal '(nil (a 10 20 30) (b))
+                      (delimit-on #'symbolp
+                                '(a 10 20 30 b))))
+  (assert-true (equal 'nil
+                      (delimit-on #'symbolp
+                                nil))))
+  
+               

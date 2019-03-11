@@ -950,13 +950,36 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
 (defun take-while (predicate items)
   "Return a copy of the head of the given list of ITEMS containing all the element of ITEMS
  for which the given PREDICATE returns true.  The list returns terminates (and does not include
- the first item which satisfies the given PREDICATE."
+ the first item which satisfies the given PREDICATE.
+ This function returns two values, first is the head of the list as described above,
+ second is the rest of the list from that point."
   (labels ((recur (items acc)
              (cond
                ((null items)
-                (nreverse acc))
+                (values (nreverse acc) items))
                ((funcall predicate (car items))
                 (recur (cdr items) (cons (car items) acc)))
                (t
-                (nreverse acc)))))
+                (values (nreverse acc) items)))))
     (recur items nil)))
+
+(defun delimit-on (predicate items &aux (not-predicate (lambda (item) (not (funcall predicate item)))))
+  "Chop a given list of ITEMS into consecutive sublists such that if you append them back together
+ you get the original list.  The chopping occurs on each element for which the given PREDICATE
+ returns true.  A list is returned whose first element is a possibly NIL list of the leading
+ elements for which the PREDICATE is false, thereafter the elements are lists whose first element
+ satisfies the PREDICATE, and whose trailing elements do not satisfy the PREDICATE. e.g.,
+ (delimit-on #'evenp '(1 3 5 2 5 7 10 12 3 5 7)
+ =>   ((1 3 5) (2 5 7) (10) (12 3 5 7))
+ (delimit-on #'evenp '(2 5 7 10 12 3 5 7)
+ =>   (nil (2 5 7) (10) (12 3 5 7))"
+  (labels ((recur (items groups)
+             (cond
+               ((null items)
+                (nreverse groups))
+               (t
+                (multiple-value-bind (leading trailing) (take-while not-predicate (cdr items))
+                  (recur trailing (cons (cons (car items) leading) groups)))))))
+    (when items
+      (multiple-value-bind (leading trailing) (take-while not-predicate items)
+        (cons leading (recur trailing nil))))))

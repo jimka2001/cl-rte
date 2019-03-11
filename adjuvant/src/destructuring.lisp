@@ -35,7 +35,7 @@
          ,@body))))
 
 (defmacro destructuring-let (bindings &body body)
-  "Similar to let, but the variables also understand destructuring like with destructuring-bind:  E.g.,
+  "Similar to LET, but the variables also understand destructuring like with destructuring-bind:  E.g.,
  (destructuring-let ((a 1)
                     ((b) '(2))
                     ((&key c d &allow-other-keys) '(:d 1 :a 2 :b 3 :c 4)))
@@ -44,7 +44,7 @@
         (values (mapcar #'cadr bindings)))
     `(funcall (destructuring-lambda ,vars
         ,@body)
-      ,@values)))
+              ,@values)))
 
 (labels ((expand-functions (functions)
            (mapcar #'expand-function functions))

@@ -144,6 +144,14 @@ list of objects sorted toplogically.  The second is a boolean
 indicating whether all of the objects in the input graph are present
 in the topological ordering (i.e., the first value).
 
+* `take-while` -- Returns a copy of the head of the given list of `ITEMS` containing all the element of `ITEMS`
+ for which the given `PREDICATE` returns true.  The list returns terminates (and does not include
+ the first item which satisfies the given `PREDICATE`."
+```lisp
+PKG> (take-while #evenp '(2 4 6 8 9 10 11 12))
+(2 4 6 8)
+```
+
 ### Iterators
 
 * `map-subsets` --  call the given VISITOR function once for each subset of the list DATA

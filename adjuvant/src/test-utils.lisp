@@ -544,3 +544,18 @@
                                   (4.41 4.1111))))))))
                            
                            
+(define-test test/take-while
+  (assert-true (equal '(1 2 3)
+                      (take-while (lambda (x)
+                                    (< x 4))
+                                  '(1 2 3 4 5 6 7))))
+  (assert-true (equal nil 
+                      (take-while #'evenp
+                                  '(1 2 3 4 5 6 7))))
+
+  (assert-true (equal nil
+                      (take-while #'symbolp
+                                  '(1 2 3 4 5 6 7))))
+  (assert-true (equal '(1 2 3 4 5 6 7)
+                      (take-while #'numberp
+                                  '(1 2 3 4 5 6 7)))))

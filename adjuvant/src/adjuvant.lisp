@@ -946,3 +946,17 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
     ((cons t (cons list))
      (matrix-multiply mat-a
                       (make-array (list (length mat-b) (length (car mat-b))) :initial-contents mat-b)))))
+
+(defun take-while (predicate items)
+  "Return a copy of the head of the given list of ITEMS containing all the element of ITEMS
+ for which the given PREDICATE returns true.  The list returns terminates (and does not include
+ the first item which satisfies the given PREDICATE."
+  (labels ((recur (items acc)
+             (cond
+               ((null items)
+                (nreverse acc))
+               ((funcall predicate (car items))
+                (recur (cdr items) (cons (car items) acc)))
+               (t
+                (nreverse acc)))))
+    (recur items nil)))

@@ -141,9 +141,9 @@
     ))
 
 
-(defrte (:0-* number number))
-(defrte (:1 (RTE (:0-* NUMBER NUMBER))))
-(defrte (:1-* (rte (:0-* number number))))
+(defrte rte-test-1 (:0-* number number))
+(defrte rte-test-2 (:1 (RTE (:0-* NUMBER NUMBER))))
+(defrte rte-test-3 (:1-* (rte (:0-* number number))))
 
 (defun type/declaration2 ()
   (typep nil '(rte
@@ -168,7 +168,15 @@
 (define-test type/declaration2b
   (assert-true (type/declaration2)))
 
-(defrte (:1-* (RTE (:CAT NUMBER NUMBER))))
+(defrte rte-test-4 (:1-* (RTE (:CAT NUMBER NUMBER))))
+
+(defrte 3-number (:cat number number number))
+(define-test type/rte-ref
+  (assert-true (typep '(1 2 3) '(rte (:or (:rte 3-number)
+                                      (:cat string (:rte 3-number) string)))))
+  (assert-true (typep '("x" 1 2 3 "y") '(rte (:or (:rte 3-number)
+                                              (:cat string (:rte 3-number) string))))))
+
 
 (define-test type/declaration
   (assert-true (equal '(1 2 3)
@@ -282,7 +290,7 @@
 
     ;; test to fix error
     (assert-true (equal :empty-word (canonicalize-pattern '(:AND (:0-* T) (:CAT (:CAT) (:CAT))))))
-    (assert-true (equal '(:and t :empty-word)  (canonicalize-pattern '(:AND t (:CAT (:CAT) (:CAT))))))
+    (assert-true (equal ':empty-set  (canonicalize-pattern '(:AND t (:CAT (:CAT) (:CAT))))))
     (assert-true (equal :empty-word (canonicalize-pattern '(:CAT (:CAT) (:CAT)))))
     (assert-true (equal :empty-word (canonicalize-pattern '(:AND (:0-* T) :empty-word))))
     )

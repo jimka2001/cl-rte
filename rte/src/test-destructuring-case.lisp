@@ -493,14 +493,10 @@
 
   )
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrte (:CAT NUMBER NUMBER NUMBER)))
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrte (:CAT (:* NUMBER NUMBER NUMBER))))
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrte (:CAT (:* FIXNUM FIXNUM FIXNUM))))
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defrte (:CAT FIXNUM FIXNUM FIXNUM)))
+(defrte 3-number (:CAT NUMBER NUMBER NUMBER))
+(defrte multiple-of-3-number (:CAT (:* NUMBER NUMBER NUMBER)))
+(defrte multiple-of-3-fixnum (:CAT (:* FIXNUM FIXNUM FIXNUM)))
+(defrte 3-fixnum (:CAT FIXNUM FIXNUM FIXNUM))
 
 (define-test test/destructuring-methods-2
   (assert-true (typep '(1 2 3)
@@ -967,7 +963,7 @@
 
 (garbage-collect)
 
-(defrte (:cat float float integer))
+(defrte float-float-integer (:cat float float integer))
 
 (define-test test/destructuring-case-15b
   (let ((n 0))

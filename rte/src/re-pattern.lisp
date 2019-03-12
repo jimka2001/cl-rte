@@ -22,6 +22,28 @@
 
 (in-package   :rte)
 
+(defun rte-expand-type (type-name)
+  (unless (valid-type-p type-name)
+    (warn "Invalid type specifier ~S" type-name))
+  (if (typep type-name '(cons (eql rte)))
+      type-name
+      (let ((expanded-type (type-expand type-name)))
+        (if (equal expanded-type type-name)
+            type-name ;; return the orginal, rather than something equal but not eq to it
+            expanded-type))))
+
+(defun with-expanded-type (type-name f-original f-expanded)
+  (declare (type (function (t) t) f-original f-expanded))
+  (let ((expanded-type (rte-expand-type type-name)))
+    ;; (unless (equal type-name expanded-type)
+    ;;   (format t "~&expanded ~A --> ~A~%" type-name expanded-type))
+    (if (eq expanded-type type-name)
+        (funcall f-original type-name)
+        (funcall f-expanded expanded-type))))
+
+(defvar *rte-hash* (make-hash-table :test #'eq)
+  "Hash table storing named rte's for reuse by (:rte ...) within an rte pattern")
+
 (defun traverse-pattern (pattern &rest functions
                          &key
                            (client #'(lambda (pattern)
@@ -60,9 +82,18 @@ depend on the choice of F-... function given."
            ((:empty-set)
             (funcall f-empty-set pattern))
            (t
-            (funcall f-type pattern))))
+            (with-expanded-type pattern
+              f-type
+              (lambda (expanded-pattern)
+                (apply #'traverse-pattern expanded-pattern functions))))))
         (t                              ; list
          (case (car pattern)
+           ((:rte rte-name)
+            (assert (and (cadr pattern)
+                         (null (cddr pattern))) () "invalid rte designator ~A" pattern)
+            (assert (gethash (cadr pattern) *rte-hash*) ()
+                    "Unknown rte definition ~A" (cadr pattern))
+            (apply #'traverse-pattern (gethash (cadr pattern) *rte-hash*) functions))
            ((:or)
             (funcall f-or (cdr pattern)))
            ((:and)
@@ -83,9 +114,10 @@ depend on the choice of F-... function given."
             (assert (null (cddr pattern)) nil "Invalid type: ~S" pattern)
             (funcall f-type (cadr pattern)))
            (t
-            (unless (valid-type-p pattern)
-              (warn "Invalid type specifier ~S" pattern))
-            (funcall f-type pattern))))))
+            (with-expanded-type pattern
+              f-type
+              (lambda (expanded-pattern)
+                (apply #'traverse-pattern expanded-pattern functions))))))))
 
 (defun alphabetize (patterns)
   "non-descructively sort a list of patterns into a canonical order."
@@ -201,6 +233,10 @@ a fixed point is found."
                              (dolist (p (cdr s))
                                (push p patterns)))
                            (setf patterns (set-difference patterns sub-or :test #'equal)))
+
+                         ;; (:or ... :empty-set ...) --> (:or ...)
+                         (setf patterns (remove :empty-set patterns :test #'eq))
+
                          ;; (:or (member 1 2 3) (member 10 20 30))
                          ;;  --> (:or (member 1 2 3 10 20 30))   ;; in some order, unspecified
                          (when (< 1 (count-if #'(lambda (obj)
@@ -210,7 +246,7 @@ a fixed point is found."
                                                                                             (and (listp obj)
                                                                                                  (member (car obj) '(eql member))))
                                                                                         patterns)
-                             (setq patterns (cons (cons 'member (mapcan (lambda (match)
+                             (setf patterns (cons (cons 'member (mapcan (lambda (match)
                                                                           (copy-list (cdr match))) matches))
                                                   other))))
                          (setf patterns (uniquify patterns)
@@ -248,9 +284,10 @@ a fixed point is found."
                                     (dolist (p (cdr s))
                                       (push p patterns)))
                                   (setf patterns (set-difference patterns sub-and :test #'equal)))
-                                
+
                                 ;; (:and A B (:0-* t))
                                 ;;  --> (:and A B)
+                                ;; TODO, is this correct?  what about (:and (:* t)) -/-> (:and)
                                 (dolist (p '((:0-* t)
                                              (:0-or-more t)
                                              (:* t)))
@@ -269,7 +306,7 @@ a fixed point is found."
                                     (let ((common (cdr (car matches))))
                                       (dolist (match (cdr matches))
                                         (setf common (intersection common (cdr match))))
-                                      (setq patterns (cons (cons 'member common)
+                                      (setf patterns (cons (cons 'member common)
                                                            other)))))
                                 ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
                                 (let ((sub-or (find-if (lambda (s)
@@ -284,6 +321,26 @@ a fixed point is found."
                                                                            :collect `(:and ,p ,@patterns)))))
                                     ((member :empty-set patterns)
                                      :empty-set)
+
+                                    ((and (member :empty-word patterns)
+                                          (exists p patterns
+                                            (and (symbolp p)
+                                                 (valid-type-p p)
+                                                 (not (subtypep p nil)))))
+                                     :empty-set)
+
+                                    ((and (exists p patterns
+                                            (and (symbolp p)
+                                                 (valid-type-p p)
+                                                 (not (subtypep p nil))))
+                                          (exists p patterns
+                                            (and (typep p '(cons (eql :cat)))
+                                                 (> (count-if-not #'nullable (cdr p)) 1))))
+                                     :empty-set)
+                                    
+                                    ;; NOTE that we cannot convert (:and A :empty-word) into :empty-set nor :empty-word
+                                    ;;   becasue if A != :empty-word  then it reduces to :empty-set
+                                    ;;   but if     A == :empty-word  then it reduces to :empty-word
                                     (t
                                      (setf patterns (uniquify patterns)
                                            patterns (mapcar #'canonicalize-pattern patterns)
@@ -717,6 +774,7 @@ consists of values whose types match PATTERN."
                                         (equal (state-label state) (next-label transition))))
                                  (transitions state))))))
            (sort-transitions ()
+             (declare (notinline sort))
              (dolist (state (ndfa:states sm))
                (setf (ndfa:transitions state)
                      (sort (ndfa:transitions state)
@@ -834,15 +892,16 @@ a valid regular type expression.
   (or (gethash pattern *rte-types* nil)
       (define-rte pattern)))
 
-(defmacro defrte (pattern)
-  "Declare a given RTE patter so that that it can be used when loaded from fasl."
+(defmacro defrte (rte-name pattern)
+  "Declare a given RTE pattern so that that it can be used when loaded from fasl or referenced symbolically be another rte."
   (let* ((dfa (rte-to-dfa pattern))
          (name (make-rte-function-name pattern))
          (code (dump-code dfa)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (unless (and (fboundp ',name )
                     (symbol-function ',name))
-         (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern)
+         (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern
+               (gethash ',rte-name *rte-hash*) ',pattern)
          (defun ,name ,@(cdr code))))))
 
 (defun rte-reset ()

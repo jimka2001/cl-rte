@@ -65,8 +65,8 @@ removing or resolving redundant or trivial type designators.  E.g.,
 
 * `defrte` -- Declare a given RTE patter so that that it can be used when loaded from fasl.  E.g.,
 ```lisp
-(defrte (:cat number number number))
-(defrte (:+ (:cat keyword number)))
+(defrte 3-number (:cat number number number))
+(defrte number-plist (:+ (:cat keyword number)))
 ```
 
 ## Syntax of regular type expressions
@@ -81,6 +81,12 @@ of `string` `number` where the string is optional.  `("hello" 42)` or `(42)`.
 * `:and` -- Match a sequence which simultaneously matches all the given regular typeexpressions.  E.g., `(rte (:and (:cat (:* number) float) (:cat float (:* number))))` matches a sequence of numbers which both ends with a `float` and also begins with a `float`.
 * `:or` -- Match a sequence which matches any one the given regular expressions.  E.g., `(rte (:or (:cat (:* number) float) (:cat float (:* number))))` matches a sequence of numbers which either ends with a `float` or begins with a `float`.
 * `:not` -- Matches a sequence which does not match the given regular type expression.  E.g., `(rte (:not (:+ number)))` matches a sequence unless it is a sequence of one or more numbers.
+* `:rte` -- substitute value of another rte named by `defrte` E.g.,
+```lisp
+(defrte 3-number (:cat number number number))
+(typep obj '(rte (:or (:rte 3-number)
+                      (:cat string (:rte 3-number) string))))
+```
 * `:empty-word` -- The empty word is a standard concept in
      rational languages.  Useful in combinations with `:or` and
      `:cat`.   E.g. `(:cat string (:or string :empty-word))` matches a sequence or one or two strings.

@@ -92,6 +92,14 @@
                3))))  )
 
 (define-test test-destructuring-lambda-list-to-rte
+  (assert-true (equal :empty-set
+                      (canonicalize-pattern '(:and t (:cat t t)))))
+  (assert-true (equal :empty-set
+                      (canonicalize-pattern '(:and symbol (:cat symbol t)))))
+  (assert-true (equal :empty-set
+                      (canonicalize-pattern '(:and :empty-word symbol))))
+  (assert-true (equal 'symbol
+                      (canonicalize-pattern '(:and symbol (:* t)))))
   (assert-true (equivalent-patterns '(:cat t t)
                                     (destructuring-lambda-list-to-rte '(a b))))
   (assert-true (equivalent-patterns '(:cat t t)

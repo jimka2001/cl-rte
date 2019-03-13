@@ -672,56 +672,75 @@ returned."
      ,@body
      ,var))
 
-(defun topological-sort (graph &key (test 'eql))
-  ;; this function was taking verbatim from rosettacode.org
-  ;; https://rosettacode.org/wiki/Topological_sort#Common_Lisp
-  "Graph is an car/cdr association list whose keys are objects and whose
-values are lists of objects on which the corresponding key depends.
-Test is used to compare elements, and should be a suitable test for
-hash-tables.  Topological-sort returns two values.  The first is a
-list of objects sorted toplogically.  The second is a boolean
-indicating whether all of the objects in the input graph are present
-in the topological ordering (i.e., the first value)."
-  (let ((entries (make-hash-table :test test)))
-    (flet ((entry (vertex)
-             "Return the entry for vertex.  Each entry is a cons whose
-              car is the number of outstanding dependencies of vertex
-              and whose cdr is a list of dependants of vertex."
-             (multiple-value-bind (entry presentp) (gethash vertex entries)
-               (if presentp entry
-                 (setf (gethash vertex entries) (cons 0 '()))))))
-      ;; populate entries initially
-      (dolist (vertex graph)
-        (destructuring-bind (vertex &rest dependencies) vertex
-          (let ((ventry (entry vertex)))
-            (dolist (dependency dependencies)
-              (let ((dentry (entry dependency)))
-                (unless (funcall test dependency vertex)
-                  (incf (car ventry))
-                  (push vertex (cdr dentry))))))))
-      ;; L is the list of sorted elements, and S the set of vertices
-      ;; with no outstanding dependencies.
-      (let ((L '())
-            (S (loop for entry being each hash-value of entries
-                     using (hash-key vertex)
-                     when (zerop (car entry)) collect vertex)))
-        ;; Until there are no vertices with no outstanding dependencies,
-        ;; process vertices from S, adding them to L.
-        (do* () ((endp S))
-          (let* ((v (pop S))
-                 (ventry (entry v)))
-            (remhash v entries)
-            (dolist (dependant (cdr ventry) (push v L))
-              (when (zerop (decf (car (entry dependant))))
-                (push dependant S)))))
-        ;; return (1) the list of sorted items, (2) whether all items
-        ;; were sorted, and (3) if there were unsorted vertices, the
-        ;; hash table mapping these vertices to their dependants
-        (let ((all-sorted-p (zerop (hash-table-count entries))))
-          (values (nreverse L)
-                  all-sorted-p
-                  (unless all-sorted-p
-                    entries)))))))
+(defun topological-sort (constraints &key
+                                       (if-cycle (lambda (list-so-far remaining-constraints)
+                                                   (error "Cannot topologically sort cyclic graph: list-so-far=~A remaining-constraints=~A"
+                                                          list-so-far remaining-constraints)))
+                                       (tie-breaker (lambda (candidates list-so-far)
+                                                      (declare (ignore list-so-far))
+                                                      (car candidates)))
+                                       (test #'eql))
+  "CONSTRAINTS is a car/cdr association list whose keys are objects and whose
+ values are lists of objects on which the corresponding key depends.
+ CONSTRAINTS is of the form ((early later later ...)
+                             (early later later ...)
+                             ...)
+ This is an implementation of the Kahn algorithm for topological sort, but with a tie
+ breaker function.  The tie breaker is allowed to examine the candidates, which each have
+ their constraints met, but no remaining constraint.  The tie breaker also has access
+ to the head of the list, ie., all the verticies which preceed the candidate vertices
+ in question.  The tie-breaker function must select one of the candidate vertices and
+ return it."
+  (declare (type list constraints)
+           (type (function (list list) t) tie-breaker))
+  (let* ((sorted_conc (list nil nil))
+         (remaining-constraints (mapcan (destructuring-lambda ((before &rest afters))
+                                          (mapcar (lambda (after)
+                                                    (list before after)) afters))
+                                        constraints))
+         (vertices (make-hash-table :test test)))
+    ;; populate the vertices hash table
+    (destructuring-dolist ((a &rest bs) constraints)
+      (setf (gethash a vertices) t)
+      (dolist (b bs)
+        (setf (gethash b vertices) t)))
+    (labels ((test (a b)
+               (funcall test a b))
+             (tie-breaker (candidates list-so-far)
+               (funcall tie-breaker candidates list-so-far))
+             (unconstrained ()
+               (loop :for v :being :the :hash-keys :of vertices
+                  :unless (exists edge constraints
+                                  (test v (cadr edge)))
+                  :collect v))
+             (collect (n s)
+               (setf s (remove n s :test test))
+               (let ((edges-to-remove (setof edge remaining-constraints
+                                             (test n (car edge)))))
+                 (tconc sorted_conc n)
+                 (remhash n vertices)
+                 (setf remaining-constraints
+                       (set-difference remaining-constraints edges-to-remove
+                                       :test (lambda (edge1 edge2)
+                                               (every test edge1 edge2))))
+                 (destructuring-dolist ((_ m) edges-to-remove)
+                                       (declare (ignore _))
+                                       (unless (find m remaining-constraints :key #'cadr :test test)
+                                         (push m s)))
+                 (recure s)))
+             (recure (s)
+               (cond
+                 ((cdr s)
+                  ;; ambiguous choice
+                  (collect (tie-breaker s (car sorted_conc)) s))
+                 (s
+                  ;; unique choice
+                  (collect (car s) s))
+                 ((zerop (hash-table-count vertices))
+                  (car sorted_conc))
+                 (t
+                  (funcall if-cycle (car sorted_conc) remaining-constraints)))))
+      (recure (unconstrained)))))
 
 (defun empty-file-p (fname)
   "Predicate to determine whether a file is empty.  A limitation of the CL:OPEN function

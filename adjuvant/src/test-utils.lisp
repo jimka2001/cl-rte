@@ -438,25 +438,31 @@
     (assert-true executed)
   ))
 
+
+
 (define-test test-topological-sort
-  (let* ((dependency-graph '((des-system-lib   std synopsys std-cell-lib des-system-lib dw02 dw01 ramlib ieee)
-                             (dw01             ieee dw01 dware gtech)
-                             (dw02             ieee dw02 dware)
-                             (dw03             std synopsys dware dw03 dw02 dw01 ieee gtech)
-                             (dw04             dw04 ieee dw01 dware gtech)
-                             (dw05             dw05 ieee dware)
-                             (dw06             dw06 ieee dware)
-                             (dw07             ieee dware)
-                             (dware            ieee dware)
-                             (gtech            ieee gtech)
-                             (ramlib           std ieee)
-                             (std-cell-lib     ieee std-cell-lib)
-                             (synopsys)))
+  (assert-true (equal '(a b c d)
+                      (topological-sort '((a b c d) (b c d) (c d))
+                                        :if-cycle (lambda (&rest _)
+                                                    (declare (ignore _))
+                                                    (assert-true nil)))))
+  (let* ((dependency-graph '((ieee dw01 dw02 dw03 dw04 dw05 dw06 dw07
+                                   gtech des-system-lib  std-cell-lib ramlib dware)
+                             (std des-system-lib dw03 ramlib)
+                             (gtech dw01 dw03 dw04 gtech)
+                             (dware dw01 dw02 dw03 dw04 dw05 dw06 dw07 dware)
+                             (dw01 des-system-lib dw03 dw04)
+                             (dw02 des-system-lib dw03)
+                             (synopsys dw03)
+                             (ramlib des-system-lib)
+                             (std-cell-lib des-system-lib)
+                             (synopsys des-system-lib)
+                             (std)))
          (sorted (topological-sort dependency-graph)))
     (dolist (node dependency-graph)
-      (destructuring-bind (later &rest earlier) node
-        (dolist (early earlier)
-          (assert-true (member later (member early sorted))))))))
+      (destructuring-bind (early &rest laters) node
+        (dolist (later laters)
+          (assert-true (member later (cdr (member early sorted)))))))))
 
 (define-test test/bfs-graph
   (let* ((edge-list '((a b)

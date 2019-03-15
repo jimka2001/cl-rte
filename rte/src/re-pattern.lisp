@@ -481,7 +481,7 @@ a fixed point is found."
   ((ndfa::test :initform #'typep)
    (deterministicp :initform t)
    (transition-label-combine :initform (lambda (a b)
-                                         (bdd-reduce-lisp-type  `(or ,a ,b))))
+                                         (type-to-dnf-bottom-up (bdd-reduce-lisp-type  `(or ,a ,b)))))
    (transition-label-omit :initform (lambda (label)
                                       ;; we omit creating nil  transitions
                                       ;;    (ie. transitions whose label is nil)
@@ -740,7 +740,7 @@ consists of values whose types match PATTERN."
                             (t
                              (pushnew deriv pending :test #'equal)
                              (push (list :next-label deriv
-                                         :transition-label type)
+                                         :transition-label (lisp-types:type-to-dnf-bottom-up type))
                                    transitions)))))
                       ;; TODO, can't this be made to create an instance of an
                       ;;   rte-specific subclass of state.   add-rte-state?
@@ -788,7 +788,10 @@ consists of values whose types match PATTERN."
              (maphash (lambda (key transitions &aux (s1 (car key)) (tr1 (car transitions)))
                         (when (cdr transitions)
                           (let ((transition-labels (mapcar #'ndfa:transition-label transitions)))
-                            (setf (ndfa:transition-label tr1) (reduce-lisp-type `(or ,@transition-labels)))
+                            (setf (ndfa:transition-label tr1)
+                                  (reduce (transition-label-combine sm)
+                                          transition-labels
+                                          :initial-value nil))
                             (setf (ndfa:transitions s1)
                                   (set-difference (ndfa:transitions s1)
                                                   (cdr transitions))))))

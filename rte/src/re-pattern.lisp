@@ -505,7 +505,8 @@ a fixed point is found."
                                             
                                             (minimize t)
                                             (complement-transition-label (lambda (state)
-                                                                           `(and t (not (or ,@(and state (mapcar #'transition-label (transitions state))))))))
+                                                                           (lisp-types:type-to-dnf-bottom-up
+                                                                            `(and t (not (or ,@(and state (mapcar #'transition-label (transitions state)))))))))
                                             (merge-transition-labels (lambda (label-1 label-2)
                                                                        (lisp-types:type-to-dnf-bottom-up `(and ,label-1
                                                                                                                ,label-2))))

@@ -506,7 +506,17 @@
       (assert-false (typep no pattern)))))
 
                                         
-
+(define-test type/rte-2
+  (assert-true (typep '(1 1)
+                      '(rte (:+ number))))
+  (assert-false (typep '(2 2 x 2 2)
+                       '(rte (:* number))))
+  (assert-false (typep '((1 1)
+                         (2 2 x 2 2))
+                       '(rte (:* (rte (:* number))))))
+  (assert-false (typep '((1 1)
+                         (2 2 x 2 2))
+                       '(rte (:* (rte (:+ number)))))))
 (define-test type/rte
   (assert-true (typep '(1 x) '(rte (:1 number symbol))))
   

@@ -727,8 +727,8 @@ a fixed point is found."
                         (equal (state-label state) (next-label transition)))
                       (transitions state))
                ;; the union of the types is t
-               (reduce (transition-label-combine sm) (mapcar #'transition-label (transitions state))
-                       :initial-value nil)))))
+               (subtypep t (reduce (transition-label-combine sm) (mapcar #'transition-label (transitions state))
+                                   :initial-value nil))))))
 
 (defun rte-to-dfa (pattern &key trim reduce (final-body t) (clause-index 0))
   "Create and return a finite state machine (ndfa) which can be used to determine if a given list

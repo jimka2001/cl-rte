@@ -124,7 +124,8 @@
         (rte-string (rte-to-dfa 'string)))
     (assert-true (= 2 (length (states rte-number))))
     (assert-true (= 2 (length (states rte-string))))
-    (let ((rte-or (synchronized-product rte-number rte-string :boolean-function (lambda (a b) (or a b)))))
+    (let ((rte-or (synchronized-product rte-number rte-string
+                                        :boolean-function (lambda (a b) (or a b)))))
       (assert-true (= 2 (length (states rte-or))))
       (dolist (st-i (get-initial-states rte-or))
         (dolist (trans (transitions st-i))
@@ -132,8 +133,10 @@
                                '((or string number)
                                  (or number string)) :test #'equal)))))
                   
-    (assert-true (= 2 (length (states (synchronized-product rte-string rte-number :boolean-function (lambda (a b) (or a b)))))))
-    (assert-true (= 0 (length (states (synchronized-product rte-string rte-number :boolean-function (lambda (a b) (and a b)))))))
+    (assert-true (= 2 (length (states (synchronized-product rte-string rte-number
+                                                            :boolean-function (lambda (a b) (or a b)))))))
+    (assert-true (= 0 (length (states (synchronized-product rte-string rte-number
+                                                            :boolean-function (lambda (a b) (and a b)))))))
 
     (let ((dfa-or (rte-synchronized-product (list rte-number rte-string))))
       (assert-true (= 2 (length (states dfa-or))))

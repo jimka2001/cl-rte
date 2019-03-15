@@ -709,6 +709,27 @@ a fixed point is found."
            input-sequence)
     current-states))
 
+
+(defmethod calc-sticky-states ((sm rte-state-machine))
+  ;; if a state only has transitions which are t (or some supertype of t such as (or number (not number))
+  ;; then mark it as not escapable.
+  (dolist (state (states sm))
+    (setf (ndfa:state-sticky-p state)
+          ;; a state is sticky, or non-escapable, if evert transition
+          ;; has a type=t transition to the state itself.  NOTE that
+          ;; this test is somewhat dangerous because it is being run
+          ;; using transition-label and state-label, i.e., before next
+          ;; (the next state of the transition) has been lazily
+          ;; calculated.
+          (and (transitions state)
+               ;; every transition leads back to this same state
+               (every (lambda (transition)
+                        (equal (state-label state) (next-label transition)))
+                      (transitions state))
+               ;; the union of the types is t
+               (reduce (transition-label-combine sm) (mapcar #'transition-label (transitions state))
+                       :initial-value nil)))))
+
 (defun rte-to-dfa (pattern &key trim reduce (final-body t) (clause-index 0))
   "Create and return a finite state machine (ndfa) which can be used to determine if a given list
 consists of values whose types match PATTERN."
@@ -756,23 +777,7 @@ consists of values whose types match PATTERN."
                                                         clause-index
                                                         nil)
                                       :transitions transitions)))))
-           (calc-sticky ()
-             ;; if a state only has transitions which are t (or some supertype of t such as (or number (not number))
-             ;; then mark it as not escapable.
-             (dolist (state (states sm))
-               (setf (ndfa:state-sticky-p state)
-                     ;; a state is sticky, or non-escapable, if evert
-                     ;; transition has a type=t transition to the
-                     ;; state itself.  NOTE that this test is somewhat
-                     ;; dangerous because it is being run using
-                     ;; transition-label and state-label, i.e., before
-                     ;; next (the next state of the transition) has
-                     ;; been lazily calculated.
-                     (and (transitions state)
-                          (every (lambda (transition)
-                                   (and (subtypep t (transition-label transition))
-                                        (equal (state-label state) (next-label transition))))
-                                 (transitions state))))))
+
            (sort-transitions ()
              (declare (notinline sort))
              (dolist (state (ndfa:states sm))
@@ -808,7 +813,7 @@ consists of values whose types match PATTERN."
                   (t sm)))
       (parallel-transitions)
       (sort-transitions)
-      (calc-sticky))
+      (calc-sticky-states sm))
     sm))
       
 (defun remember-state-machine (sm pattern)

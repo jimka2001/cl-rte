@@ -907,11 +907,9 @@ a valid regular type expression.
          (name (make-rte-function-name pattern))
          (code (dump-code dfa)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (unless (and (fboundp ',name )
-                    (symbol-function ',name))
-         (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern
-               (gethash ',rte-name *rte-hash*) ',pattern)
-         (defun ,name ,@(cdr code))))))
+       (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern
+             (gethash ',rte-name *rte-hash*) ',pattern)
+       (defun ,name ,@(cdr code)))))
 
 (defun rte-reset ()
   "Forget all regular type expressions."

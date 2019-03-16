@@ -661,13 +661,13 @@ EQL, then the files are judged to be the same."
              ;; read different character
              (return-from diff-files t))))))))
 
-(defmacro prog1-let ((var expr) &body body)
+(defmacro prog1-let ((var &optional expr) &body body)
   "This macro declares the given variable, and returns its value after the body has been evaluated. E.g.,
-(prog1-let (A 100)
+ (prog1-let (A 100)
    ...)
-This expression binds A to 100 and then evaluates the body.  It returns 100
-unless the body modifies the value of A, otherwise that new value of A is
-returned."
+ This expression binds A to 100 and then evaluates the body.  It returns 100
+ unless the body modifies the value of A, otherwise that new value of A is
+ returned."
   `(let ((,var ,expr))
      ,@body
      ,var))
@@ -1044,3 +1044,10 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
             (error "cannot compare ~A ~A with ~A ~A" (class-of a) a (class-of b) b))))))
 
 
+
+(defun hash-to-assoc (hash)
+  "Build a car/cadr assoc-list from the entries in a given hash table"
+  (declare (type hash-table hash))
+  (prog1-let (alist)
+    (maphash (lambda (&rest args)
+               (push args alist)) hash)))

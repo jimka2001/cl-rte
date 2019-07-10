@@ -5,6 +5,4 @@ set path = ($path $BIN)
 set PROJECT=$BIN/../cl-robdd/src/cl-robdd-scala
 cd $PROJECT
 
-printenv
-
-sbt "runMain dimacs.dimacsParse"
+sbt -Dsbt.log.noformat=true "runMain dimacs.dimacsParse"

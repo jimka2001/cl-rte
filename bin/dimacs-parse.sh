@@ -4,7 +4,7 @@ BIN="$HOME/sw/regular-type-expression/bin/"
 inDi=/lrde/cluster/jnewton/SAT-benchmarks/NoLimits
 cd $BIN/..
 
-initial=`qsub -l walltime=30 $BIN/dimacs-compile.csh`
+initial=`qsub -l walltime=3000 $BIN/dimacs-compile.csh`
 
 cd $inDir
 for cnf in g2-ACG-*.cnf

@@ -1,4 +1,5 @@
 #!/bin/csh -f
+#PBS -m bea
 set verbose echo
 
 set BIN="$HOME/sw/regular-type-expression/bin/"

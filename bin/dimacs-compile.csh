@@ -7,5 +7,6 @@ echo "ls /usr/bin"
 ls -l /usr/bin
 
 cd $BIN
+git stash
 git pull
 sbt compile

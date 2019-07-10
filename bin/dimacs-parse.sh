@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -m bea
+#PBS -m a
 set verbose echo
 
 BIN="$HOME/sw/regular-type-expression/bin/"

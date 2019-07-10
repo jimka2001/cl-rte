@@ -1,13 +1,14 @@
-#!/bin/csh -f
+#!/bin/bash
 
-set BIN="$HOME/sw/regular-type-expression/bin/"
-set path = ($path $BIN)
-set inDir = /lrde/cluster/jnewton/SAT-benchmarks/NoLimits
+BIN="$HOME/sw/regular-type-expression/bin/"
+inDi =/lrde/cluster/jnewton/SAT-benchmarks/NoLimits
 cd $BIN/..
 
-set initial = `qsub -l walltime=30 $BIN/dimacs-compile.csh`
+initial=`qsub -l walltime=30 $BIN/dimacs-compile.csh`
 
 cd $inDir
-foreach cnf (g2-ACG-*.cnf)
-  qsub -W depend=afterok:$x $BIN/dimacs-parse-1.csh $cnf
-end
+for cnf in (g2-ACG-*.cnf)
+do
+  qsub -W depend=afterok:$initial $BIN/dimacs-parse-1.csh $cnf
+done
+

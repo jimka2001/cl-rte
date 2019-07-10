@@ -6,4 +6,4 @@ set path = ($path $BIN)
 cd $BIN
 git stash
 git pull
-sbt -Dsbt.log.noformat=false compile
+sbt -Dsbt.log.noformat=true compile

@@ -9,7 +9,7 @@ cd $BIN/..
 initial=`qsub -l walltime=3000 $BIN/dimacs-compile.csh`
 
 cd $inDir
-for cnf in g2-ACG-*.cnf
+for cnf in *.cnf
 do
   cd $BIN/..
   qsub -W depend=afterok:$initial -F  "$inDir $cnf"  $BIN/dimacs-parse-1.csh

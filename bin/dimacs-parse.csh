@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BIN="$HOME/sw/regular-type-expression/bin/"
-inDi =/lrde/cluster/jnewton/SAT-benchmarks/NoLimits
+inDi=/lrde/cluster/jnewton/SAT-benchmarks/NoLimits
 cd $BIN/..
 
 initial=`qsub -l walltime=30 $BIN/dimacs-compile.csh`

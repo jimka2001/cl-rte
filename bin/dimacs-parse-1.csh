@@ -1,6 +1,5 @@
 #!/bin/csh -f
 #PBS -m a
-set verbose echo
 
 set BIN="$HOME/sw/regular-type-expression/bin/"
 set path = ($path $BIN)

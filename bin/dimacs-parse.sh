@@ -13,6 +13,6 @@ for cnf in *.cnf
 do
   echo file = $cnf
   cd $BIN/..
-  qsub -W depend=afterok:$initial -l ppn=4 -F  "$inDir $cnf"  $BIN/dimacs-parse-1.csh
+  qsub -W depend=afterok:$initial -l nodes=1:ppn=4 -F  "$inDir $cnf"  $BIN/dimacs-parse-1.csh
 done
 

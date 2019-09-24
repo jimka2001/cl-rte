@@ -599,3 +599,12 @@
                                 nil))))
   
                
+(define-test test/destructuring-group-by
+  (mapcar (destructuring-lambda (( len strings))
+            (list :length len :strings strings))
+          (group-by '("abc" "ab" "ac" "xy" "xyz" "abcd") :key #'length))
+  (mapcar (destructuring-lambda (( len strings))
+            (assert-true (equal len 3))
+            (assert-true (equal strings '("abc"))))
+          (group-by '("abc") :key #'length)))
+  

@@ -22,17 +22,32 @@
 (in-package :rte-test)
 
 (define-test test/strategy
-  (dolist (rte '((:cat t symbol (:+ keyword))
-                 (:and (:* t) (:not (:cat string (:* t))))
-                 (:not (:cat string (:* t)))))
-    (format t "rte=~A~%" rte)
+  (destructuring-dolist ((&key rte yes no) '((:rte (:cat t symbol (:+ keyword))
+                                              :yes ((3 x :x)
+                                                    (3 x :x :y :z))
+                                              :no ((3 x)
+                                                   (3 x 3)
+                                                   (3 x :x 3)))
+                                             (:rte (:and (:* t) (:not (:cat string (:* t))))
+                                              :yes (()
+                                                    (3))
+                                              :no (("hello")
+                                                   ("hello" 3)))))
     (dolist (cl '(strategy-goto
                   strategy-tail-call
                   strategy-trampoline
                   ;;strategy-jump-table
                   ))
-      (format t "cl=~A~%~A~%~%" cl
-              (rte::dump-code (rte-to-dfa rte) (make-instance cl))))))
+      (let ((lambda-match (rte::dump-code (rte-to-dfa rte) (make-instance cl))))
+        (format t "rte=~A~%" rte)
+        (format t "cl=~A~%~A~%~%" cl lambda-match)
+        (let ((f-match (eval lambda-match)))
+          (declare (type function f-match))
+          (dolist (seq yes)
+            (assert (funcall f-match seq) (cl rte seq) "expecting match cl=~A rte=~A seq=~A" cl rte seq))
+          (dolist (seq no)
+            (assert (not (funcall f-match seq)) (cl rte seq) "expecting no match")))))))
+    
 
 
 

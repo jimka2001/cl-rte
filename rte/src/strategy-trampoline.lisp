@@ -25,6 +25,37 @@
 (defclass strategy-trampoline (strategy-inline)
   ())
 
-(defmethod dump-code ((ndfa rte-state-machine) (strategy strategy-trampoline) &key (var 'seq))
-  (call-next-method)
-  )
+
+(defmethod goto-next-state ((strategy strategy-trampoline) state-name)
+  `(lambda () (,state-name)))
+
+(defun trampoline (xyzzy)
+  (declare (type function xyzzy))
+  (loop :while t
+        :for ret = (funcall xyzzy)
+        :when (consp ret)
+          :do (return-from trampoline (car ret))
+        :do (setf xyzzy ret)))
+
+(defmethod format-state-dispatch ((strategy strategy-trampoline) initial-state-name dumped-states)
+  `(trampoline (lambda ()
+                 (labels ,dumped-states
+                   ,(goto-next-state strategy initial-state-name)))))
+               
+(defmethod dump-state ((strategy strategy-trampoline) state-name dumped-case)
+  (copy-list `((,state-name
+                ()
+                ,dumped-case))))
+
+(defmethod state-assoc ((strategy strategy-trampoline) exit-form-p states)
+  (let ((n 0))
+    (mapcar (lambda (state)
+              (list state (cond
+                            (exit-form-p
+                             (gensym "L-EXIT-"))
+                            ((state-sticky-p state)
+                             (gensym (format nil "STICKY-~D-" (incf n))))
+                            (t
+                             (gensym (format nil "L-~D-" (incf n)))))))
+            states)))
+

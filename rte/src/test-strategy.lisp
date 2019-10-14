@@ -21,7 +21,6 @@
 
 (in-package :rte-test)
 
-
 (define-test test/strategy
   (dolist (rte '((:cat t symbol (:+ keyword))
                  (:and (:* t) (:not (:cat string (:* t))))
@@ -29,7 +28,7 @@
     (format t "rte=~A~%" rte)
     (dolist (cl '(strategy-goto
                   strategy-tail-call
-                  ;;strategy-trampoline
+                  strategy-trampoline
                   ;;strategy-jump-table
                   ))
       (format t "cl=~A~%~A~%~%" cl

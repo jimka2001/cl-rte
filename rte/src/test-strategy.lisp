@@ -19,31 +19,21 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(in-package   :rte)
+(in-package :rte-test)
 
-(defclass strategy-tail-call (strategy-inline)
-  ())
 
-(defmethod goto-next-state ((strategy strategy-tail-call) state-name)
-  `(,state-name))
+(define-test test/strategy
+  (dolist (rte '((:cat t symbol (:+ keyword))
+                 (:and (:* t) (:not (:cat string (:* t))))
+                 (:not (:cat string (:* t)))))
+    (format t "rte=~A~%" rte)
+    (dolist (cl '(strategy-goto
+                  strategy-tail-call
+                  ;;strategy-trampoline
+                  ;;strategy-jump-table
+                  ))
+      (format t "cl=~A~%~A~%~%" cl
+              (rte::dump-code (rte-to-dfa rte) (make-instance cl))))))
 
-(defmethod format-state-dispatch ((strategy strategy-tail-call) initial-state-name dumped-states)
-  `(labels ,dumped-states
-     ,(goto-next-state strategy initial-state-name)))
 
-(defmethod dump-state ((strategy strategy-tail-call) state-name  dumped-case)
-  (copy-list `((,state-name
-                ()
-                ,dumped-case))))
 
-(defmethod state-assoc ((strategy strategy-tail-call) exit-form-p states)
-  (let ((n 0))
-    (mapcar (lambda (state)
-              (list state (cond
-                            (exit-form-p
-                             (gensym "L-EXIT-"))
-                            ((state-sticky-p state)
-                             (gensym (format nil "STICKY-~D-" (incf n))))
-                            (t
-                             (gensym (format nil "L-~D-" (incf n)))))))
-            states)))

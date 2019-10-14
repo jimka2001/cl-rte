@@ -43,4 +43,5 @@
      (:rte-file "test-destructuring-case-2")
      (:rte-file "test-destructuring-case")
      (:rte-file "test-ordinary-lambda-list")
-     (:rte-file "test-rte-case")))))
+     (:rte-file "test-rte-case")
+     (:rte-file "test-strategy")))))

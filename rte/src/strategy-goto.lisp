@@ -24,135 +24,26 @@
 (defclass strategy-goto (strategy-inline)
   ())
 
-(defmethod dump-code ((ndfa rte-state-machine) (strategy strategy-goto) &key (var 'seq))
-  (let* ((states (append (ndfa:get-initial-states ndfa)
-                         (set-difference (ndfa:states ndfa)
-                                         (ndfa:get-initial-states ndfa) :test #'eq)))
-         (exit-form-p (find-if (lambda (state)
-                                 ;; something evaluatable?
-                                 (typecase (state-exit-form state)
-                                   ((member t nil) nil)
-                                   (keyword nil)
-                                   (cons t)
-                                   (symbol t)
-                                   (t nil))) (get-final-states ndfa)))
-         (state-assoc (let ((n 0))
-                        (mapcar (lambda (state)
-                                  (list state (if exit-form-p
-                                                  (gensym "L")
-                                                  (incf n))))
-                                states)))
-         (list-end `(null ,var))
-         (list-next `(pop ,var))
-         (i (if exit-form-p (gensym "I") 'i))
-         (check (if exit-form-p (gensym "CHECK") 'check))
-         (len (if exit-form-p (gensym "LEN") 'len))
-         (simple-vector-end `(>= ,i ,len))
-         (simple-vector-next `(prog1 (svref ,var ,i)
-                                (incf ,i)))
+(defmethod goto-next-state ((strategy strategy-goto) state-name)
+  `(go ,state-name))
 
-         (vector-end `(>= ,i ,len))
-         (vector-next `(prog1 (aref ,var ,i)
-                         (incf ,i)))
+(defmethod format-state-dispatch ((strategy strategy-goto) initial-state-name dumped-states)
+  `(tagbody 
+      ,(goto-next-state strategy initial-state-name)
+      ,@dumped-states))
 
-         #+sbcl (sequence-end `(or (sequence:emptyp ,var)
-                            (>= ,i ,len)))
-         #+sbcl (sequence-next `(prog1 (sequence:elt ,var ,i)
-                           (incf ,i))))
-         
-    (labels ((state-name (state)
-               (declare (type ndfa::state state))
-               (or (cadr (assoc state state-assoc :test #'eq))
-                   (error "no state name registered for state ~A, available states are ~A" state state-assoc)))
-             (dump-typecase-transition (transition)
-               (declare (type ndfa::transition transition))
-               (assert (typep (ndfa:next-state transition) 'ndfa::state))
-               (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
-               `(,(transition-label transition)
-                 (go ,(state-name (ndfa:next-state transition)))))
-             (dump-case-transition (transition)
-               (declare (type ndfa::transition transition))
-               (assert (typep (ndfa:next-state transition) 'ndfa::state))
-               (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
-               `(,(cdr (transition-label transition))
-                 (go ,(state-name (ndfa:next-state transition)))))
-             (dump-end (state end)
-               (cond ((null (state-final-p state))
-                      `(when ,end
-                         (return-from ,check nil)))
-                     ((state-sticky-p state)
-                      `(return-from ,check ,(state-exit-form state)))
-                     (t
-                      `(when ,end
-                         (return-from ,check ,(state-exit-form state))))))
-             (dump-case (state next)
-               (cond
-                 ((every #'(lambda (trans)
-                             (and (listp (transition-label trans))
-                                  (member (car (transition-label trans)) '(eql member))))
-                         (transitions state))
-                  `(case ,next
-                     ,@(mapcar #'dump-case-transition (transitions state))
-                     (t (return-from ,check nil))))
-                 (t
-                  (let* ((leading-clauses (mapcar #'dump-typecase-transition (transitions state)))
-                         ;; We use subtypep here to remove the final T clause
-                         ;; cases like (string...) ((not string) ...)  or
-                         ;; if a (T ...) clause already exists.
-                         (exhaustive? (subtypep t (cons 'or (mapcar #'car leading-clauses))))
-                         (final-clause-option (if exhaustive?
-                                                  nil
-                                                  `((t (return-from ,check nil))))))
-                    ;; final-clause-option is a ,@-comaptible list of the final
-                    ;; clause or NIL in the situation that the leading clauses are
-                    ;; exhaustive.  This is because we
-                    ;; want to eliminate a final T clause in the clause the leading 
-                    ;; clauses are exhaustive.
-                    `(typecase ,next ;; TODO -- change to bdd-typecase, but this makes startup VERY slow
-                                   ,@leading-clauses
-                                   ,@final-clause-option)))))
-             (dump-state (state end next)
-               (copy-list `(,(state-name state)
-                            ,(dump-end state end)
-                            ,(dump-case state next))))
-             (dump-tagbody (end final-next)
-               (cond
-                 ((get-initial-states ndfa)
-                  (assert (= 1 (length (get-initial-states ndfa))))
-                  (assert (typep (car (get-initial-states ndfa)) 'ndfa::state))
-                  `(tagbody 
-                      (go ,(state-name (car (get-initial-states ndfa))))
-                      ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states)))
-                 (t
-                   nil))))
+(defmethod dump-state ((strategy strategy-goto) state-name dumped-case)
+  (copy-list `(,state-name
+               ,dumped-case)))
 
-      `(lambda (,var)
-         ;; Don't declare seq a sequence! because if this function gets called with
-         ;; a non-sequence, we want to simply return nil, rather than signaling
-         ;; an error.
-         (declare (optimize (speed 3) (debug 0) (safety 0))
-                  ;; (optimize (speed 0) (debug 3) (safety 3))
-                  )
-         (block ,check
-           (typecase ,var
-             (list
-              ,(dump-tagbody list-end list-next))
-             (simple-vector
-              (let ((,i 0)
-                    (,len (length ,var)))
-                (declare (type (and unsigned-byte fixnum) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody simple-vector-end simple-vector-next)))
-             (vector
-              (let ((,i 0)
-                    (,len (length ,var)))
-                (declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody vector-end vector-next)))
-             #+sbcl
-             (sequence           ; case to handle extensible sequences
-              (let ((,i 0)
-                    (,len (sequence:length ,var))) ; sequence (such as infinite sequence) might not support length
-                (declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody sequence-end sequence-next)))
-             (t
-              nil))))))
-  )
+(defmethod state-assoc ((strategy strategy-goto) exit-form-p states)
+  (let ((n 0))
+    (mapcar (lambda (state)
+              (list state (cond
+                            (exit-form-p
+                             (gensym "L-EXIT-"))
+                            ((state-sticky-p state)
+                             (gensym (format nil "STICKY-~D-" (incf n))))
+                            (t
+                             (incf n)))))
+            states)))

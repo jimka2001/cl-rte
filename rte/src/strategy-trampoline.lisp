@@ -22,7 +22,7 @@
 
 (in-package   :rte)
 
-(defclass strategy-trampoline (dump-code-strategy)
+(defclass strategy-trampoline (strategy-inline)
   ())
 
 (defmethod dump-code ((ndfa rte-state-machine) (strategy strategy-trampoline) &key (var 'seq))

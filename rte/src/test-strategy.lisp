@@ -44,10 +44,12 @@
         (let ((f-match (eval lambda-match)))
           (declare (type function f-match))
           (dolist (seq yes)
-            (assert (funcall f-match seq) (cl rte seq) "expecting match cl=~A rte=~A seq=~A" cl rte seq))
+            (assert (funcall f-match seq) (cl rte seq) "expecting match cl=~A rte=~A seq=~A" cl rte seq)
+            (assert (funcall f-match (make-array (length seq) :initial-contents seq)) (cl rte seq) "expecting match cl=~A rte=~A seq=~A" cl rte seq))
           (dolist (seq no)
-            (assert (not (funcall f-match seq)) (cl rte seq) "expecting no match")))))))
-    
+            (assert (not (funcall f-match seq)) (cl rte seq) "expecting no match")
+            (assert (not (funcall f-match (make-array (length seq) :initial-contents seq))) (cl rte seq) "expecting no match")))))))
+
 
 
 

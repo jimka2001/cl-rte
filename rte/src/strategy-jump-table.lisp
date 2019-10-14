@@ -25,7 +25,3 @@
 (defclass strategy-jump-table (dump-code-strategy)
   ())
 
-
-(defmethod dump-code ((ndfa rte-state-machine) (strategy strategy-jump-table) &key (var 'seq))
-  (call-next-method)
-  )

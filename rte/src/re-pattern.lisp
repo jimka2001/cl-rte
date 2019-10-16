@@ -205,199 +205,7 @@ depend on the choice of F-... function given."
                :f-0-* #'(lambda (patterns)
                           (first-types (cons ':cat patterns)))))
 
-(defclass rte-state-machine (ndfa:state-machine)
-  ((ndfa::test :initform #'typep)
-   (deterministicp :initform t)
-   (transition-label-combine :initform (lambda (a b)
-                                         (type-to-dnf-bottom-up (bdd-reduce-lisp-type  `(or ,a ,b)))))
-   (transition-label-omit :initform (lambda (label)
-                                      ;; we omit creating nil  transitions
-                                      ;;    (ie. transitions whose label is nil)
-                                      ;;    on these state machines.
-                                      (eq nil (lisp-types:type-to-dnf-bottom-up label))))
-   (transition-label-equal :initform (lambda (a b &aux
-                                                    (a-reduc (lisp-types:type-to-dnf-bottom-up a))
-                                                    (b-reduc (lisp-types:type-to-dnf-bottom-up b)))
-                                       (and (subtypep a-reduc b-reduc)
-                                            (subtypep b-reduc a-reduc))))))
 
-(defmethod print-object ((rte rte-state-machine) stream)
-  (print-unreadable-object (rte stream :type t :identity nil)
-    (dolist (state (get-initial-states rte))
-      (format stream "~A" state))))
-
-(defmethod populate-synchronized-product ((sm-product rte-state-machine)
-                                          (sm1 rte-state-machine)
-                                          (sm2 rte-state-machine)
-                                          &key (boolean-function (lambda (a b) (and a b)))
-                                            
-                                            (minimize t)
-                                            (complement-transition-label (lambda (state)
-                                                                           (lisp-types:type-to-dnf-bottom-up
-                                                                            `(and t (not (or ,@(and state (mapcar #'transition-label (transitions state)))))))))
-                                            (merge-transition-labels (lambda (label-1 label-2)
-                                                                       (lisp-types:type-to-dnf-bottom-up `(and ,label-1
-                                                                                                               ,label-2))))
-                                            
-                                                               
-                                            (final-state-callback (lambda (product-state st1 st2)
-                                                                    (setf (state-exit-form product-state)
-                                                                          (cond
-                                                                            ((and st1
-                                                                                  st2
-                                                                                  (state-exit-form st1)
-                                                                                  (state-exit-form st2))
-                                                                             ;; if the two states both have an exit form, take the one with
-                                                                             ;; lowest clause-index (highest priority), this is the one which appears
-                                                                             ;; first in the unexpanded typecase.
-                                                                             (if (< (clause-index st1) (clause-index st2))
-                                                                                 (state-exit-form st1)
-                                                                                 (state-exit-form st2)))
-                                                                            (t
-                                                                             (or (and st1 (state-exit-form st1))
-                                                                                 (and st2 (state-exit-form st2)))))))))
-  (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
-                                       :minimize minimize
-                                       :merge-transition-labels merge-transition-labels
-                                       :complement-transition-label complement-transition-label
-                                       :final-state-callback final-state-callback))
-
-(defgeneric dump-code (object &key var))
-
-(defmethod dump-code ((pattern list) &key (var 'seq))
-  (dump-code (rte-to-dfa pattern :reduce t) :var var))
-
-(defmethod dump-code ((ndfa rte-state-machine) &key (var 'seq))
-  (let* ((states (append (ndfa:get-initial-states ndfa)
-                         (set-difference (ndfa:states ndfa)
-                                         (ndfa:get-initial-states ndfa) :test #'eq)))
-         (exit-form-p (find-if (lambda (state)
-                                 ;; something evaluatable?
-                                 (typecase (state-exit-form state)
-                                   ((member t nil) nil)
-                                   (keyword nil)
-                                   (cons t)
-                                   (symbol t)
-                                   (t nil))) (get-final-states ndfa)))
-         (state-assoc (let ((n 0))
-                        (mapcar (lambda (state)
-                                  (list state (if exit-form-p
-                                                  (gensym "L")
-                                                  (incf n))))
-                                states)))
-         (list-end `(null ,var))
-         (list-next `(pop ,var))
-         (i (if exit-form-p (gensym "I") 'i))
-         (check (if exit-form-p (gensym "CHECK") 'check))
-         (len (if exit-form-p (gensym "LEN") 'len))
-         (simple-vector-end `(>= ,i ,len))
-         (simple-vector-next `(prog1 (svref ,var ,i)
-                                (incf ,i)))
-
-         (vector-end `(>= ,i ,len))
-         (vector-next `(prog1 (aref ,var ,i)
-                         (incf ,i)))
-
-         #+sbcl (sequence-end `(or (sequence:emptyp ,var)
-                            (>= ,i ,len)))
-         #+sbcl (sequence-next `(prog1 (sequence:elt ,var ,i)
-                           (incf ,i))))
-         
-    (labels ((state-name (state)
-               (declare (type ndfa::state state))
-               (or (cadr (assoc state state-assoc :test #'eq))
-                   (error "no state name registered for state ~A, available states are ~A" state state-assoc)))
-             (dump-typecase-transition (transition)
-               (declare (type ndfa::transition transition))
-               (assert (typep (ndfa:next-state transition) 'ndfa::state))
-               (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
-               `(,(transition-label transition)
-                 (go ,(state-name (ndfa:next-state transition)))))
-             (dump-case-transition (transition)
-               (declare (type ndfa::transition transition))
-               (assert (typep (ndfa:next-state transition) 'ndfa::state))
-               (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
-               `(,(cdr (transition-label transition))
-                 (go ,(state-name (ndfa:next-state transition)))))
-             (dump-end (state end)
-               (cond ((null (state-final-p state))
-                      `(when ,end
-                         (return-from ,check nil)))
-                     ((state-sticky-p state)
-                      `(return-from ,check ,(state-exit-form state)))
-                     (t
-                      `(when ,end
-                         (return-from ,check ,(state-exit-form state))))))
-             (dump-case (state next)
-               (cond
-                 ((every #'(lambda (trans)
-                             (and (listp (transition-label trans))
-                                  (member (car (transition-label trans)) '(eql member))))
-                         (transitions state))
-                  `(case ,next
-                     ,@(mapcar #'dump-case-transition (transitions state))
-                     (t (return-from ,check nil))))
-                 (t
-                  (let* ((leading-clauses (mapcar #'dump-typecase-transition (transitions state)))
-                         ;; We use subtypep here to remove the final T clause
-                         ;; cases like (string...) ((not string) ...)  or
-                         ;; if a (T ...) clause already exists.
-                         (exhaustive? (subtypep t (cons 'or (mapcar #'car leading-clauses))))
-                         (final-clause-option (if exhaustive?
-                                                  nil
-                                                  `((t (return-from ,check nil))))))
-                    ;; final-clause-option is a ,@-comaptible list of the final
-                    ;; clause or NIL in the situation that the leading clauses are
-                    ;; exhaustive.  This is because we
-                    ;; want to eliminate a final T clause in the clause the leading 
-                    ;; clauses are exhaustive.
-                    `(typecase ,next ;; TODO -- change to bdd-typecase, but this makes startup VERY slow
-                                   ,@leading-clauses
-                                   ,@final-clause-option)))))
-             (dump-state (state end next)
-               (copy-list `(,(state-name state)
-                            ,(dump-end state end)
-                            ,(dump-case state next))))
-             (dump-tagbody (end final-next)
-               (cond
-                 ((get-initial-states ndfa)
-                  (assert (= 1 (length (get-initial-states ndfa))))
-                  (assert (typep (car (get-initial-states ndfa)) 'ndfa::state))
-                  `(tagbody 
-                      (go ,(state-name (car (get-initial-states ndfa))))
-                      ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states)))
-                 (t
-                   nil))))
-
-      `(lambda (,var)
-         ;; Don't declare seq a sequence! because if this function gets called with
-         ;; a non-sequence, we want to simply return nil, rather than signaling
-         ;; an error.
-         (declare (optimize (speed 3) (debug 0) (safety 0))
-                  ;; (optimize (speed 0) (debug 3) (safety 3))
-                  )
-         (block ,check
-           (typecase ,var
-             (list
-              ,(dump-tagbody list-end list-next))
-             (simple-vector
-              (let ((,i 0)
-                    (,len (length ,var)))
-                (declare (type (and unsigned-byte fixnum) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody simple-vector-end simple-vector-next)))
-             (vector
-              (let ((,i 0)
-                    (,len (length ,var)))
-                (declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody vector-end vector-next)))
-             #+sbcl
-             (sequence           ; case to handle extensible sequences
-              (let ((,i 0)
-                    (,len (sequence:length ,var))) ; sequence (such as infinite sequence) might not support length
-                (declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody sequence-end sequence-next)))
-             (t
-              nil)))))))
 
 (defmethod ndfa:perform-some-transitions ((ndfa rte-state-machine) starting-states input-sequence)
   (declare (type list starting-states)
@@ -585,6 +393,16 @@ consists of values whose types match PATTERN."
     ;; (format t "~%rte pattern: ~A~%" name-sym) ; debug
     name-sym))
 
+(defparameter *dump-code-strategy* (make-instance 'strategy-goto))
+
+(defmethod dump-code ((pattern list) strategy &key (var 'seq))
+  (dump-code (rte-to-dfa pattern :reduce t) strategy :var var))
+
+(defmethod dump-code ((ndfa rte-state-machine) strategy &key (var 'seq))
+  (declare (ignore var))
+  (error
+   "need to implement dump-code for strategy of classes ~A ~A~%" (type-of ndfa) (type-of strategy)))
+
 (defun define-rte (pattern)
   ;; TODO
   ;; optimization, a top-level (:cat ...) which contains only
@@ -597,7 +415,7 @@ consists of values whose types match PATTERN."
               (function-name (make-rte-function-name pattern)))
           (register-dependents dfa)
           (remember-state-machine dfa pattern)
-          (setf (symbol-function function-name) (eval (dump-code dfa)))
+          (setf (symbol-function function-name) (eval (dump-code dfa *dump-code-strategy*)))
           `(and sequence (satisfies ,function-name)))))
 
 (deftype rte (pattern)
@@ -633,7 +451,7 @@ a valid regular type expression.
   "Declare a given RTE pattern so that that it can be used when loaded from fasl or referenced symbolically be another rte."
   (let* ((dfa (rte-to-dfa pattern))
          (name (make-rte-function-name pattern))
-         (code (dump-code dfa)))
+         (code (dump-code dfa *dump-code-strategy*)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern
              (gethash ',rte-name *rte-hash*) ',pattern)

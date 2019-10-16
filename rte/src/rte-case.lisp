@@ -120,7 +120,7 @@
                 ((not sequence) nil)
                 ,@(mapcar #'unreachable-clause unreachable-bodys)
                 (t
-                 (funcall ,(dump-code dfa :var object)
+                 (funcall ,(dump-code dfa *dump-code-strategy* :var object)
                           ,object))))))))))
 
 (defmacro rte-ecase (object-form &body clauses)

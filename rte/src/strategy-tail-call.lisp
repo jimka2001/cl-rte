@@ -1,4 +1,4 @@
-;; Copyright (c) 2016 EPITA Research and Development Laboratory
+;; Copyright (c) 2019 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,29 +19,31 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(asdf:defsystem :rte-test
-  :version (:read-file-form "../version.lisp")
-  :author "Jim Newton"
-  :description "Test cases for rte package/system"
-  :license "MIT"
-  :defsystem-depends-on (:rte)
-  :depends-on (;;:rte
-	       :adjuvant
-	       :rte-regexp-test
-	       (:feature :sbcl :2d-array)
-	       :scrutiny
-	       (:feature :sbcl :2d-array-test)
-	       :ndfa-test
-	       :lisp-types-test)
-  :components
-  ((:module "src"
-    :components
-    ((:file "test-rte")
-     (:file "test-list-of")
-     (:rte-file "test-re-pattern")
-     (:rte-file "test-destructuring-case-1")
-     (:rte-file "test-destructuring-case-2")
-     (:rte-file "test-destructuring-case")
-     (:rte-file "test-ordinary-lambda-list")
-     (:rte-file "test-rte-case")
-     (:rte-file "test-strategy")))))
+(in-package   :rte)
+
+(defclass strategy-tail-call (strategy-inline)
+  ())
+
+(defmethod goto-next-state ((strategy strategy-tail-call) state-name)
+  `(,state-name))
+
+(defmethod format-state-dispatch ((strategy strategy-tail-call) initial-state-name dumped-states)
+  `(labels ,dumped-states
+     ,(goto-next-state strategy initial-state-name)))
+
+(defmethod dump-state ((strategy strategy-tail-call) state-name  dumped-case)
+  (copy-list `((,state-name
+                ()
+                ,dumped-case))))
+
+(defmethod state-assoc ((strategy strategy-tail-call) exit-form-p states)
+  (let ((n 0))
+    (mapcar (lambda (state)
+              (list state (cond
+                            (exit-form-p
+                             (gensym "L-EXIT-"))
+                            ((state-sticky-p state)
+                             (gensym (format nil "STICKY-~D-" (incf n))))
+                            (t
+                             (gensym (format nil "L-~D-" (incf n)))))))
+            states)))

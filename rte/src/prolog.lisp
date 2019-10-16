@@ -53,7 +53,7 @@ the list is sorted by complexity, otherwise the sort order is non-deterministic.
   (dolist (pattern patterns)
     (let* ((dfa (gethash pattern *state-machines*))
            (name (make-rte-function-name pattern))
-           (code (dump-code dfa)))
+           (code (dump-code dfa *dump-code-strategy*)))
       (format stream ";; ")
       (write pattern
              :stream stream

@@ -322,3 +322,112 @@
                                                          (type-to-dnf-bottom-up `(or ,a ,b))))))
     (assert-true (= 3 (length (states reduced-dfa))))))
 
+(define-test ndfa/test-reduce-2
+  (let* ((T1 'fixnum)
+         (T3 'number)
+         (T4 'string)
+         (T6 '(and integer (not fixnum)))
+         (T7 '(and number (not integer)))
+         (T8 '(and integer
+               (not fixnum)
+               (or fixnum (not integer))))
+         (dfa (make-ndfa `((:label 0 :initial-p t
+                            :transitions ((:next-label 2 :transition-label ,T4)
+                                          (:next-label 1 :transition-label ,T1)))
+                           (:label 1
+                            :transitions ((:next-label 6 :transition-label ,T7)
+                                          (:next-label 5 :transition-label ,T1)
+                                          (:next-label 4 :transition-label ,T6)
+                                          (:next-label 3 :transition-label ,T8)))
+                           (:label 2
+                            :transitions ((:next-label 7 :transition-label ,T3)))
+                           (:label 3)
+                           (:label 4 :final-p t :exit-form :clause-2)
+                           (:label 5 :final-p t :exit-form :clause-1)
+                           (:label 6 :final-p t :exit-form :clause-3)
+                           (:label 7 :final-p t :exit-form :clause-3)
+                           )))
+         (reduced-dfa (minimize-state-machine dfa
+                                              :equal-labels (lambda (a b)
+                                                              (and (subtypep a b)
+                                                                   (subtypep b a)))
+                                              :combine (lambda (a b)
+                                                         (type-to-dnf-bottom-up `(or ,a ,b))))))
+    (assert-true (= 6 (length (states reduced-dfa))))))
+
+(define-test ndfa/test-reduce-3
+  (let* ((T1 'fixnum)
+         (T2 'integer)
+         (T3 'number)
+         (T4 'string)
+         (T6 '(and integer (not fixnum)))
+         (T7 '(and number (not integer)))
+         (T8 '(and integer
+               (not fixnum)
+               (or fixnum (not integer))))
+         (T9 'symbol)
+         (dfa (make-ndfa `((:label 0 :initial-p t
+                            :transitions ((:next-label 2 :transition-label ,T4)
+                                          (:next-label 1 :transition-label ,T1)
+                                          (:next-label 8 :transition-label ,T9)))
+                           (:label 1
+                            :transitions ((:next-label 6 :transition-label ,T7)
+                                          (:next-label 5 :transition-label ,T1)
+                                          (:next-label 4 :transition-label ,T6)
+                                          (:next-label 3 :transition-label ,T8)))
+                           (:label 2
+                            :transitions ((:next-label 7 :transition-label ,T3)))
+                           (:label 3)
+                           (:label 4 :final-p t :exit-form :clause-2)
+                           (:label 5 :final-p t :exit-form :clause-1)
+                           (:label 6 :final-p t :exit-form :clause-3)
+                           (:label 7 :final-p t :exit-form :clause-3)
+                           (:label 8
+                            :transitions ((:next-label 7 :transition-label ,T2)
+                                          (:next-label 6 :transition-label ,T7)))
+                           )))
+         (reduced-dfa (minimize-state-machine dfa
+                                              :equal-labels (lambda (a b)
+                                                              (and (subtypep a b)
+                                                                   (subtypep b a)))
+                                              :combine (lambda (a b)
+                                                         (type-to-dnf-bottom-up `(or ,a ,b))))))
+    (assert-true (= 6 (length (states reduced-dfa))))))
+
+(define-test ndfa/test-reduce-4
+  (let* ((T1 'fixnum)
+         (T3 'number)
+         (T4 'string)
+         (T6 '(and integer (not fixnum)))
+         (T7 '(and number (not integer)))
+         (T8 '(and integer
+               (not fixnum)
+               (or fixnum (not integer))))
+         (T9 'symbol)
+         (dfa (make-ndfa `((:label 0 :initial-p t
+                            :transitions ((:next-label 2 :transition-label ,T4)
+                                          
+                                          (:next-label 8 :transition-label ,T9)))
+                          
+                           (:label 2
+                            :transitions ((:next-label 7 :transition-label ,T3)))
+                           (:label 3)
+                           (:label 4 :final-p t :exit-form :clause-2)
+                           (:label 5 :final-p t :exit-form :clause-1)
+                           (:label 6 :final-p t :exit-form :clause-3)
+                           (:label 7 :final-p t :exit-form :clause-3)
+                           (:label 8
+                            :transitions ((:next-label 7 :transition-label ,T3)
+                                          (:next-label 6 :transition-label ,T7)))
+                           )))
+         (reduced-dfa (minimize-state-machine dfa
+                                              :equal-labels (lambda (a b)
+                                                              (and (subtypep a b)
+                                                                   (subtypep b a)))
+                                              :combine (lambda (a b)
+                                                         (type-to-dnf-bottom-up `(or ,a ,b))))))
+    ;;(ndfa::ndfa-to-dot dfa nil :view t :prefix "dfa")
+    ;;(ndfa::ndfa-to-dot reduced-dfa nil :view t :prefix "reduced-dfa")
+    (assert-true (= 3 (length (states reduced-dfa))))
+
+    ))

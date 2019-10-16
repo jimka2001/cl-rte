@@ -1,4 +1,4 @@
-;; Copyright (c) 2018 EPITA Research and Development Laboratory
+;; Copyright (c) 2019 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,21 +19,9 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(asdf:defsystem :cl-robdd-test
-  :version (:read-file-form "../version.lisp")
-  :author "Jim Newton"
-  :description "Test cases for cl-robdd package/system"
-  :license "MIT"
-  :depends-on (:cl-fad
-	       :adjuvant
-               :scrutiny
-               :cl-robdd
-               )
-  :components
-  ((:module "src"
-    :components
-    ((:file "test-bdd")
-     ;;(:file "test-open-pipe-to-file")
-     (:file "test-bdd-dot")
-     (:file "test-cnf")
-     ))))
+
+(in-package   :rte)
+
+(defclass strategy-jump-table (dump-code-strategy)
+  ())
+

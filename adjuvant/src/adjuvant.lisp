@@ -240,7 +240,7 @@ USE DOLIST-TCONC instead."
 		      (declare (type (unsigned-byte 16) n1 n2))
                       (cond
                         ((= n1 n2)
-                         (let ((value (funcall fold-function obj1 obj2)))
+                         (let ((value (funcall fold-function obj2 obj1)))
                            (if (eql value stop-when)
                                (return-from tree-reduce stop-when)
                                (compactify (cons (list (1+ n1) value) tail)))))
@@ -250,7 +250,7 @@ USE DOLIST-TCONC instead."
                 (when (eql acc stop-when)
                   (return-from tree-reduce stop-when))
 		(if stack
-		    (finish-stack (funcall fold-function acc (cadr (car stack)))
+		    (finish-stack (funcall fold-function (cadr (car stack)) acc)
 				  (cdr stack))
 		    acc)))
        (destructuring-bind ((_ obj) &rest tail)

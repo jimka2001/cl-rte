@@ -57,7 +57,7 @@
          ((not sequence) nil)
          ,@(mapcar #'unreachable-clause unreachable-bodys)
            (t
-            (funcall ,(dump-code dfa :var object)
+            (funcall ,(dump-code dfa *dump-code-strategy* :var object)
                      ,object)
             )))))
 
@@ -84,6 +84,6 @@ CLAUSES is a list of sublists, each sublist can be destructured as: (RATIONAL-TY
            ((not sequence) nil)
            ,@(mapcar #'unreachable-clause unreachable-bodys)
            (t
-            (funcall ,(dump-code (rte-synchronized-product dfas) :var object)
+            (funcall ,(dump-code (rte-synchronized-product dfas) *dump-code-strategy* :var object)
                      ,object)
             ))))))

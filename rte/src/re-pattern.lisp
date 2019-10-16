@@ -157,215 +157,6 @@ depend on the choice of F-... function given."
     (values true-elements false-elements)))
 
 
-(defun canonicalize-pattern-once (re)
-  "Given a regular-type-expression, return a more canonical form.  This attempts to create an (:or ..) of (:and ...)'s, and
-removing or resolving redundant or trivial type designators. CANONICALIZE-PATTERN calls this function multiple times until
-a fixed point is found."
-  (flet ((like-multipy (operator patterns &key idempotent)
-           (setf patterns (remove :empty-word patterns))
-           (let ((new (remove :empty-word (mapcar #'canonicalize-pattern patterns))))
-             (cond
-               ((member :empty-set patterns)
-                :empty-set)
-               ((cdr new) ; at least 2 args
-                (cons operator new))
-               (new ; exactly 1 arg
-                (if idempotent
-                    (car new)
-                    (cons operator new)))
-               (t ; empty art list
-                :empty-word)))))
-  (traverse-pattern re
-                    :f-type #'(lambda (pattern)
-                                (cond ((atom pattern)
-                                       pattern)
-                                      ((eql 'member (car pattern)) ; alphabetize the arguments of (member ...)
-                                       (cons 'member (alphabetize (cdr pattern))))
-                                      ((eql 'rte (car pattern))
-                                       (cons 'rte (mapcar #'canonicalize-pattern (cdr pattern))))
-                                      (t
-                                       pattern)))
-               :f-empty-set #'identity
-               :f-empty-word #'identity
-               :f-0-* #'(lambda (patterns)
-                          (like-multipy :* patterns :idempotent nil))
-               :f-cat #'(lambda (patterns)
-                          ;; (:cat A B (:cat C D) E F) --> (:cat A B C D E F)
-                          (setf patterns
-                                (mapcan (lambda (term)
-                                          (cond ((and (listp term)
-                                                      (eql :cat (car term)))
-                                                 (copy-list (cdr term)))
-                                                (t
-                                                 (list term))))
-                                        patterns))
-                          (like-multipy :cat patterns :idempotent t))
-               :f-not #'(lambda (patterns &aux (pattern (car patterns)))
-                          (typecase pattern
-                            ((cons (eql :not))
-                             (canonicalize-pattern (cadr pattern)))
-                            ;;   (:not (:and A B)) --> (:or (:not A) (:not B))
-                            ((cons (eql :and))
-                             (cons :or (mapcar #'(lambda (p)
-                                                   (canonicalize-pattern (list :not p))) (cdr pattern))))
-                            ;;   (:not (:or A B)) --> (:and (:not A) (:not B))
-                            ((cons (eql :or))
-                             (cons :and (mapcar #'(lambda (p)
-                                                    (canonicalize-pattern (list :not p))) (cdr pattern))))
-                            ((cons (member :0-* :*) (cons (eql t) null)) ;; (:not (:0-* t)) --> :empty-set
-                             :empty-set)
-                            ((eql :empty-word) ;; (:not :empty-word) --> (:+ t)
-                              '(:+ t))
-                            ((eql :empty-set) ;; (:not :empty-set) --> (:* t)
-                             '(:* t))
-                            ((cons keyword)
-                             (cons :not (mapcar #'canonicalize-pattern patterns)))
-                            (t
-                             `(:or :empty-word
-                                   (not ,@patterns)
-                                   (:cat t t (:0-* t))))))
-               :f-or #'(lambda (patterns)
-                         (let ((sub-or (setof s patterns
-                                              (and (listp s)
-                                                   (eql :or (car s))))))
-                           ;; (:or (:or A B ) C D) --> (:or A B C D)
-                           (dolist (s sub-or)
-                             (dolist (p (cdr s))
-                               (push p patterns)))
-                           (setf patterns (set-difference patterns sub-or :test #'equal)))
-
-                         ;; (:or ... :empty-set ...) --> (:or ...)
-                         (setf patterns (remove :empty-set patterns :test #'eq))
-
-                         ;; (:or (member 1 2 3) (member 10 20 30))
-                         ;;  --> (:or (member 1 2 3 10 20 30))   ;; in some order, unspecified
-                         (when (< 1 (count-if #'(lambda (obj)
-                                                  (and (listp obj)
-                                                       (member (car obj) '(eql member)))) patterns))
-                           (multiple-value-bind (matches other) (partition-by-predicate #'(lambda (obj)
-                                                                                            (and (listp obj)
-                                                                                                 (member (car obj) '(eql member))))
-                                                                                        patterns)
-                             (setf patterns (cons (cons 'member (mapcan (lambda (match)
-                                                                          (copy-list (cdr match))) matches))
-                                                  other))))
-                         (setf patterns (uniquify patterns)
-                               patterns (remove :empty-set patterns)
-                               patterns (mapcar #'canonicalize-pattern patterns)
-                               patterns (remove :empty-set patterns)
-                               patterns (uniquify patterns)
-                               patterns (remove-redundant-types patterns :or))
-                         ;; (:or A B (:0-* t))
-                         ;;  --> (:or (:0-* t))
-                         (when (intersection patterns
-                                             '((:0-* t)
-                                               (:0-or-more t)
-                                               (:* t))
-                                             :test #'equal)
-                           (setf patterns (list '(:* t))))
-                         (cond
-                           ((cdr patterns)
-                            ;; TODO, should not alphabetize patterns because it will not work in the case
-                            ;; the types have side effect or if they are order dependents such as
-                            ;; (:or (not list) (rte ...))
-                            ;; this will break some tests, which will need to be fixed. and it will be harder
-                            ;; to make assertions about complicated types.
-                            (cons :or (alphabetize patterns)))
-                           (patterns
-                            (car patterns))
-                           (t
-                            :empty-set)))
-                    :f-and  #'(lambda (patterns)
-                                (let ((sub-and (setof s patterns
-                                                      (and (listp s)
-                                                           (eql :and (car s))))))
-                                  ;; (:and (:and A B ) C D) --> (:and A B C C)
-                                  (dolist (s sub-and)
-                                    (dolist (p (cdr s))
-                                      (push p patterns)))
-                                  (setf patterns (set-difference patterns sub-and :test #'equal)))
-
-                                ;; (:and A B (:0-* t))
-                                ;;  --> (:and A B)
-                                ;; TODO, is this correct?  what about (:and (:* t)) -/-> (:and)
-                                (dolist (p '((:0-* t)
-                                             (:0-or-more t)
-                                             (:* t)))
-                                  (setf patterns (remove p patterns :test #'equal)))
-                                
-                                ;; (:and (member 1 2 3) (member 2 3 4) ...)
-                                ;;  --> (:and (member 2 3) ...)   ;; in some order, unspecified
-                                (when (< 1 (count-if #'(lambda (obj)
-                                                         (and (listp obj)
-                                                              (member (car obj) '(eql member)))) patterns))
-                                  (multiple-value-bind (matches other) (partition-by-predicate #'(lambda (obj)
-                                                                                                   (and (listp obj)
-                                                                                                        (member (car obj) '(eql member))))
-                                                                                               patterns)
-                                    (declare (notinline intersection))
-                                    (let ((common (cdr (car matches))))
-                                      (dolist (match (cdr matches))
-                                        (setf common (intersection common (cdr match))))
-                                      (setf patterns (cons (cons 'member common)
-                                                           other)))))
-                                ;; (:and (:or A B) C D) --> (:or (:and A C D) (:and B C D))
-                                (let ((sub-or (find-if (lambda (s)
-                                                         (and (listp s)
-                                                              (eql :or (car s))))
-                                                       patterns)))
-                                  (setf patterns (remove sub-or patterns :test #'equal))
-                                  
-                                  (cond
-                                    (sub-or
-                                     (canonicalize-pattern (cons :or (loop :for p :in (cdr sub-or)
-                                                                           :collect `(:and ,p ,@patterns)))))
-                                    ((member :empty-set patterns)
-                                     :empty-set)
-
-                                    ((and (member :empty-word patterns)
-                                          (exists p patterns
-                                            (and (symbolp p)
-                                                 (valid-type-p p)
-                                                 (not (subtypep p nil)))))
-                                     :empty-set)
-
-                                    ((and (exists p patterns
-                                            (and (symbolp p)
-                                                 (valid-type-p p)
-                                                 (not (subtypep p nil))))
-                                          (exists p patterns
-                                            (and (typep p '(cons (eql :cat)))
-                                                 (> (count-if-not #'nullable (cdr p)) 1))))
-                                     :empty-set)
-                                    
-                                    ;; NOTE that we cannot convert (:and A :empty-word) into :empty-set nor :empty-word
-                                    ;;   becasue if A != :empty-word  then it reduces to :empty-set
-                                    ;;   but if     A == :empty-word  then it reduces to :empty-word
-                                    (t
-                                     (setf patterns (uniquify patterns)
-                                           patterns (mapcar #'canonicalize-pattern patterns)
-                                           patterns (remove '(:0-* t) patterns :test #'equal)
-                                           patterns (uniquify patterns)
-                                           patterns (remove-redundant-types patterns :and))
-                                     (cond
-                                       ((member :empty-set patterns)
-                                        :empty-set)
-                                       ((cdr patterns)
-                                        ;; TODO, should not alphabetize patterns because it will not work in the case
-                                        ;; the types have side effect or if they are order dependents such as
-                                        ;; (:or (not list) (rte ...))
-                                        ;; this will break some tests, which will need to be fixed. and it will be harder
-                                        ;; to make assertions about complicated types.
-                                        (cons :and (alphabetize patterns)))
-                                       (patterns
-                                        (car patterns))
-                                       (t
-                                        '(:0-* t))))))))))
-
-(defun canonicalize-pattern (re)
-  "Given a regular-type-expression, return a canonical form."
-  (fixed-point #'canonicalize-pattern-once re :test #'equal))
-
 (defun nullable (re)
   (traverse-pattern re
                :f-empty-set (constantly nil)
@@ -392,69 +183,6 @@ a fixed point is found."
      (cons (car objects)
            (uniquify (cdr objects))))))
 
-(defun derivative (pattern wrt-type)
-  (flet ((walk (patterns)
-           (mapcar (lambda (p)
-                     (derivative (canonicalize-pattern p) wrt-type))
-                   patterns)))
-    (canonicalize-pattern
-     (traverse-pattern pattern
-                  :f-empty-word (constantly :empty-set)
-                  :f-empty-set  (constantly :empty-set)
-                  :f-type  #'(lambda (single-type-pattern)
-                               (cond
-                                 ((equal wrt-type single-type-pattern)
-                                  ;; the check for equivalence is not strictly necessary because if T1 and T2 are equivalent types
-                                  ;; then they are NOT mutually exclusive, thus the 3rd clause of this cond would be taken.
-                                  ;; Nevertheless, equivalence check is probably common, and fast.
-                                  :empty-word)
-                                 ((smarter-subtypep wrt-type single-type-pattern)
-                                  :empty-word)
-                                 ((disjoint-types-p wrt-type single-type-pattern)
-                                  ;; are the types mutually exclusive, e.g., string vs number
-                                  ;; (warn "~A and ~A are mutually exclusive~%" wrt-type single-type-pattern)
-                                  :empty-set)
-                                 ((null (nth-value 1 (smarter-subtypep wrt-type single-type-pattern)))
-                                  (warn-ambiguous-subtype :sub wrt-type :super single-type-pattern
-                                                          :consequence "assuming :empty-word")
-                                  :empty-word)
-                                 ((null (nth-value 1 (smarter-subtypep single-type-pattern wrt-type)))
-                                  (warn-ambiguous-subtype :sub single-type-pattern :super wrt-type
-                                                          :consequence "assuming :empty-word")
-                                  :empty-word)
-                                 ((smarter-subtypep single-type-pattern wrt-type)
-                                  (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S because ~S is a subtype of ~S--assuming :empty-word"
-                                        single-type-pattern wrt-type single-type-pattern wrt-type)
-                                  :empty-word)
-                                 (t
-                                  (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S--assuming :empty-word"
-                                        single-type-pattern wrt-type)
-                                  :empty-word)))
-                  :f-or    #'(lambda (patterns)
-                               (cons :or (walk patterns)))
-                  :f-and   #'(lambda (patterns)
-                               (cons :and (walk patterns)))
-                  :f-not   #'(lambda (patterns)
-                               (cons :not (walk patterns)))
-                  :f-cat #'(lambda (patterns)
-                             (flet ((term1 ()
-                                      `(:cat
-                                        ,(derivative (car patterns) wrt-type)
-                                        ,@(cdr patterns)))
-                                    (term2 ()
-                                      (derivative `(:cat ,@(cdr patterns)) wrt-type)))
-                               (cond
-                                 ((null (cdr patterns))
-                                  ;; if :cat has single argument, (derivative (:cat X) Y) --> (derivate X Y)
-                                  (derivative (car patterns) wrt-type))
-                                 ((nullable (car patterns))
-                                  `(:or ,(term1) ,(term2)))
-                                 (t
-                                  (term1)))))
-                  :f-0-* #'(lambda (patterns)
-                             (let ((deriv (derivative `(:cat ,@patterns) wrt-type)))
-                               `(:cat ,deriv (:* ,@patterns))))))))
-
 (defun first-types (pattern)
   (traverse-pattern pattern
                :f-empty-word (constantly nil)
@@ -477,199 +205,7 @@ a fixed point is found."
                :f-0-* #'(lambda (patterns)
                           (first-types (cons ':cat patterns)))))
 
-(defclass rte-state-machine (ndfa:state-machine)
-  ((ndfa::test :initform #'typep)
-   (deterministicp :initform t)
-   (transition-label-combine :initform (lambda (a b)
-                                         (type-to-dnf-bottom-up (bdd-reduce-lisp-type  `(or ,a ,b)))))
-   (transition-label-omit :initform (lambda (label)
-                                      ;; we omit creating nil  transitions
-                                      ;;    (ie. transitions whose label is nil)
-                                      ;;    on these state machines.
-                                      (eq nil (lisp-types:type-to-dnf-bottom-up label))))
-   (transition-label-equal :initform (lambda (a b &aux
-                                                    (a-reduc (lisp-types:type-to-dnf-bottom-up a))
-                                                    (b-reduc (lisp-types:type-to-dnf-bottom-up b)))
-                                       (and (subtypep a-reduc b-reduc)
-                                            (subtypep b-reduc a-reduc))))))
 
-(defmethod print-object ((rte rte-state-machine) stream)
-  (print-unreadable-object (rte stream :type t :identity nil)
-    (dolist (state (get-initial-states rte))
-      (format stream "~A" state))))
-
-(defmethod populate-synchronized-product ((sm-product rte-state-machine)
-                                          (sm1 rte-state-machine)
-                                          (sm2 rte-state-machine)
-                                          &key (boolean-function (lambda (a b) (and a b)))
-                                            
-                                            (minimize t)
-                                            (complement-transition-label (lambda (state)
-                                                                           (lisp-types:type-to-dnf-bottom-up
-                                                                            `(and t (not (or ,@(and state (mapcar #'transition-label (transitions state)))))))))
-                                            (merge-transition-labels (lambda (label-1 label-2)
-                                                                       (lisp-types:type-to-dnf-bottom-up `(and ,label-1
-                                                                                                               ,label-2))))
-                                            
-                                                               
-                                            (final-state-callback (lambda (product-state st1 st2)
-                                                                    (setf (state-exit-form product-state)
-                                                                          (cond
-                                                                            ((and st1
-                                                                                  st2
-                                                                                  (state-exit-form st1)
-                                                                                  (state-exit-form st2))
-                                                                             ;; if the two states both have an exit form, take the one with
-                                                                             ;; lowest clause-index (highest priority), this is the one which appears
-                                                                             ;; first in the unexpanded typecase.
-                                                                             (if (< (clause-index st1) (clause-index st2))
-                                                                                 (state-exit-form st1)
-                                                                                 (state-exit-form st2)))
-                                                                            (t
-                                                                             (or (and st1 (state-exit-form st1))
-                                                                                 (and st2 (state-exit-form st2)))))))))
-  (call-next-method sm-product sm1 sm2 :boolean-function boolean-function
-                                       :minimize minimize
-                                       :merge-transition-labels merge-transition-labels
-                                       :complement-transition-label complement-transition-label
-                                       :final-state-callback final-state-callback))
-
-(defgeneric dump-code (object &key var))
-
-(defmethod dump-code ((pattern list) &key (var 'seq))
-  (dump-code (rte-to-dfa pattern :reduce t) :var var))
-
-(defmethod dump-code ((ndfa rte-state-machine) &key (var 'seq))
-  (let* ((states (append (ndfa:get-initial-states ndfa)
-                         (set-difference (ndfa:states ndfa)
-                                         (ndfa:get-initial-states ndfa) :test #'eq)))
-         (exit-form-p (find-if (lambda (state)
-                                 ;; something evaluatable?
-                                 (typecase (state-exit-form state)
-                                   ((member t nil) nil)
-                                   (keyword nil)
-                                   (cons t)
-                                   (symbol t)
-                                   (t nil))) (get-final-states ndfa)))
-         (state-assoc (let ((n 0))
-                        (mapcar (lambda (state)
-                                  (list state (if exit-form-p
-                                                  (gensym "L")
-                                                  (incf n))))
-                                states)))
-         (list-end `(null ,var))
-         (list-next `(pop ,var))
-         (i (if exit-form-p (gensym "I") 'i))
-         (check (if exit-form-p (gensym "CHECK") 'check))
-         (len (if exit-form-p (gensym "LEN") 'len))
-         (simple-vector-end `(>= ,i ,len))
-         (simple-vector-next `(prog1 (svref ,var ,i)
-                                (incf ,i)))
-
-         (vector-end `(>= ,i ,len))
-         (vector-next `(prog1 (aref ,var ,i)
-                         (incf ,i)))
-
-         #+sbcl (sequence-end `(or (sequence:emptyp ,var)
-                            (>= ,i ,len)))
-         #+sbcl (sequence-next `(prog1 (sequence:elt ,var ,i)
-                           (incf ,i))))
-         
-    (labels ((state-name (state)
-               (declare (type ndfa::state state))
-               (or (cadr (assoc state state-assoc :test #'eq))
-                   (error "no state name registered for state ~A, available states are ~A" state state-assoc)))
-             (dump-typecase-transition (transition)
-               (declare (type ndfa::transition transition))
-               (assert (typep (ndfa:next-state transition) 'ndfa::state))
-               (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
-               `(,(transition-label transition)
-                 (go ,(state-name (ndfa:next-state transition)))))
-             (dump-case-transition (transition)
-               (declare (type ndfa::transition transition))
-               (assert (typep (ndfa:next-state transition) 'ndfa::state))
-               (assert (typep (state-name (ndfa:next-state transition)) '(not null)))
-               `(,(cdr (transition-label transition))
-                 (go ,(state-name (ndfa:next-state transition)))))
-             (dump-end (state end)
-               (cond ((null (state-final-p state))
-                      `(when ,end
-                         (return-from ,check nil)))
-                     ((state-sticky-p state)
-                      `(return-from ,check ,(state-exit-form state)))
-                     (t
-                      `(when ,end
-                         (return-from ,check ,(state-exit-form state))))))
-             (dump-case (state next)
-               (cond
-                 ((every #'(lambda (trans)
-                             (and (listp (transition-label trans))
-                                  (member (car (transition-label trans)) '(eql member))))
-                         (transitions state))
-                  `(case ,next
-                     ,@(mapcar #'dump-case-transition (transitions state))
-                     (t (return-from ,check nil))))
-                 (t
-                  (let* ((leading-clauses (mapcar #'dump-typecase-transition (transitions state)))
-                         ;; We use subtypep here to remove the final T clause
-                         ;; cases like (string...) ((not string) ...)  or
-                         ;; if a (T ...) clause already exists.
-                         (exhaustive? (subtypep t (cons 'or (mapcar #'car leading-clauses))))
-                         (final-clause-option (if exhaustive?
-                                                  nil
-                                                  `((t (return-from ,check nil))))))
-                    ;; final-clause-option is a ,@-comaptible list of the final
-                    ;; clause or NIL in the situation that the leading clauses are
-                    ;; exhaustive.  This is because we
-                    ;; want to eliminate a final T clause in the clause the leading 
-                    ;; clauses are exhaustive.
-                    `(typecase ,next ;; TODO -- change to bdd-typecase, but this makes startup VERY slow
-                                   ,@leading-clauses
-                                   ,@final-clause-option)))))
-             (dump-state (state end next)
-               (copy-list `(,(state-name state)
-                            ,(dump-end state end)
-                            ,(dump-case state next))))
-             (dump-tagbody (end final-next)
-               (cond
-                 ((get-initial-states ndfa)
-                  (assert (= 1 (length (get-initial-states ndfa))))
-                  (assert (typep (car (get-initial-states ndfa)) 'ndfa::state))
-                  `(tagbody 
-                      (go ,(state-name (car (get-initial-states ndfa))))
-                      ,@(mapcan #'(lambda (state) (dump-state state end final-next)) states)))
-                 (t
-                   nil))))
-
-      `(lambda (,var)
-         ;; Don't declare seq a sequence! because if this function gets called with
-         ;; a non-sequence, we want to simply return nil, rather than signaling
-         ;; an error.
-         (declare (optimize (speed 3) (debug 0) (safety 0))
-                  ;; (optimize (speed 0) (debug 3) (safety 3))
-                  )
-         (block ,check
-           (typecase ,var
-             (list
-              ,(dump-tagbody list-end list-next))
-             (simple-vector
-              (let ((,i 0)
-                    (,len (length ,var)))
-                (declare (type (and unsigned-byte fixnum) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody simple-vector-end simple-vector-next)))
-             (vector
-              (let ((,i 0)
-                    (,len (length ,var)))
-                (declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody vector-end vector-next)))
-             #+sbcl
-             (sequence           ; case to handle extensible sequences
-              (let ((,i 0)
-                    (,len (sequence:length ,var))) ; sequence (such as infinite sequence) might not support length
-                (declare (type (and fixnum unsigned-byte) ,i ,len) (ignorable ,len))
-                ,(dump-tagbody sequence-end sequence-next)))
-             (t
-              nil)))))))
 
 (defmethod ndfa:perform-some-transitions ((ndfa rte-state-machine) starting-states input-sequence)
   (declare (type list starting-states)
@@ -857,6 +393,16 @@ consists of values whose types match PATTERN."
     ;; (format t "~%rte pattern: ~A~%" name-sym) ; debug
     name-sym))
 
+(defparameter *dump-code-strategy* (make-instance 'strategy-goto))
+
+(defmethod dump-code ((pattern list) strategy &key (var 'seq))
+  (dump-code (rte-to-dfa pattern :reduce t) strategy :var var))
+
+(defmethod dump-code ((ndfa rte-state-machine) strategy &key (var 'seq))
+  (declare (ignore var))
+  (error
+   "need to implement dump-code for strategy of classes ~A ~A~%" (type-of ndfa) (type-of strategy)))
+
 (defun define-rte (pattern)
   ;; TODO
   ;; optimization, a top-level (:cat ...) which contains only
@@ -869,7 +415,7 @@ consists of values whose types match PATTERN."
               (function-name (make-rte-function-name pattern)))
           (register-dependents dfa)
           (remember-state-machine dfa pattern)
-          (setf (symbol-function function-name) (eval (dump-code dfa)))
+          (setf (symbol-function function-name) (eval (dump-code dfa *dump-code-strategy*)))
           `(and sequence (satisfies ,function-name)))))
 
 (deftype rte (pattern)
@@ -905,7 +451,7 @@ a valid regular type expression.
   "Declare a given RTE pattern so that that it can be used when loaded from fasl or referenced symbolically be another rte."
   (let* ((dfa (rte-to-dfa pattern))
          (name (make-rte-function-name pattern))
-         (code (dump-code dfa)))
+         (code (dump-code dfa *dump-code-strategy*)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (setf (getf (symbol-plist ',name) :rte-pattern) ',pattern
              (gethash ',rte-name *rte-hash*) ',pattern)

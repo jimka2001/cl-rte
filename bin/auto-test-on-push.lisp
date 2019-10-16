@@ -42,6 +42,7 @@
 (ql:quickload :iterate)
 (ql:quickload :yacc)
 (ql:quickload :spatial-trees)
+(ql:quickload :trivia)
 
 (asdf:initialize-source-registry `(:source-registry
                                    (:tree (,(sb-posix:getcwd)))

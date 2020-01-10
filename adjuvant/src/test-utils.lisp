@@ -608,3 +608,17 @@
             (assert-true (equal strings '("abc"))))
           (group-by '("abc") :key #'length)))
   
+
+(define-test test/assoc-to-hash
+  (assert-true (hash-table-p (assoc-to-hash nil)))
+  (assert-true (eql 100 (gethash :a (assoc-to-hash '((:a 100)
+                                                     (:b 200))))))
+  (assert-true (eql 200 (gethash :b (assoc-to-hash '((:a 100)
+                                                     (:b 200))))))
+  (assert-true (eql 200 (gethash :b (assoc-to-hash '((:a . 100)
+                                                     (:b . 200))
+                                                   :assoc-get #'cdr))))
+  (assert-true (eql 100 (gethash :a (assoc-to-hash '((:a . 100)
+                                                     (:b . 200))
+                                                   :assoc-get #'cdr)))))
+  

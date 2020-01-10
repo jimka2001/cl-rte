@@ -1043,11 +1043,16 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
            (t
             (error "cannot compare ~A ~A with ~A ~A" (class-of a) a (class-of b) b))))))
 
-
-
 (defun hash-to-assoc (hash)
   "Build a car/cadr assoc-list from the entries in a given hash table"
   (declare (type hash-table hash))
   (prog1-let (alist)
     (maphash (lambda (&rest args)
                (push args alist)) hash)))
+
+(defun assoc-to-hash (assoc &key (test #'eql) (assoc-get #'cadr))
+  "Build a hash table from a car/cadr assoc-list (or car/cdr if :assoc-get #'cdr)"
+  (let ((hash (make-hash-table :test test)))
+    (dolist (pair assoc)
+      (setf (gethash (car pair) hash) (funcall assoc-get pair)))
+    hash))

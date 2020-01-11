@@ -240,6 +240,15 @@
   (assert-true (equal (alphabetize '(number (number 10 12) (number 2 5) (number 6) float))
                       '(float number (number 2 5) (number 6) (number 10 12)))))
 
+(defclass test-X () ())
+(defclass test-A (test-X) ())
+(defclass test-B (test-X) ())
+(defclass test-C (test-X) ())
+(defclass test-D (test-X) ())
+(defclass test-E (test-X) ())
+(defclass test-F (test-X) ())
+(defclass test-G (test-X) ())
+
 (define-test type/canonicalize-pattern
 
     (assert-true (equal '(:cat symbol number) (canonicalize-pattern '(:cat (type symbol) (type number)))))
@@ -273,13 +282,14 @@
     (assert-true (equal '(:cat (:* float) (:or float string))
                         (canonicalize-pattern '(:cat (:0-* float) (:or string float)))))
 
-    (assert-true (equal '(:OR (:AND A D E F)
-                              (:AND A D E G)
-                              (:AND B D E F)
-                              (:AND B D E G)
-                              (:AND C D E F)
-                              (:AND C D E G))
-                        (canonicalize-pattern '(:and (:or A B C) D E (:or F G)))))
+    (assert-true (equal '(:OR (:AND test-A test-D test-E test-F)
+                              (:AND test-A test-D test-E test-G)
+                              (:AND test-B test-D test-E test-F)
+                              (:AND test-B test-D test-E test-G)
+                              (:AND test-C test-D test-E test-F)
+                              (:AND test-C test-D test-E test-G))
+                        (canonicalize-pattern '(:and (:or test-A test-B test-C) test-D test-E
+                                                (:or test-F test-G)))))
 
     ;; redundant types
 

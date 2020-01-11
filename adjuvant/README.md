@@ -9,6 +9,8 @@ Utility functions used in other packages.
 ### List Manipulation
 * `hash-to-assoc` -- Build a car/cadr assoc-list from the entries in a given hash table.
 
+* `assoc-to-hash` -- Build an assoc-list from the entries in a given hash table.
+
 * `exists-tail` -- iterate a variable across a list, as if by `CL:MAPL`, until an element is found to verify
 the `BODY`, at which point the tail, including the verifying element, is returned.
 The values of the variable are the cons cells of the given list, not the individual elements.

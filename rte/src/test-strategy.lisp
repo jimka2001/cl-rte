@@ -39,8 +39,6 @@
                   ;;strategy-jump-table
                   ))
       (let ((lambda-match (rte::dump-code (rte-to-dfa rte) (make-instance cl))))
-        (format t "rte=~A~%" rte)
-        (format t "cl=~A~%~A~%~%" cl lambda-match)
         (let ((f-match (eval lambda-match)))
           (declare (type function f-match))
           (dolist (seq yes)

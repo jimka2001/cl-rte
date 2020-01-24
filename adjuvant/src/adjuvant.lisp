@@ -871,6 +871,7 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
                             (y-log nil)
                             (x-label nil)
                             (y-label nil)
+                            (tics nil) ;; or "nomirror"
                             (create-png-p t)
                             (with "linespoints") ;; or "points"
                             data)
@@ -901,6 +902,8 @@ E.g.,  (chop-pathname \"/full/path/name/to/file.extension\") --> \"file.extensio
       (format gnu "set xlabel ~S~%" x-label))
     (when y-label
       (format gnu "set ylabel ~S~%" y-label))
+    (when tics
+      (format gnu "set tics ~S~%" tics))
     (format gnu "set key bmargin~%")
     (when title
       (format gnu "set title ~S~%" title))

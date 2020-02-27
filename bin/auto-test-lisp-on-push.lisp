@@ -10,14 +10,6 @@
 ;; (declaim (optimize (safety 3) (debug 3) (space 0) (speed 0))) 
 (declaim (optimize (safety 1) (debug 0) (space 0) (speed 3) (compilation-speed 0)))
 
-(format t "============= apt-get update~%")
-(sb-ext:run-program "apt-get" (list "update")
-                    :search t :output t)
-
-(dolist (app '("graphviz" "gnuplot" "git"))
-  (format t "============= installing ~A~%" app)
-  (sb-ext:run-program "apt-get" (list "install" "-y" app)
-                      :search t  :output t))
 (format t "============= cloning subtypep~%")
 
 ;;  git clone http://<username>:<deploy_token>@gitlab.example.com/tanuki/awesome_project.git

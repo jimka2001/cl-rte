@@ -188,6 +188,9 @@ depend on the choice of F-... function given."
                :f-empty-word (constantly nil)
                :f-empty-set  (constantly nil)
                :f-type #'list
+               ;; TODO this is a bug need to figure out what should
+               ;;   (first-types (:or)), (first-types (:and)),
+               ;;   (first-types (:cat)) return
                :f-or   #'(lambda (patterns)
                            (mapcan #'first-types patterns))
                :f-and #'(lambda (patterns)

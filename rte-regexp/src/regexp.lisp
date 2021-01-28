@@ -41,6 +41,7 @@
 ;; <elementary-RE> ::= <group> | <any> | <bos> | <eos> | <char> | <set> ; <bos> is missing from the published spec
 ;; <group>         ::= "(" <RE> ")"
 ;; <any>           ::= "."
+;; <bos>           ::= "^"
 ;; <eos>           ::= "$"
 ;; <char>          ::= any non metacharacter | "\" metacharacter
 ;; <set>           ::= <positive-set> | <negative-set>
@@ -130,7 +131,7 @@
   (<any>
    (|.| (constantly t)))
   
-  ;; <eos>           ::= "^"
+  ;; <bos>           ::= "^"
   (<bos>
    (|^| #'syntax-not-supported))
 

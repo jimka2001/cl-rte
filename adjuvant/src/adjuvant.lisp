@@ -233,7 +233,7 @@ USE DOLIST-TCONC instead."
                 (if (eql value stop-when)
                     (return-from tree-reduce stop-when)
                     value))
-              (compactify (stack)
+              (dwindle-tree (stack)
 		(if (null (cdr stack))
 		    stack
 		    (destructuring-bind ((n1 obj1) (n2 obj2) &rest tail) stack
@@ -243,7 +243,7 @@ USE DOLIST-TCONC instead."
                          (let ((value (funcall fold-function obj2 obj1)))
                            (if (eql value stop-when)
                                (return-from tree-reduce stop-when)
-                               (compactify (cons (list (1+ n1) value) tail)))))
+                               (dwindle-tree (cons (list (1+ n1) value) tail)))))
                         (t
                          stack)))))
 	      (finish-stack (acc stack)
@@ -255,7 +255,7 @@ USE DOLIST-TCONC instead."
 		    acc)))
        (destructuring-bind ((_ obj) &rest tail)
            (reduce (lambda (stack item)
-                     (compactify (cons (list 1 (local-key item)) stack)))
+                     (dwindle-tree (cons (list 1 (local-key item)) stack)))
                    (cdr object-list)
                    :initial-value (list (list 1 (local-key (car object-list)))))
 	 (declare (ignore _))

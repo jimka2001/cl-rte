@@ -230,23 +230,39 @@ a fixed point is found."
                                        (t
                                         '(:0-* t))))))))))
 
-(defun derivative (pattern wrt-type)
-  "Calculate the rational derivate of the given pattern."
+(defun derivative (pattern wrt-type &key type-hints)
+  "Calculate the rational derivative of the given pattern.
+type-hints is a list of triples:
+  each triple is of the form (type factors disjoints)
+  where factors is a list of known supertypes of the given type,
+  and disjoints is a list of known disjoint types of the given type"
   (flet ((walk (patterns)
            (mapcar (lambda (p)
-                     (derivative (canonicalize-pattern p) wrt-type))
+                     (derivative (canonicalize-pattern p) wrt-type :type-hints type-hints))
                    patterns)))
     (canonicalize-pattern
      (traverse-pattern pattern
                   :f-empty-word (constantly :empty-set)
                   :f-empty-set  (constantly :empty-set)
                   :f-type  #'(lambda (single-type-pattern)
+                               (let* ((type-hint (assoc wrt-type type-hints))
+                                      (factors (nth 1 type-hint))
+                                      (disjoints (nth 2 type-hint)))
                                (cond
                                  ((equal wrt-type single-type-pattern)
-                                  ;; the check for equivalence is not strictly necessary because if T1 and T2 are equivalent types
-                                  ;; then they are NOT mutually exclusive, thus the 3rd clause of this cond would be taken.
-                                  ;; Nevertheless, equivalence check is probably common, and fast.
+                                  ;; the check for equivalence is not strictly necessary because if T1
+                                  ;; and T2 are equivalent types then they are NOT mutually exclusive,
+                                  ;; thus the 3rd clause of this cond would be taken.  Nevertheless,
+                                  ;; equivalence check is probably common, and fast.
                                   :empty-word)
+                                 ((member single-type-pattern factors :test #'equal)
+                                  (format t "found ~A in factors ~A~%"
+                                          single-type-pattern factors)
+                                  :empty-word)
+                                 ((member single-type-pattern disjoints :test #'equal)
+                                  (format t "found ~A in disjoints ~A~%"
+                                          single-type-pattern disjoints)
+                                  :empty-set)
                                  ((smarter-subtypep wrt-type single-type-pattern)
                                   :empty-word)
                                  ((disjoint-types-p wrt-type single-type-pattern)
@@ -268,7 +284,7 @@ a fixed point is found."
                                  (t
                                   (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S--assuming :empty-word"
                                         single-type-pattern wrt-type)
-                                  :empty-word)))
+                                  :empty-word))))
                   :f-or    #'(lambda (patterns)
                                (cons :or (walk patterns)))
                   :f-and   #'(lambda (patterns)
@@ -278,20 +294,20 @@ a fixed point is found."
                   :f-cat #'(lambda (patterns)
                              (flet ((term1 ()
                                       `(:cat
-                                        ,(derivative (car patterns) wrt-type)
+                                        ,(derivative (car patterns) wrt-type :type-hints type-hints)
                                         ,@(cdr patterns)))
                                     (term2 ()
-                                      (derivative `(:cat ,@(cdr patterns)) wrt-type)))
+                                      (derivative `(:cat ,@(cdr patterns)) wrt-type :type-hints type-hints)))
                                (cond
                                  ((null (cdr patterns))
                                   ;; if :cat has single argument, (derivative (:cat X) Y) --> (derivate X Y)
-                                  (derivative (car patterns) wrt-type))
+                                  (derivative (car patterns) wrt-type :type-hints type-hints))
                                  ((nullable (car patterns))
                                   `(:or ,(term1) ,(term2)))
                                  (t
                                   (term1)))))
                   :f-0-* #'(lambda (patterns)
-                             (let ((deriv (derivative `(:cat ,@patterns) wrt-type)))
-                               `(:cat ,deriv (:* ,@patterns))))))))
+                             (let ((deriv (derivative `(:cat ,@patterns) wrt-type :type-hints type-hints)))
+                               `(:cat ,deriv (:* ,@patterns)))))))))
 
 

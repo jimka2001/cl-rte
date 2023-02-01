@@ -293,16 +293,20 @@ consists of values whose types match PATTERN."
                       ;; plus t.  For example, if the only first type is STRING,
                       ;; then we need (STRING (NOT STRING)), otherwise
                       ;; (:not ...) won't work properly
-                      (dolist (type (mdtd-bdd (uniquify (cons t (first-types re)))))
-                        (let ((deriv (derivative re type)))
-                          (case deriv
-                            ((:empty-set)
-                             nil)
-                            (t
-                             (pushnew deriv pending :test #'equal)
-                             (push (list :next-label deriv
-                                         :transition-label (lisp-types:type-to-dnf-bottom-up type))
-                                   transitions)))))
+                      ;; Some implementations of mdtd return a second value which is an assoc of type hints.
+                      ;;   If we have the type-hints, we pass it along to derivative, which will have
+                      ;;   an easier job of determining subtypeness and disjointness.
+                      (multiple-value-bind (types type-hints) (mdtd-padl (uniquify (cons t (first-types re))))
+                        (dolist (type types)
+                          (let ((deriv (derivative re type :type-hints type-hints)))
+                            (case deriv
+                              ((:empty-set)
+                               nil)
+                              (t
+                               (pushnew deriv pending :test #'equal)
+                               (push (list :next-label deriv
+                                           :transition-label (lisp-types:type-to-dnf-bottom-up type))
+                                     transitions))))))
                       ;; TODO, can't this be made to create an instance of an
                       ;;   rte-specific subclass of state.   add-rte-state?
                       ;;   thus removing exit-form from ndfa:state

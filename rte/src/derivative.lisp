@@ -255,13 +255,19 @@ type-hints is a list of triples:
                                   ;; thus the 3rd clause of this cond would be taken.  Nevertheless,
                                   ;; equivalence check is probably common, and fast.
                                   :empty-word)
+                                 ;; if single-type-pattern is in factors, then we know that it
+                                 ;;    wrt-type was constructed (by construction) to be a subtype of single-type-pattern
                                  ((member single-type-pattern factors :test #'equal)
-                                  (format t "found ~A in factors ~A~%"
-                                          single-type-pattern factors)
+                                  (format t "found ~A in factors ~A~%, subtype=~A~%"
+                                          single-type-pattern factors
+                                          (values (subtypep wrt-type single-type-pattern)))
                                   :empty-word)
+                                 ;; if single-type-pattern is in disjoints, then we know that it
+                                 ;;    wrt-type was constructed (by construction) to be a disjoint with single-type-pattern
                                  ((member single-type-pattern disjoints :test #'equal)
-                                  (format t "found ~A in disjoints ~A~%"
-                                          single-type-pattern disjoints)
+                                  (format t "found ~A in disjoints ~A~%, subtype=~A~%"
+                                          single-type-pattern disjoints
+                                          (values (subtypep `(and ,wrt-type ,single-type-pattern) nil)))
                                   :empty-set)
                                  ((smarter-subtypep wrt-type single-type-pattern)
                                   :empty-word)

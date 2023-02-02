@@ -14,7 +14,7 @@ However, several intermediate results might be useful as well, so they are made
 available.
 
 
-## Packages usable for the general public.
+## Packages usable for the general public
 ### [cl-robdd](cl-robdd/README.md)
 
 Implementation of ROBDD, Reduced Ordered Binary Decision Diagram

@@ -194,11 +194,11 @@
        (f2)))))
 
 (define-test test/rte-case-dfas-4
-  (flet ((f1 () :x)
-         (f2 () :y))
+  (flet ((f1 (x) (if x :x :y))
+         (f2 (x y) (if (or x y) :y :x)))
     (DESTRUCTURING-CASE-ALT '("1" "2")
-      ((&KEY X) NIL (F1))
-      ((&KEY X Y) NIL (F2)))))
+      ((&KEY X) NIL (F1 x ))
+      ((&KEY X Y) NIL (F2 x y)))))
 
 (define-test test/rte-case-dfas-5
   (flet ((f1 () :x)

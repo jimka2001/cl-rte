@@ -314,6 +314,6 @@ type-hints is a list of triples:
                                   (term1)))))
                   :f-0-* #'(lambda (patterns)
                              (let ((deriv (derivative `(:cat ,@patterns) wrt-type :type-hints type-hints)))
-                               `(:cat ,deriv (:* ,@patterns)))))))))
+                   `(:cat ,deriv (:* ,@patterns))))))))
 
 

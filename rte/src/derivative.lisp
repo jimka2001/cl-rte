@@ -241,79 +241,74 @@ type-hints is a list of triples:
                      (derivative (canonicalize-pattern p) wrt-type :type-hints type-hints))
                    patterns)))
     (canonicalize-pattern
-     (traverse-pattern pattern
-                  :f-empty-word (constantly :empty-set)
-                  :f-empty-set  (constantly :empty-set)
-                  :f-type  #'(lambda (single-type-pattern)
-                               (let* ((type-hint (assoc wrt-type type-hints))
-                                      (factors (nth 1 type-hint))
-                                      (disjoints (nth 2 type-hint)))
-                               (cond
-                                 ((equal wrt-type single-type-pattern)
-                                  ;; the check for equivalence is not strictly necessary because if T1
-                                  ;; and T2 are equivalent types then they are NOT mutually exclusive,
-                                  ;; thus the 3rd clause of this cond would be taken.  Nevertheless,
-                                  ;; equivalence check is probably common, and fast.
-                                  :empty-word)
-                                 ;; if single-type-pattern is in factors, then we know that it
-                                 ;;    wrt-type was constructed (by construction) to be a subtype of single-type-pattern
-                                 ((member single-type-pattern factors :test #'equal)
-                                  (format t "found ~A in factors ~A~%, subtype=~A~%"
-                                          single-type-pattern factors
-                                          (values (subtypep wrt-type single-type-pattern)))
-                                  :empty-word)
-                                 ;; if single-type-pattern is in disjoints, then we know that it
-                                 ;;    wrt-type was constructed (by construction) to be a disjoint with single-type-pattern
-                                 ((member single-type-pattern disjoints :test #'equal)
-                                  (format t "found ~A in disjoints ~A~%, subtype=~A~%"
-                                          single-type-pattern disjoints
-                                          (values (subtypep `(and ,wrt-type ,single-type-pattern) nil)))
-                                  :empty-set)
-                                 ((smarter-subtypep wrt-type single-type-pattern)
-                                  :empty-word)
-                                 ((disjoint-types-p wrt-type single-type-pattern)
-                                  ;; are the types mutually exclusive, e.g., string vs number
-                                  ;; (warn "~A and ~A are mutually exclusive~%" wrt-type single-type-pattern)
-                                  :empty-set)
-                                 ((null (nth-value 1 (smarter-subtypep wrt-type single-type-pattern)))
-                                  (warn-ambiguous-subtype :sub wrt-type :super single-type-pattern
-                                                          :consequence "assuming :empty-word")
-                                  :empty-word)
-                                 ((null (nth-value 1 (smarter-subtypep single-type-pattern wrt-type)))
-                                  (warn-ambiguous-subtype :sub single-type-pattern :super wrt-type
-                                                          :consequence "assuming :empty-word")
-                                  :empty-word)
-                                 ((smarter-subtypep single-type-pattern wrt-type)
-                                  (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S because ~S is a subtype of ~S--assuming :empty-word"
-                                        single-type-pattern wrt-type single-type-pattern wrt-type)
-                                  :empty-word)
-                                 (t
-                                  (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S--assuming :empty-word"
-                                        single-type-pattern wrt-type)
-                                  :empty-word))))
-                  :f-or    #'(lambda (patterns)
-                               (cons :or (walk patterns)))
-                  :f-and   #'(lambda (patterns)
-                               (cons :and (walk patterns)))
-                  :f-not   #'(lambda (patterns)
-                               (cons :not (walk patterns)))
-                  :f-cat #'(lambda (patterns)
-                             (flet ((term1 ()
-                                      `(:cat
-                                        ,(derivative (car patterns) wrt-type :type-hints type-hints)
-                                        ,@(cdr patterns)))
-                                    (term2 ()
-                                      (derivative `(:cat ,@(cdr patterns)) wrt-type :type-hints type-hints)))
-                               (cond
-                                 ((null (cdr patterns))
-                                  ;; if :cat has single argument, (derivative (:cat X) Y) --> (derivate X Y)
-                                  (derivative (car patterns) wrt-type :type-hints type-hints))
-                                 ((nullable (car patterns))
-                                  `(:or ,(term1) ,(term2)))
-                                 (t
-                                  (term1)))))
-                  :f-0-* #'(lambda (patterns)
-                             (let ((deriv (derivative `(:cat ,@patterns) wrt-type :type-hints type-hints)))
+     (traverse-pattern
+      pattern
+      :f-empty-word (constantly :empty-set)
+      :f-empty-set  (constantly :empty-set)
+      :f-type  #'(lambda (single-type-pattern)
+                   (let* ((type-hint (assoc wrt-type type-hints))
+                          (factors (nth 1 type-hint))
+                          (disjoints (nth 2 type-hint)))
+                     (cond
+                       ((equal wrt-type single-type-pattern)
+                        ;; the check for equivalence is not strictly necessary because if T1
+                        ;; and T2 are equivalent types then they are NOT mutually exclusive,
+                        ;; thus the 3rd clause of this cond would be taken.  Nevertheless,
+                        ;; equivalence check is probably common, and fast.
+                        :empty-word)
+                       ;; if single-type-pattern is in factors, then we know that it
+                       ;;    wrt-type was constructed (by construction) to be a subtype of single-type-pattern
+                       ((member single-type-pattern factors :test #'equal)
+                        :empty-word)
+                       ;; if single-type-pattern is in disjoints, then we know that it
+                       ;;    wrt-type was constructed (by construction) to be a disjoint with single-type-pattern
+                       ((member single-type-pattern disjoints :test #'equal)
+                        :empty-set)
+                       ((smarter-subtypep wrt-type single-type-pattern)
+                        :empty-word)
+                       ((disjoint-types-p wrt-type single-type-pattern)
+                        ;; are the types mutually exclusive, e.g., string vs number
+                        ;; (warn "~A and ~A are mutually exclusive~%" wrt-type single-type-pattern)
+                        :empty-set)
+                       ((null (nth-value 1 (smarter-subtypep wrt-type single-type-pattern)))
+                        (warn-ambiguous-subtype :sub wrt-type :super single-type-pattern
+                                                :consequence "assuming :empty-word")
+                        :empty-word)
+                       ((null (nth-value 1 (smarter-subtypep single-type-pattern wrt-type)))
+                        (warn-ambiguous-subtype :sub single-type-pattern :super wrt-type
+                                                :consequence "assuming :empty-word")
+                        :empty-word)
+                       ((smarter-subtypep single-type-pattern wrt-type)
+                        (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S because ~S is a subtype of ~S--assuming :empty-word"
+                              single-type-pattern wrt-type single-type-pattern wrt-type)
+                        :empty-word)
+                       (t
+                        (warn "cannot calculate the derivative of ~S~%    w.r.t. ~S--assuming :empty-word"
+                              single-type-pattern wrt-type)
+                        :empty-word))))
+      :f-or    #'(lambda (patterns)
+                   (cons :or (walk patterns)))
+      :f-and   #'(lambda (patterns)
+                   (cons :and (walk patterns)))
+      :f-not   #'(lambda (patterns)
+                   (cons :not (walk patterns)))
+      :f-cat #'(lambda (patterns)
+                 (flet ((term1 ()
+                          `(:cat
+                            ,(derivative (car patterns) wrt-type :type-hints type-hints)
+                            ,@(cdr patterns)))
+                        (term2 ()
+                          (derivative `(:cat ,@(cdr patterns)) wrt-type :type-hints type-hints)))
+                   (cond
+                     ((null (cdr patterns))
+                      ;; if :cat has single argument, (derivative (:cat X) Y) --> (derivate X Y)
+                      (derivative (car patterns) wrt-type :type-hints type-hints))
+                     ((nullable (car patterns))
+                      `(:or ,(term1) ,(term2)))
+                     (t
+                      (term1)))))
+      :f-0-* #'(lambda (patterns)
+                 (let ((deriv (derivative `(:cat ,@patterns) wrt-type :type-hints type-hints)))
                    `(:cat ,deriv (:* ,@patterns))))))))
 
 

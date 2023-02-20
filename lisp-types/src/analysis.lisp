@@ -1,4 +1,4 @@
-;; Copyright (c) 2016-18 EPITA Research and Development Laboratory
+;; Copyright (c) 2016-23 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -515,7 +515,7 @@
                                           (incf line-style)
                                           (format stream "set style line ~D linewidth ~D linecolor rgb \"#~A\"~%"
                                                   line-style
-                                                  (or (getf descr :linewidth) 1)
+                                                  (or (getf descr :linewidth) 2)
                                                   (getf descr :gnu-color))
                                           ;; collect
                                           `(:line-style ,line-style ,@descr))
@@ -903,7 +903,7 @@ i.e., of all the points whose xcoord is between x/2 and x*2."
 			      (format str "\\definecolor{color~A}{RGB}{~A,~A,~A}~%"
 				      color red green blue))
 			    (format str "\\addlegendimage{color~A,line width=2.0pt,font=\\ttfamily}~%" color))
-			  (format str "\\addlegendentry{~A};~%" (string-downcase legend-entry))))
+			  (format str "\\addlegendentry{~A}~%" (string-downcase legend-entry))))
 		  items)))
 	  (axis legend
 		'("hide axis"
@@ -1624,9 +1624,10 @@ sleeping before the code finishes evaluating."
                                         (suite-time-out (* 60 60 4)) (time-out 100) normalize hilite-min
                                         (decomposition-functions '(
 								   mdtd-baseline
+                                                                   mdtd-padl
 								   mdtd-bdd 
 
-								   mdtd-rtev2 
+								   ;; mdtd-rtev2 
 								   
 								   
 								   mdtd-graph
@@ -1663,7 +1664,17 @@ sleeping before the code finishes evaluating."
 			:destination-dir destination-dir)))))
 
 (defun best-2-report (&key (re-run t) (multiplier 1.8) (create-png-p t) (destination-dir *destination-dir*)
-                        (bucket-reporters *bucket-reporters*))
+                        (bucket-reporters *bucket-reporters*)
+                        (decomposition-functions '(;; mdtd-bdd-graph-strong
+                                                   ;; mdtd-bdd-graph-weak
+					           parameterized-mdtd-bdd-graph ;; tuned by params- simulation
+                                                   mdtd-bdd-graph ;; same as mdtd-bdd-graph-weak-dynamic
+                                                   ;;mdtd-bdd-strong
+                                                   ;;mdtd-bdd-weak
+                                                   mdtd-bdd ;; same as mdtd-bdd-weak-dynamic
+                                                   mdtd-padl
+                                                   ;; mdtd-rtev2
+                                                   mdtd-graph)))
   (big-test-report :re-run re-run
                    :prefix "best-2-" ;; should change to best-4-
                    :multiplier multiplier
@@ -1674,15 +1685,7 @@ sleeping before the code finishes evaluating."
                    :destination-dir destination-dir
                    :create-png-p create-png-p
                    :bucket-reporters bucket-reporters
-                   :decomposition-functions '( ;; mdtd-bdd-graph-strong
-                                              ;; mdtd-bdd-graph-weak
-					      parameterized-mdtd-bdd-graph ;; tuned by params- simulation
-                                              mdtd-bdd-graph ;; same as mdtd-bdd-graph-weak-dynamic
-                                              ;;mdtd-bdd-strong
-                                              ;;mdtd-bdd-weak
-                                              mdtd-bdd ;; same as mdtd-bdd-weak-dynamic
-                                              mdtd-rtev2
-                                              mdtd-graph)))
+                   :decomposition-functions decomposition-functions))
 
 (defun mdtd-report (&key (re-run t) (multiplier 2.5) (create-png-p t) (bucket-reporters *bucket-reporters*) (destination-dir *destination-dir*))
   (big-test-report :re-run re-run
@@ -1937,12 +1940,14 @@ sleeping before the code finishes evaluating."
 		  '("STRONG" "WEAK")
 		  )))
 
+
 (defun rebuild-analysis (&key (destination-dir *destination-dir*) (autogen-dir *autogen-dir*))
   (rebuild-plots :destination-dir destination-dir :create-png-p t)
-  (generate-latex-plots :analysis-dir destination-dir
-			:gen-samples nil
-		 	:autogen-dir autogen-dir)
-  (gen-parameters-summary-tabular :destination-dir destination-dir :autogen-dir autogen-dir)
-  (gen-mdtd-profile-single-figures :destination-dir destination-dir :autogen-dir autogen-dir)
+  ;; TODO, the following seems to be broken for the moment because of missing files.
+  ;;(generate-latex-plots :analysis-dir destination-dir
+	;;		:gen-samples nil
+	;;	 	:autogen-dir autogen-dir)
+  ;;(gen-parameters-summary-tabular :destination-dir destination-dir :autogen-dir autogen-dir)
+  ;;(gen-mdtd-profile-single-figures :destination-dir destination-dir :autogen-dir autogen-dir)
 )
 

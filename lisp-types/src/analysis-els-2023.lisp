@@ -1,4 +1,4 @@
-;; Copyright (c) 2017 EPITA Research and Development Laboratory
+;; Copyright (c) 2023 EPITA Research and Development Laboratory
 ;;
 ;; Permission is hereby granted, free of charge, to any person obtaining
 ;; a copy of this software and associated documentation
@@ -19,45 +19,29 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-(defpackage :lisp-types
-  (:use :cl :cl-robdd :adjuvant)
-  (:export
-   "*AMBIGUOUS-SUBTYPES*"
-   "AMBIGUOUS-SUBTYPE"
-   "AUTO-PERMUTE-TYPECASE"
-   "BDD-DISJOINT-TYPES-P"
-   "BDD-EMPTY-TYPE"
-   "BDD-REDUCE-LISP-TYPE"
-   "BDD-SUBTYPEP"
-   "BDD-TYPE-EQUAL"
-   "BDD-TYPECASE"
-   "CACHING-TYPES"
-   "DISJOINT-TYPES-P"
-   "EQUIVALENT-TYPES-P"
-   "LTBDD"
-   "LTBDD-WITH-NEW-HASH"
-   "MDTD-BASELINE"
-   "MDTD-BDD"
-   "MDTD-BDD-GRAPH"
-   "MDTD-BDD-GRAPH-STRONG"
-   "MDTD-BDD-GRAPH-WEAK"
-   "MDTD-BDD-GRAPH-WEAK-DYNAMIC"
-   "MDTD-BDD-STRONG"
-   "MDTD-BDD-WEAK"
-   "MDTD-BDD-WEAK-DYNAMIC"
-   "MDTD-GRAPH"
-   "MDTD-GRAPH-BAKER"
-   "MDTD-RTEV2"
-   "MDTD-SAT"
-   "MDTD-PADL"
-   "PARAMETERIZED-MDTD-BDD-GRAPH"
-   "REDUCE-LISP-TYPE"
-   "REDUCED-TYPECASE"
-   "REMOVE-SUBS"
-   "REMOVE-SUPERS"
-   "SMARTER-SUBTYPEP"
-   "SUBTYPEP-WRAPPER"
-   "TYPE-TO-DNF-BOTTOM-UP"
-   "WARN-AMBIGUOUS-SUBTYPE"
-   "*SUBTYPEP*"
-   ))
+
+(in-package :lisp-types-analysis)
+
+(defun els-2023-analysis ()
+  "Generate the files, including the ltxdat files used in the ELS 2023 submission.
+These files must be copied from *destination-dir* to
+~/Repos/research/publications/src/newton.23.els.includes/.
+It is the responsibility of the caller to make this copy."
+  (best-2-report :multiplier 1.1
+                 :decomposition-functions '(mdtd-bdd-graph
+                                            mdtd-bdd
+                                            mdtd-padl
+                                            mdtd-graph)))
+
+(defclass A1 () ())
+(defclass A2 (A1) ())
+(defclass A3 (A1) ())
+(defclass A23 (A2 A3) ())
+(defclass A4 (A1) ())
+(defclass A423 (A4 A23) ())
+(defclass A5 (A4) ())
+(defclass A6 (A1) ())
+
+(mdtd-padl '(A1 A2 A3 A4 A5 A6))
+(subtypep '(and A3 (not A2) (not A4)) 'A1)
+(subtypep '(and (and A3 (not A2) (not A4)) A1) nil)

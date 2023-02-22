@@ -381,6 +381,11 @@ consists of values whose types match PATTERN."
   (match-sequence input-sequence (or (find-state-machine pattern)
                                      (remember-state-machine (rte-to-dfa pattern) pattern))))
 
+(defun rte-simulate (pattern input-sequence)
+  "Decide whether the given sequence conforms to the given rte pattern.
+Returns Boolean."
+  (match-sequence input-sequence pattern))
+
 (defvar *rte-pattern-functions* nil "List of function names created by MAKE-RTE-FUNCTION-NAME")
 
 (defun make-rte-function-name (pattern)

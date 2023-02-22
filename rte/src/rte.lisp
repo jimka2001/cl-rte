@@ -33,6 +33,7 @@
    "LIST-OF"
    "RTE"
    "RTE-RESET"
+   "RTE-SIMULATE"
    ))
 
 (in-package :rte)

@@ -2,7 +2,7 @@
 set verbose
 set echo
 
-cd ~/sw/regular-type-expression
+cd ~/sw/cl-rte
 foreach path (`find * -type f -name '*.asd' -print`)
    rm -rf ~/.cache/common-lisp/sbcl-*
    set system = $path:t:r

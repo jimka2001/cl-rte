@@ -10,7 +10,7 @@ CL-ROBDD-ANALYSIS> (combine-bdd-size-results "/lrde/cluster/jnewton/bdd-sizes"
                                                              (directory "/lrde/home/jnewton/cluster.*/bdd-sizes.*.master.lrde.epita.fr-*-*.gz")))
 
 
-sh> ~/sw/regular-type-expression/bin/uniqify.sh
+sh> ~/sw/cl-rte/bin/uniqify.sh
 sh> cd
 sh> find cluster.* -type f -mtime +2 -name 'bdd-sizes.8.master.lrde.epita.fr-*-*[0-9]' -print | xargs gzip -9v
 

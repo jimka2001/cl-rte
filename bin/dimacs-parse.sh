@@ -2,7 +2,7 @@
 #PBS -m a
 set verbose echo
 
-BIN="$HOME/sw/regular-type-expression/bin/"
+BIN="$HOME/sw/cl-rte/bin/"
 cd $BIN/..
 
 initial=`qsub -l walltime=3000 $BIN/dimacs-compile.csh`

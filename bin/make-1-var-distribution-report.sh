@@ -1,6 +1,6 @@
 #!/bin/bash
 #qselect -u $USER -s RQ | xargs --no-run-if-empty qdel
-cd /lrde/home/jnewton/sw/regular-type-expression ; git stash ; git pull --no-edit
+cd /lrde/home/jnewton/sw/cl-rte ; git stash ; git pull --no-edit
 cd
 export CLUSTER_JOB_NUM=$$
 if [ -d cluster.$$ ]; then
@@ -9,7 +9,7 @@ fi
 mkdir cluster.$$
 cd cluster.$$
 echo starting jobs in cluster.$$
-BIN="$HOME/sw/regular-type-expression/bin"
+BIN="$HOME/sw/cl-rte/bin"
 
 numvars=$1
 time=$2

@@ -15,10 +15,6 @@ available.
 
 
 ## Packages usable for the general public
-### [cl-robdd](cl-robdd/README.md)
-
-Implementation of ROBDD, Reduced Ordered Binary Decision Diagram
-
 ### [rte](rte/README.md)
 
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
@@ -55,6 +51,11 @@ This code references several external asdf systems.  These may be found and inst
 ### subtypep (gitlab.lrde.epita.fr)
 ### bordeaux-threads (quicklisp)
 ### yacc (quicklisp)
+### cl-robdd
+### ndfa
+### adjuvant
+### scrutiny
+### lisp-types
 
 ## API Reference
 

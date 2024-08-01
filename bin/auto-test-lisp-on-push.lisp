@@ -31,6 +31,9 @@
 (sb-ext:run-program "git" (list "clone" "http://gitlab+deploy-token-2:gLsySaNTMHGmqZS6xtVe@gitlab.lrde.epita.fr/jimka/ndfa.git")
                     ;; clone ndfa repo
                     :search t :output t)
+(sb-ext:run-program "git" (list "clone" "http://gitlab+deploy-token-2:gLsySaNTMHGmqZS6xtVe@gitlab.lrde.epita.fr/jimka/cl-robdd.git")
+                    ;; clone cl-robdd repo
+                    :search t :output t)
 (format t "cwd=~A~%" (sb-posix:getcwd))
 (format t "user-homedir=~A~%" (user-homedir-pathname))
 (format t "PATH=~A~%" (sb-posix:getenv "PATH"))

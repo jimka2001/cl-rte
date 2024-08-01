@@ -45,23 +45,6 @@ Implementation of the function `SPECIALIZER-INTERSECTION`
     
 
 
-## Used for analsis in PhD thesis.
-### research
-### cl-robdd-analysis
-### lisp-types-baker-analysis
-### lisp-types-analysis
-
-## Used for testing other packages.
-### cl-robdd-test
-### cl-robdd-analysis-test
-### rte-test
-### 2d-array-test
-### lisp-types-test
-### rte-regexp-test
-### ndfa-test
-### adjuvant-test
-### scrutiny-test
-
 
 
 ## Installation

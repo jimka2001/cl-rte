@@ -31,14 +31,6 @@ Simple string regular expression matcher based on rte
 
 Extensible sequence classes to represent vertical and horizontal "slices" of 2d arrays
 
-### [lisp-types](lisp-types/README.md)
-
-Utilities dealing with CL types
-
-### [ndfa](ndfa/README.md)
-
-Implementation of non-deterministed finite automata
-
 ### [dispatch](dispatch/README.md)
 
 Implementation of the function `SPECIALIZER-INTERSECTION`

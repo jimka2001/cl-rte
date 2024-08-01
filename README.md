@@ -19,10 +19,6 @@ available.
 
 Implementation of ROBDD, Reduced Ordered Binary Decision Diagram
 
-### [scrutiny](scrutiny/README.md)
-
-Slime-friendly Unit Testing package, based loosely on lisp-unit (https://github.com/OdonataResearchLLC/lisp-unit). 
-
 ### [rte](rte/README.md)
 
 Definition of the RTE CL type.  A type (and supporting functions) which implement rational type expressions.
@@ -42,10 +38,6 @@ Utilities dealing with CL types
 ### [ndfa](ndfa/README.md)
 
 Implementation of non-deterministed finite automata
-
-### [adjuvant](adjuvant/README.md)
-
-Certain utilities used in many other packages
 
 ### [dispatch](dispatch/README.md)
 

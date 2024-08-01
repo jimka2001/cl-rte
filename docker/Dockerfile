@@ -1,5 +1,8 @@
 FROM lokedhs/sbcl-quicklisp
 
+# may need to change something in this file to force the docker image to be rebuilt.
+# updated Thu Aug  1 13:15:42 CEST 2024
+
 RUN apt-get update                              \
   && RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive  \
      apt-get install -y --no-install-recommends \
